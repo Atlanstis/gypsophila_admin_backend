@@ -7,6 +7,11 @@ export class PsnineController {
 
   @Get('gamelist')
   async getGameList(@Query('page') page: number) {
-    return await this.psnineService.getGameList(page);
+    return await this.psnineService.getGameList(Number(page));
+  }
+
+  @Get('trophy')
+  async getTrophy(@Query('gameId') gameId: number) {
+    return await this.psnineService.getTrophy(Number(gameId));
   }
 }

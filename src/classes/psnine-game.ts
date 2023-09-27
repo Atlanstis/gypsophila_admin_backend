@@ -1,8 +1,8 @@
 /**平台信息 */
 export type Platform = 'PS3' | 'PSV' | 'PS4' | 'PS5';
 
-/** 奖杯信息 */
-export type Trophy = {
+/** 奖杯数量信息 */
+export type TrophyNum = {
   /** 白金奖杯数 */
   platinum: number;
   /** 金奖杯数 */
@@ -37,5 +37,41 @@ export class PsnineGame {
   /** 完成进度 */
   progress: number;
   /** 获得奖杯数 */
-  trophyGot: Trophy;
+  trophyGot: TrophyNum;
+}
+
+export class PsTrophy {
+  /** 游戏 id */
+  gameId: number;
+  /** 奖杯 id */
+  trophyId: number;
+  /** 奖杯名称 */
+  name: string;
+  /** 奖杯类型 */
+  trophyType: 'platinum' | 'gold' | 'silver' | 'bronze';
+  /** 奖杯图标 */
+  thumbnail: string;
+  /** 奖杯描述 */
+  description: string;
+  /** 奖杯获取时间 */
+  completeTime: string;
+  /** 奖杯顺序 */
+  order: number;
+  /** 是否完成 */
+  isComplete: boolean;
+}
+
+export class PsTrophyGroup {
+  /** 游戏 id */
+  gameId: number;
+  /** 奖杯组名称 */
+  name: string;
+  /** 缩略图 */
+  thumbnail: string;
+  /** 奖杯数量信息 */
+  trophyNum: TrophyNum;
+  /** 是否 DLC */
+  isDLC: boolean;
+  /** 奖杯信息 */
+  trophies: PsTrophy[];
 }
