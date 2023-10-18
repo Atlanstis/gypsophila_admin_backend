@@ -89,3 +89,15 @@ export class PsTopic {
   /** 讨论数 */
   discussTimes: number;
 }
+
+/** 游玩排名信息 */
+export class PsGameRank {
+  /** 排名顺序 */
+  index: number;
+  /** 完成时间 */
+  completionTime: string;
+  /** 完成进度 */
+  completionRate: string;
+  /** 使用时间 */
+  usedTime: string;
+}

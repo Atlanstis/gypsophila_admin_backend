@@ -16,7 +16,12 @@ export class PsnineController {
   }
 
   @Get('/game/topic')
-  async getgameTopic(@Query('gameId') gameId: number) {
+  async getGameTopic(@Query('gameId') gameId: number) {
     return await this.psnineService.getGameTopic(Number(gameId));
+  }
+
+  @Get('/game/rank')
+  async getGameRank(@Query('gameId') gameId: number) {
+    return await this.psnineService.getGameRank(Number(gameId));
   }
 }
