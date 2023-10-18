@@ -10,8 +10,13 @@ export class PsnineController {
     return await this.psnineService.getGameList(Number(page));
   }
 
-  @Get('trophy')
-  async getTrophy(@Query('gameId') gameId: number) {
-    return await this.psnineService.getTrophy(Number(gameId));
+  @Get('/game/trophy')
+  async getGameTrophy(@Query('gameId') gameId: number) {
+    return await this.psnineService.getGameTrophy(Number(gameId));
+  }
+
+  @Get('/game/topic')
+  async getgameTopic(@Query('gameId') gameId: number) {
+    return await this.psnineService.getGameTopic(Number(gameId));
   }
 }

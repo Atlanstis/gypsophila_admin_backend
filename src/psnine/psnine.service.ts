@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { PsGame } from 'src/entities/ps-game.entity';
 import { getElFromUrl } from 'src/utils/cheerio';
-import { Platform, PsTrophy, PsTrophyGroup, PsnineGame } from '../classes/psnine-game';
+import { Platform, PsTopic, PsTrophy, PsTrophyGroup, PsnineGame } from '../classes/psnine-game';
 import { getTrophyNumFromEl, getIdFromUrl } from './helpers';
 
 @Injectable()
@@ -41,9 +41,9 @@ export class PsnineService {
             const $platforms = $(childEl).find('span');
             game.platforms = $platforms
               .map(function (pi, pEl) {
-                return $(pEl).text();
+                return $(pEl).text() as Platform;
               })
-              .toArray() as Platform[];
+              .toArray<Platform>();
             game.lastTrophyTime = $(childEl).find('small').text();
           }
           if (ci === 2) {
@@ -83,7 +83,7 @@ export class PsnineService {
    * @param gameId 游戏 id
    * @returns 奖杯信息
    */
-  async getTrophy(gameId: number) {
+  async getGameTrophy(gameId: number) {
     const url = `https://psnine.com/psngame/${gameId}?psnid=kiceous`;
     const $ = await getElFromUrl(url);
     const $trophyGroup = $('table.list');
@@ -139,10 +139,42 @@ export class PsnineService {
             });
             return trophy;
           })
-          .toArray();
+          .toArray<PsTrophy>();
         return trophyGroup;
       })
-      .toArray();
+      .toArray<PsTrophyGroup>();
     return trophyGroup;
+  }
+
+  /**
+   * 获取游戏相关讨论
+   * @param gameId 游戏 id
+   * @returns 讨论信息
+   */
+  async getGameTopic(gameId: number) {
+    const url = `https://psnine.com/psngame/${gameId}/topic`;
+    const $ = await getElFromUrl(url);
+    const $TopicList = $('.box .list li');
+    const list = $TopicList
+      .map(function (i, el) {
+        const topic = new PsTopic();
+        topic.title = $(el).find('.title a').text();
+        topic.url = $(el).find('.title a').attr('href');
+        const $meta = $(el).find('.meta');
+        $meta.find('a').remove('a');
+        const publicationTime = $meta
+          .text()
+          .replace(/\n|[ ]+/g, '')
+          .trim();
+        topic.publicationTime = `${publicationTime.slice(0, 10)} ${publicationTime.slice(10)}`;
+        topic.discussTimes = Number($(el).find('.rep.r').text());
+        return topic;
+      })
+      .toArray<PsTopic>();
+    const totalText = $('.page .disabled a').text().replace('条', '');
+    return {
+      list,
+      total: Number(totalText),
+    };
   }
 }

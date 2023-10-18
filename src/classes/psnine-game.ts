@@ -12,7 +12,7 @@ export type TrophyNum = {
   /** 铜奖杯数 */
   bronze: number;
 };
-
+/** Ps 游戏 */
 export class PsnineGame {
   /** psnine 游戏 id */
   id: number;
@@ -40,6 +40,7 @@ export class PsnineGame {
   trophyGot: TrophyNum;
 }
 
+/** 奖杯 */
 export class PsTrophy {
   /** 游戏 id */
   gameId: number;
@@ -61,6 +62,7 @@ export class PsTrophy {
   isComplete: boolean;
 }
 
+/** 奖杯组 */
 export class PsTrophyGroup {
   /** 游戏 id */
   gameId: number;
@@ -74,4 +76,16 @@ export class PsTrophyGroup {
   isDLC: boolean;
   /** 奖杯信息 */
   trophies: PsTrophy[];
+}
+
+/** 讨论信息 */
+export class PsTopic {
+  /** 标题 */
+  title: string;
+  /** 详细地址 */
+  url: string;
+  /** 发布时间 */
+  publicationTime: string;
+  /** 讨论数 */
+  discussTimes: number;
 }
