@@ -1,5 +1,9 @@
 import { ArgumentsHost, Catch, ExceptionFilter, HttpException } from '@nestjs/common';
 
+interface ExcepionResJson {
+  message?: string[];
+}
+
 /**
  * 拦截 HttpException，并返回统一的数据格式，用于处理业务上的异常。
  */
@@ -9,11 +13,21 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const ctx = host.switchToHttp(); // 获取请求上下文
     const response = ctx.getResponse(); // 获取请求上下文中的 response对象
     const status = exception.getStatus(); // 获取异常状态码
+    const resJson = exception.getResponse() as ExcepionResJson; // 获取异常内容
 
     // 设置错误信息
-    const message = exception.message
+    let message = exception.message
       ? exception.message
       : `${status >= 500 ? 'Service Error' : 'Client Error'}`;
+
+    if (status === 400) {
+      // 通过 ValidationPipe 进行参数校验错误时，会抛出 BadRequestException 异常，且异常码为 400，此处进行捕获，并转换报错信息
+      const { message: exceptionMessage } = resJson;
+      if (exceptionMessage && Array.isArray(exceptionMessage) && exceptionMessage.length > 0) {
+        message = exceptionMessage.join(';');
+      }
+    }
+
     const errorResponse = {
       data: {},
       message: message,
