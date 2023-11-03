@@ -1,6 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { HttpExceptionFilter, TransformInterceptor } from './core';
+import { HttpExceptionFilter, TransformInterceptor, AllExceptionsFilter } from './core';
 import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
@@ -9,7 +9,7 @@ async function bootstrap() {
   // 成功返回数据时，对内容进行包裹
   app.useGlobalInterceptors(new TransformInterceptor());
   // 注册全局错误的过滤器
-  app.useGlobalFilters(new HttpExceptionFilter());
+  app.useGlobalFilters(new AllExceptionsFilter(), new HttpExceptionFilter());
   // 参数校验
   app.useGlobalPipes(new ValidationPipe());
 
