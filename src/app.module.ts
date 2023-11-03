@@ -1,7 +1,5 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { PsnineModule } from './psnine/psnine.module';
 import { PsGame } from './entities/ps-game.entity';
 
@@ -26,7 +24,7 @@ import { PsGame } from './entities/ps-game.entity';
     }),
     PsnineModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [],
+  providers: [],
 })
 export class AppModule {}
