@@ -7,7 +7,7 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "debug nest",
+      "name": "调试程序",
       "runtimeExecutable": "pnpm",
       "args": ["run", "start:dev"],
       "skipFiles": ["<node_internals>/**"],
