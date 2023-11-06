@@ -2,6 +2,8 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { HttpExceptionFilter, TransformInterceptor, AllExceptionsFilter } from './core';
 import { ValidationPipe } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { ENV_VARS } from './enum';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -13,7 +15,11 @@ async function bootstrap() {
   // 参数校验
   app.useGlobalPipes(new ValidationPipe());
 
-  await app.listen(3000);
+  // 获取端口
+  const configService = app.get(ConfigService);
+  const port = configService.get(ENV_VARS.PORT);
+
+  await app.listen(port);
 }
 
 bootstrap();
