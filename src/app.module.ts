@@ -2,9 +2,10 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { PsnineModule } from './psnine/psnine.module';
 import { PsGame } from './entities/ps-game.entity';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import config from './utils/config';
 import * as Joi from 'joi';
+import { ENV_VARS, MysqlConfig } from './enum';
 
 @Module({
   imports: [
@@ -15,26 +16,28 @@ import * as Joi from 'joi';
       ignoreEnvFile: true,
       /** 自定义加载配置文件 */
       load: [config],
-      /** 检验 NODE_ENV 参数 */
+      /** 校验 NODE_ENV 参数 */
       validationSchema: Joi.object({
         NODE_ENV: Joi.string().valid('development', 'production').required(),
       }),
     }),
-    TypeOrmModule.forRoot({
-      type: 'mysql',
-      host: 'localhost',
-      port: 3306,
-      username: 'root',
-      password: 'j!Y6hTwR',
-      database: 'gypsophila',
-      synchronize: true,
-      logging: true,
-      entities: [PsGame],
-      poolSize: 10,
-      connectorPackage: 'mysql2',
-      extra: {
-        authPlugin: 'sha256_password',
-        timezone: 'Asia/Shanghai',
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => {
+        const mysqlConfig = configService.get(ENV_VARS.MYSQL) as MysqlConfig;
+        return {
+          type: 'mysql',
+          ...mysqlConfig,
+          logging: true,
+          entities: [PsGame],
+          poolSize: 10,
+          connectorPackage: 'mysql2',
+          extra: {
+            authPlugin: 'sha256_password',
+            timezone: 'Asia/Shanghai',
+          },
+        };
       },
     }),
     PsnineModule,

@@ -5,3 +5,13 @@ export enum ENV_VARS {
   /** 运行端口 */
   PORT = 'port',
 }
+
+/** mysql 数据库配置 */
+export interface MysqlConfig {
+  host: string;
+  port: number;
+  username: string;
+  password: string;
+  database: string;
+  synchronize: boolean;
+}
