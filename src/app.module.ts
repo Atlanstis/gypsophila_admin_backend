@@ -6,6 +6,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import config from './utils/config';
 import * as Joi from 'joi';
 import { ENV_VARS, MysqlConfig } from './enum';
+import { LogModule } from './log/log.module';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { ENV_VARS, MysqlConfig } from './enum';
       },
     }),
     PsnineModule,
+    LogModule,
   ],
   controllers: [],
   providers: [],
