@@ -1,7 +1,14 @@
-import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus } from '@nestjs/common';
+import {
+  ArgumentsHost,
+  Catch,
+  ExceptionFilter,
+  HttpException,
+  HttpStatus,
+  UnauthorizedException,
+} from '@nestjs/common';
 
 interface ExcepionResJson {
-  message?: string[];
+  message?: string[] | string;
 }
 
 /**
@@ -23,9 +30,13 @@ export class HttpExceptionFilter implements ExceptionFilter {
     if (status === HttpStatus.BAD_REQUEST) {
       // 通过 ValidationPipe 进行参数校验错误时，会抛出 BadRequestException 异常，此处进行捕获，并转换报错信息
       const { message: exceptionMessage } = resJson;
-      if (exceptionMessage && Array.isArray(exceptionMessage) && exceptionMessage.length > 0) {
-        message = exceptionMessage.join(';');
+      if (exceptionMessage) {
+        message = Array.isArray(exceptionMessage) ? exceptionMessage.join(';') : exceptionMessage;
       }
+    }
+
+    if (exception instanceof UnauthorizedException) {
+      message = '没有访问的权限';
     }
 
     const errorResponse = {

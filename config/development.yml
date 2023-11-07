@@ -8,3 +8,7 @@ mysql:
   synchronize: true
 # 运行端口
 port: 3000
+# jwt 密钥
+jwtSecret: 'W9RsC*5zV^sp7*xXG6VY6d#yqn=FNPqA'
+# jwt 密钥过期时间
+jwtExpiresIn: '1d'

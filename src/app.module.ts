@@ -1,12 +1,14 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { PsnineModule } from './psnine/psnine.module';
-import { PsGame } from './entities/ps-game.entity';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import config from './utils/config';
 import * as Joi from 'joi';
 import { ENV_VARS, MysqlConfig } from './enum';
 import { LogModule } from './log/log.module';
+import { AuthModule } from './auth/auth.module';
+import { UserModule } from './user/user.module';
+import { User } from './entities';
 
 @Module({
   imports: [
@@ -31,18 +33,15 @@ import { LogModule } from './log/log.module';
           type: 'mysql',
           ...mysqlConfig,
           logging: true,
-          entities: [PsGame],
+          entities: [User],
           poolSize: 10,
-          connectorPackage: 'mysql2',
-          extra: {
-            authPlugin: 'sha256_password',
-            timezone: 'Asia/Shanghai',
-          },
         };
       },
     }),
     PsnineModule,
     LogModule,
+    AuthModule,
+    UserModule,
   ],
   controllers: [],
   providers: [],

@@ -1,14 +1,17 @@
-import { Controller, Get, HttpException, ParseIntPipe, Query } from '@nestjs/common';
+import { Controller, Get, ParseIntPipe, Query, UseGuards } from '@nestjs/common';
 import { PsnineService } from './psnine.service';
+import { BusinessException } from 'src/core';
+import { AuthGuard } from '@nestjs/passport';
 
 const numberParse = (parameter) =>
   new ParseIntPipe({
     exceptionFactory: () => {
-      throw new HttpException(`${parameter} 参数错误`, 200);
+      throw new BusinessException(`${parameter} 参数错误`);
     },
   });
 
 @Controller('psnine')
+@UseGuards(AuthGuard('jwt'))
 export class PsnineController {
   constructor(private readonly psnineService: PsnineService) {}
 
