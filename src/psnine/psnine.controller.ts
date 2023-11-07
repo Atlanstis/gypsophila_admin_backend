@@ -1,7 +1,6 @@
 import { Controller, Get, ParseIntPipe, Query, UseGuards } from '@nestjs/common';
 import { PsnineService } from './psnine.service';
-import { BusinessException } from 'src/core';
-import { AuthGuard } from '@nestjs/passport';
+import { BusinessException, JwtGuard } from 'src/core';
 
 const numberParse = (parameter) =>
   new ParseIntPipe({
@@ -11,7 +10,7 @@ const numberParse = (parameter) =>
   });
 
 @Controller('psnine')
-@UseGuards(AuthGuard('jwt'))
+@UseGuards(JwtGuard)
 export class PsnineController {
   constructor(private readonly psnineService: PsnineService) {}
 
