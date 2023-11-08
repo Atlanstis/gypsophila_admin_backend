@@ -40,7 +40,6 @@ export class HttpExceptionFilter implements ExceptionFilter {
     }
 
     const errorResponse = {
-      data: {},
       message: message,
       code: -1,
     };

@@ -28,7 +28,7 @@ import { User } from './entities';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
-        const mysqlConfig = configService.get(ENV_VARS.MYSQL) as MysqlConfig;
+        const mysqlConfig = configService.get<MysqlConfig>(ENV_VARS.MYSQL);
         return {
           type: 'mysql',
           ...mysqlConfig,
