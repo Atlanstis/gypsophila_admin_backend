@@ -10,11 +10,11 @@ export class User {
   username: string;
 
   /** 密码 */
-  @Column({ length: 64, comment: '密码' })
+  @Column({ length: 128, comment: '密码' })
   password: string;
 
-  @Column({ length: 10, nullable: true, comment: '昵称' })
-  nickname?: string;
+  @Column({ length: 10, comment: '昵称' })
+  nickname: string;
 
   @Column({
     name: 'create_time',
