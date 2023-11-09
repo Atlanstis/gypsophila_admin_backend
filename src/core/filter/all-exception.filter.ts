@@ -19,7 +19,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
     }
 
     const responseBody = {
-      message: '程序开小差了(╥_╥)',
+      msg: '程序开小差了(╥_╥)',
       code: -1,
     };
 

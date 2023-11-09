@@ -40,7 +40,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
     }
 
     const errorResponse = {
-      message: message,
+      msg: message,
       code: -1,
     };
 
