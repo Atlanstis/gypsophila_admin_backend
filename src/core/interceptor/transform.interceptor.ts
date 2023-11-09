@@ -1,4 +1,11 @@
-import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from '@nestjs/common';
+import {
+  CallHandler,
+  ExecutionContext,
+  HttpStatus,
+  Injectable,
+  NestInterceptor,
+} from '@nestjs/common';
+import { Response } from 'express';
 import { Observable, map } from 'rxjs';
 
 /**
@@ -7,6 +14,11 @@ import { Observable, map } from 'rxjs';
 @Injectable()
 export class TransformInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+    const response: Response = context.switchToHttp().getResponse();
+    // Nestjs 中 POST 请求默认的响应码为 201，此处将之修改为 200
+    if (response.statusCode === HttpStatus.CREATED && response.req.method === 'POST') {
+      response.status(HttpStatus.OK);
+    }
     return next.handle().pipe(
       map((data) => {
         return {
