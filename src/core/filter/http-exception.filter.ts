@@ -1,11 +1,4 @@
-import {
-  ArgumentsHost,
-  Catch,
-  ExceptionFilter,
-  HttpException,
-  HttpStatus,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus } from '@nestjs/common';
 
 interface ExcepionResJson {
   message?: string[] | string;
@@ -33,10 +26,6 @@ export class HttpExceptionFilter implements ExceptionFilter {
       if (exceptionMessage) {
         message = Array.isArray(exceptionMessage) ? exceptionMessage.join(';') : exceptionMessage;
       }
-    }
-
-    if (exception instanceof UnauthorizedException) {
-      message = '没有访问的权限';
     }
 
     const errorResponse = {

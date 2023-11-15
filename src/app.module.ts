@@ -4,7 +4,7 @@ import { PsnineModule } from './psnine/psnine.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import config from './utils/config';
 import * as Joi from 'joi';
-import { ENV_VARS, MysqlConfig } from './enum';
+import { ENV_VARS } from './enum';
 import { LogModule } from './log/log.module';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
@@ -28,7 +28,7 @@ import { User } from './entities';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
-        const mysqlConfig = configService.get<MysqlConfig>(ENV_VARS.MYSQL);
+        const mysqlConfig = configService.get<Environment.MysqlConfig>(ENV_VARS.MYSQL);
         return {
           type: 'mysql',
           ...mysqlConfig,

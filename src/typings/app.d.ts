@@ -1,6 +1,6 @@
 declare namespace App {
   /**
-   * jwt 加解密对象
+   * jwt payload 信息
    */
   interface JwtPayload {
     username: string;
