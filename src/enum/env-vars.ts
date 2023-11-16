@@ -6,4 +6,6 @@ export enum ENV_VARS {
   PORT = 'port',
   /** jwt 密钥 */
   JWT_SECRET = 'jwtSecret',
+  /** redis 配置 */
+  REDIS = 'redis',
 }

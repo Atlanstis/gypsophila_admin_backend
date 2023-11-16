@@ -8,4 +8,10 @@ declare namespace Environment {
     database: string;
     synchronize: boolean;
   }
+
+  /** redis 配置 */
+  interface RedisConfig {
+    host: string;
+    port: number;
+  }
 }

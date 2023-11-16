@@ -9,6 +9,7 @@ import { LogModule } from './log/log.module';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { User } from './entities';
+import { RedisModule } from './redis/redis.module';
 
 @Module({
   imports: [
@@ -42,6 +43,17 @@ import { User } from './entities';
     LogModule,
     AuthModule,
     UserModule,
+    RedisModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => {
+        const redisConfig = configService.get<Environment.RedisConfig>(ENV_VARS.REDIS);
+        return {
+          ...redisConfig,
+          isGlobal: true,
+        };
+      },
+    }),
   ],
   controllers: [],
   providers: [],
