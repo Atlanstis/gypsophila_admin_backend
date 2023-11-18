@@ -1,6 +1,6 @@
 import { Inject, Injectable, LoggerService } from '@nestjs/common';
 import { MODULE_OPTIONS_TOKEN, RedisModuleOptions } from './redis.module-definition';
-import { createClient, RedisClientType } from 'redis';
+import { createClient, RedisClientType, SetOptions } from 'redis';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 
 @Injectable()
@@ -29,17 +29,28 @@ export class RedisService {
     this.logger.log('Redis client connected', 'Redis');
   }
 
-  async set(key: string, value: string) {
+  /**
+   * 设置带有过期时间的值
+   * @param key 键
+   * @param value 值
+   * @param expire 过期时间（单位：秒）
+   */
+  async setWithExpire(key: string, value: string, expire: number) {
+    await this.set(key, value, { EX: expire });
+    this.logger.log(`key: ${key},value: ${value}, expireInSeconds: ${expire} s`, 'Redis set');
+  }
+
+  async set(key: string, value: string, config: SetOptions = {}) {
     try {
-      await this.client.set(key, value);
+      await this.client.set(key, value, config);
     } catch (e) {
       this.logger.error(e, 'Redis');
     }
   }
 
-  async get(key: string): Promise<any> {
+  async get<T>(key: string): Promise<any> {
     try {
-      return this.client.get(key);
+      return this.client.get(key) as T;
     } catch (e) {
       this.logger.error(e, 'Redis');
     }

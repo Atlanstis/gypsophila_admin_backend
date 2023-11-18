@@ -1,6 +1,6 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { LoginDto, RegisterDto } from './dto';
+import { LoginDto, RegisterDto, RefreshDto } from './dto';
 
 @Controller('auth')
 export class AuthController {
@@ -16,5 +16,11 @@ export class AuthController {
   @Post('/register')
   register(@Body() user: RegisterDto) {
     this.authService.register(user.username, user.password);
+  }
+
+  /** 重签认证 */
+  @Post('/refresh')
+  async refresh(@Body() token: RefreshDto) {
+    return await this.authService.refresh(token.refreshToken);
   }
 }

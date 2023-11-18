@@ -1,4 +1,6 @@
 import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus } from '@nestjs/common';
+import { UnauthorizedException } from 'src/core';
+import { ResponseCode, ResponseData } from 'src/typings';
 
 interface ExcepionResJson {
   message?: string[] | string;
@@ -15,6 +17,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const status = exception.getStatus(); // 获取异常状态码
     const resJson = exception.getResponse() as ExcepionResJson; // 获取异常内容
 
+    let code = ResponseCode.Error;
     // 设置错误信息
     let message = exception.message
       ? exception.message
@@ -28,9 +31,16 @@ export class HttpExceptionFilter implements ExceptionFilter {
       }
     }
 
-    const errorResponse = {
+    // 处理认证失败的情况
+    if (exception instanceof UnauthorizedException) {
+      const customException = exception.getCustomReponse();
+      message = customException.message;
+      code = customException.code;
+    }
+
+    const errorResponse: ResponseData = {
       msg: message,
-      code: -1,
+      code: code,
     };
 
     // 设置返回的状态码， 请求头，发送错误信息

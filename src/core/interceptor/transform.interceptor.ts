@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { Response } from 'express';
 import { Observable, map } from 'rxjs';
+import { ResponseCode, ResponseData } from 'src/typings';
 
 /**
  * 对成功返回的数据，进行包裹，进行格式统一
@@ -21,11 +22,12 @@ export class TransformInterceptor implements NestInterceptor {
     }
     return next.handle().pipe(
       map((data) => {
-        return {
-          data,
-          code: 0,
+        const newData: ResponseData = {
+          code: ResponseCode.Success,
           msg: '请求成功',
+          data,
         };
+        return newData;
       }),
     );
   }

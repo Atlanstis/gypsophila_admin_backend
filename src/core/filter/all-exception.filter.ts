@@ -1,5 +1,5 @@
 import { ExceptionFilter, Catch, ArgumentsHost, HttpStatus, Logger } from '@nestjs/common';
-
+import { ResponseCode, ResponseData } from 'src/typings';
 @Catch()
 /**
  * 捕获所有异常
@@ -10,17 +10,18 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse();
 
-    let httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+    const httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
 
     // 捕获代码报错的异常
     if (exception instanceof TypeError) {
       this.logger.error(exception.message, exception.stack);
-      httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+    } else if (exception instanceof Error) {
+      this.logger.error(exception.message, exception.stack);
     }
 
-    const responseBody = {
+    const responseBody: ResponseData = {
       msg: '程序开小差了(╥_╥)',
-      code: -1,
+      code: ResponseCode.Error,
     };
 
     // 设置返回的状态码， 请求头，发送错误信息
