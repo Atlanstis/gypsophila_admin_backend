@@ -8,7 +8,7 @@ import { ENV_VARS } from './enum';
 import { LogModule } from './log/log.module';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
-import { User } from './entities';
+import { Menu, Role, User } from './entities';
 import { RedisModule } from './redis/redis.module';
 
 @Module({
@@ -34,7 +34,7 @@ import { RedisModule } from './redis/redis.module';
           type: 'mysql',
           ...mysqlConfig,
           logging: true,
-          entities: [User],
+          entities: [User, Role, Menu],
           poolSize: 10,
         };
       },

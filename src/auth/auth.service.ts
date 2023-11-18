@@ -5,21 +5,32 @@ import { BusinessException, UnauthorizedException } from 'src/core';
 import { UserService } from 'src/user/user.service';
 import { RedisService } from 'src/redis/redis.service';
 import { ResponseCode } from 'src/typings';
+import { In, Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Role } from 'src/entities';
 
 /** access Token 过期时间 */
-const ACCESS_TOKEN_EXPIRE_SECONDS = 5 * 60;
+const ACCESS_TOKEN_EXPIRE_SECONDS = 5 * 60 * 10;
 /** refresh Token 过期时间 */
-const REFRESH_TOKEN_EXPIRE_SECONDS = 30 * 60;
+const REFRESH_TOKEN_EXPIRE_SECONDS = 30 * 60 * 10;
 @Injectable()
 export class AuthService {
   constructor(
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
     private readonly redisService: RedisService,
+    @InjectRepository(Role)
+    private readonly roleRepository: Repository<Role>,
   ) {}
 
+  /**
+   * 用户登录
+   * @param username 用户名
+   * @param password 密码
+   * @returns 认证信息
+   */
   async login(username: string, password: string) {
-    const user = await this.userService.findOneByUsername(username);
+    const user = await this.userService.findOneByUser({ username });
     if (!user) {
       throw new BusinessException('用户名不存在');
     }
@@ -63,6 +74,34 @@ export class AuthService {
       username: payload.username,
     };
     return await this.registerToken(payload.username, payload.id);
+  }
+
+  /**
+   * 获取已登录用户信息
+   * @param id 用户 Id
+   */
+  async info(id: string) {
+    // 查找用户信息
+    const { username, avatar, nickname, roles } = await this.userService.findOneByUser(
+      { id },
+      { id: true, username: true, avatar: true, nickname: true },
+      { roles: true },
+    );
+    // 根据用户权限，获取菜单
+    const roleIds = roles.map((role) => role.id);
+    const userRoles = await this.roleRepository.find({
+      where: { id: In(roleIds) },
+      relations: {
+        menus: true,
+      },
+    });
+    const menus = new Set<string>();
+    userRoles.forEach((role) => {
+      role.menus.forEach((menu) => {
+        menus.add(menu.key);
+      });
+    });
+    return { id, username, avatar, nickname, roles: roleIds, menus: Array.from(menus) };
   }
 
   /**
