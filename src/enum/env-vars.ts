@@ -8,4 +8,6 @@ export enum ENV_VARS {
   JWT_SECRET = 'jwtSecret',
   /** redis 配置 */
   REDIS = 'redis',
+  /** token 过期时间 */
+  TokenExpire = 'tokenExpire',
 }

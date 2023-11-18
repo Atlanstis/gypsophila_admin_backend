@@ -14,3 +14,7 @@ redis:
 port: 3000
 # jwt 密钥
 jwtSecret: 'W9RsC*5zV^sp7*xXG6VY6d#yqn=FNPqA'
+# token 过期时间(秒)
+tokenExpire:
+  accessExpire: 3000
+  refreshExpire: 18000

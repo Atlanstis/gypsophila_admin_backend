@@ -8,11 +8,9 @@ import { ResponseCode } from 'src/typings';
 import { In, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Role } from 'src/entities';
+import { ConfigService } from '@nestjs/config';
+import { ENV_VARS } from 'src/enum';
 
-/** access Token 过期时间 */
-const ACCESS_TOKEN_EXPIRE_SECONDS = 5 * 60 * 10;
-/** refresh Token 过期时间 */
-const REFRESH_TOKEN_EXPIRE_SECONDS = 30 * 60 * 10;
 @Injectable()
 export class AuthService {
   constructor(
@@ -21,6 +19,7 @@ export class AuthService {
     private readonly redisService: RedisService,
     @InjectRepository(Role)
     private readonly roleRepository: Repository<Role>,
+    private readonly configService: ConfigService,
   ) {}
 
   /**
@@ -111,27 +110,27 @@ export class AuthService {
    * @returns token 对象
    */
   async registerToken(username: string, id: string) {
+    const { accessExpire, refreshExpire } = this.configService.get<{
+      accessExpire: number;
+      refreshExpire: number;
+    }>(ENV_VARS.TokenExpire);
     const payload: App.JwtPayload = { username, id };
     const accessToken = await this.jwtService.signAsync(
       {
         ...payload,
         type: 'access_token',
       },
-      { expiresIn: ACCESS_TOKEN_EXPIRE_SECONDS },
+      { expiresIn: accessExpire },
     );
     const refreshToken = await this.jwtService.signAsync(
       {
         ...payload,
         type: 'refresh_token',
       },
-      { expiresIn: REFRESH_TOKEN_EXPIRE_SECONDS },
+      { expiresIn: refreshExpire },
     );
-    this.redisService.setWithExpire(`access_token-${id}`, accessToken, ACCESS_TOKEN_EXPIRE_SECONDS);
-    this.redisService.setWithExpire(
-      `refresh_token-${id}`,
-      refreshToken,
-      REFRESH_TOKEN_EXPIRE_SECONDS,
-    );
+    this.redisService.setWithExpire(`access_token-${id}`, accessToken, accessExpire);
+    this.redisService.setWithExpire(`refresh_token-${id}`, refreshToken, refreshExpire);
     return { refreshToken, accessToken };
   }
 }
