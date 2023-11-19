@@ -14,6 +14,13 @@ export class AuthController {
     return await this.authService.login(user.username, user.password);
   }
 
+  /** 用户退出登录 */
+  @Get('/logout')
+  @UseGuards(JwtGuard)
+  async logOut(@Req() req: Request) {
+    this.authService.logout(req.user.id);
+  }
+
   /** 用户注册 */
   @Post('/register')
   register(@Body() user: RegisterDto) {

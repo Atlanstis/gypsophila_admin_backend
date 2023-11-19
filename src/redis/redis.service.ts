@@ -56,6 +56,14 @@ export class RedisService {
     }
   }
 
+  async del(key: string) {
+    try {
+      return this.client.del(key);
+    } catch (e) {
+      this.logger.error(e, 'Redis');
+    }
+  }
+
   /**
    * 获取 redis 实例
    * @returns redis 实例

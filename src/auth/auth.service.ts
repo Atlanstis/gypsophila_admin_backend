@@ -10,6 +10,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Role } from 'src/entities';
 import { ConfigService } from '@nestjs/config';
 import { ENV_VARS } from 'src/enum';
+import { getTokenKeyName } from './helper';
 
 @Injectable()
 export class AuthService {
@@ -38,6 +39,18 @@ export class AuthService {
       return await this.registerToken(username, user.id);
     }
     throw new BusinessException('用户名或密码错误');
+  }
+
+  /**
+   * 用户退出登录
+   * @param id 用户id
+   */
+  async logout(id: string) {
+    const accessToken = getTokenKeyName(id, 'access_token');
+    const refreshToken = getTokenKeyName(id, 'refresh_token');
+    await this.redisService.del(accessToken);
+    await this.redisService.del(refreshToken);
+    return null;
   }
 
   register(username: string, password: string) {
@@ -129,8 +142,12 @@ export class AuthService {
       },
       { expiresIn: refreshExpire },
     );
-    this.redisService.setWithExpire(`access_token-${id}`, accessToken, accessExpire);
-    this.redisService.setWithExpire(`refresh_token-${id}`, refreshToken, refreshExpire);
+    this.redisService.setWithExpire(getTokenKeyName(id, 'access_token'), accessToken, accessExpire);
+    this.redisService.setWithExpire(
+      getTokenKeyName(id, 'refresh_token'),
+      refreshToken,
+      refreshExpire,
+    );
     return { refreshToken, accessToken };
   }
 }
