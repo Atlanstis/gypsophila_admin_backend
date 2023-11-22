@@ -17,6 +17,20 @@ export class UserService {
   ) {}
 
   /**
+   * 根据页码跟长度获取用户列表
+   * @param page 页码
+   * @param size 长度
+   * @returns 用户列表
+   */
+  async list(page: number, size: number) {
+    return await this.userRepository.find({
+      skip: (page - 1) * size,
+      take: size,
+      relations: { roles: true },
+    });
+  }
+
+  /**
    * 查找用户信息
    * @param user 用户查询条件
    * @returns 用户信息

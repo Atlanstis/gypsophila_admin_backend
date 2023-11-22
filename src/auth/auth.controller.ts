@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { LoginDto, RegisterDto, RefreshDto } from './dto';
+import { LoginDto, RefreshDto } from './dto';
 import { JwtGuard } from 'src/core';
 import { Request } from 'express';
 
@@ -19,12 +19,6 @@ export class AuthController {
   @UseGuards(JwtGuard)
   async logOut(@Req() req: Request) {
     this.authService.logout(req.user.id);
-  }
-
-  /** 用户注册 */
-  @Post('/register')
-  register(@Body() user: RegisterDto) {
-    this.authService.register(user.username, user.password);
   }
 
   /** 重签认证 */

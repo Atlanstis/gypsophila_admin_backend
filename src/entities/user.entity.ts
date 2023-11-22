@@ -15,7 +15,7 @@ export class User {
   avatar?: string;
 
   /** 密码 */
-  @Column({ length: 128, comment: '密码' })
+  @Column({ length: 128, comment: '密码', select: false })
   password: string;
 
   @Column({ length: 10, comment: '昵称' })

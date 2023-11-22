@@ -36,6 +36,7 @@ import { RedisModule } from './redis/redis.module';
           logging: true,
           entities: [User, Role, Menu],
           poolSize: 10,
+          dateStrings: true,
         };
       },
     }),

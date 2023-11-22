@@ -30,7 +30,7 @@ export class AuthService {
    * @returns 认证信息
    */
   async login(username: string, password: string) {
-    const user = await this.userService.findOneByUser({ username });
+    const user = await this.userService.findOneByUser({ username }, { id: true, password: true });
     if (!user) {
       throw new BusinessException('用户名不存在');
     }
@@ -51,11 +51,6 @@ export class AuthService {
     await this.redisService.del(accessToken);
     await this.redisService.del(refreshToken);
     return null;
-  }
-
-  register(username: string, password: string) {
-    console.log('🚀 ~ file: auth.service.ts:14 ~ AuthService ~ register ~ password:', password);
-    console.log('🚀 ~ file: auth.service.ts:15 ~ AuthService ~ username:', username);
   }
 
   /**
