@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
-import { PageDto, UserAddDto, UserEditDto } from './dto';
-import { JwtGuard } from 'src/core';
+import { UserAddDto, UserEditDto } from './dto';
+import { JwtGuard, PageDto } from 'src/core';
 
 @Controller('user')
 export class UserController {
