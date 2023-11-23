@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import * as argon from 'argon2';
 import { User } from 'src/entities';
 import {
   FindOneOptions,
@@ -8,6 +9,8 @@ import {
   FindOptionsWhere,
   Repository,
 } from 'typeorm';
+import { UserAddDto, UserEditDto } from './dto';
+import { BusinessException } from 'src/core';
 
 @Injectable()
 export class UserService {
@@ -23,11 +26,55 @@ export class UserService {
    * @returns 用户列表
    */
   async list(page: number, size: number) {
-    return await this.userRepository.find({
+    const [list, total] = await this.userRepository.findAndCount({
       skip: (page - 1) * size,
       take: size,
       relations: { roles: true },
+      order: {
+        createTime: 'ASC',
+      },
     });
+    return { list, total };
+  }
+
+  /**
+   * 新增用户
+   * @param dto 用户信息
+   */
+  async add(dto: UserAddDto) {
+    const existedUser = await this.findOneByUser({ username: dto.username });
+    if (existedUser) {
+      throw new BusinessException('该用户名已存在');
+    }
+    dto.password = await argon.hash(dto.password);
+    await this.userRepository.save({ ...dto, roles: [] });
+    return null;
+  }
+
+  /**
+   * 编辑用户
+   * @param dto 用户信息
+   */
+  async edit(dto: UserEditDto) {
+    const existedUser = await this.findOneByUser({ id: dto.id });
+    if (!existedUser) {
+      throw new BusinessException('该用户不存在');
+    }
+    await this.userRepository.update({ id: existedUser.id }, { ...dto });
+    return null;
+  }
+
+  /**
+   * 删除用户
+   * @param id 用户 id
+   */
+  async delete(id: string) {
+    const existedUser = await this.findOneByUser({ id: id });
+    if (!existedUser) {
+      throw new BusinessException('该用户不存在');
+    }
+    await this.userRepository.delete({ id });
+    return null;
   }
 
   /**

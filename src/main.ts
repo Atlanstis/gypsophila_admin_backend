@@ -19,7 +19,7 @@ async function bootstrap() {
   // 注册全局错误的过滤器
   app.useGlobalFilters(new AllExceptionsFilter(logger), new HttpExceptionFilter());
   // 参数校验
-  app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
 
   // 获取端口
   const configService = app.get(ConfigService);
