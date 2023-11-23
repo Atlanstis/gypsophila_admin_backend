@@ -10,6 +10,7 @@ import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { Menu, Role, User } from './entities';
 import { RedisModule } from './redis/redis.module';
+import { RoleModule } from './role/role.module';
 
 @Module({
   imports: [
@@ -40,10 +41,6 @@ import { RedisModule } from './redis/redis.module';
         };
       },
     }),
-    PsnineModule,
-    LogModule,
-    AuthModule,
-    UserModule,
     RedisModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -55,6 +52,11 @@ import { RedisModule } from './redis/redis.module';
         };
       },
     }),
+    LogModule,
+    PsnineModule,
+    AuthModule,
+    UserModule,
+    RoleModule,
   ],
   controllers: [],
   providers: [],
