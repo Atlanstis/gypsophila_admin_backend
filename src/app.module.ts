@@ -11,6 +11,7 @@ import { UserModule } from './user/user.module';
 import { Menu, Role, User } from './entities';
 import { RedisModule } from './redis/redis.module';
 import { RoleModule } from './role/role.module';
+import { MenuModule } from './menu/menu.module';
 
 @Module({
   imports: [
@@ -57,6 +58,7 @@ import { RoleModule } from './role/role.module';
     AuthModule,
     UserModule,
     RoleModule,
+    MenuModule,
   ],
   controllers: [],
   providers: [],
