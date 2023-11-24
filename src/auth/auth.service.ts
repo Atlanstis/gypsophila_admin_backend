@@ -11,7 +11,7 @@ import { Role } from 'src/entities';
 import { ConfigService } from '@nestjs/config';
 import { ENV_VARS } from 'src/enum';
 import { getTokenKeyName } from './helper';
-
+import { v4 as uuidv4 } from 'uuid';
 @Injectable()
 export class AuthService {
   constructor(
@@ -123,20 +123,14 @@ export class AuthService {
       refreshExpire: number;
     }>(ENV_VARS.TokenExpire);
     const payload: App.JwtPayload = { username, id };
-    const accessToken = await this.jwtService.signAsync(
-      {
-        ...payload,
-        type: 'access_token',
-      },
-      { expiresIn: accessExpire },
-    );
-    const refreshToken = await this.jwtService.signAsync(
-      {
-        ...payload,
-        type: 'refresh_token',
-      },
-      { expiresIn: refreshExpire },
-    );
+    const accessToken = await this.jwtService.signAsync({
+      ...payload,
+      uuid: uuidv4(),
+    });
+    const refreshToken = await this.jwtService.signAsync({
+      ...payload,
+      uuid: uuidv4(),
+    });
     this.redisService.setWithExpire(getTokenKeyName(id, 'access_token'), accessToken, accessExpire);
     this.redisService.setWithExpire(
       getTokenKeyName(id, 'refresh_token'),

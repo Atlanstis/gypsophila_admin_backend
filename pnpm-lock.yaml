@@ -65,6 +65,9 @@ dependencies:
   typeorm:
     specifier: ^0.3.17
     version: 0.3.17(mysql2@3.6.1)(redis@4.6.10)(ts-node@10.9.1)
+  uuid:
+    specifier: ^9.0.1
+    version: 9.0.1
   winston:
     specifier: ^3.11.0
     version: 3.11.0

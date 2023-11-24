@@ -5,6 +5,5 @@ declare namespace App {
   interface JwtPayload {
     username: string;
     id: string;
-    type?: 'access_token' | 'refresh_token';
   }
 }
