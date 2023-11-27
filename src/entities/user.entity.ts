@@ -1,8 +1,9 @@
 import { Column, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Role } from './role.entity';
+import { TimeBase } from './base';
 
 @Entity()
-export class User {
+export class User extends TimeBase {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -26,18 +27,4 @@ export class User {
     name: 'user_role',
   })
   roles: Role[];
-
-  @Column({
-    name: 'create_time',
-    type: 'timestamp',
-    default: () => 'CURRENT_TIMESTAMP',
-  })
-  createTime: Date;
-
-  @Column({
-    name: 'update_time',
-    type: 'timestamp',
-    default: () => 'CURRENT_TIMESTAMP',
-  })
-  updateTime: Date;
 }

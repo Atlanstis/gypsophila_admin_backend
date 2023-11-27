@@ -76,7 +76,8 @@ export class MenuService {
         throw new BusinessException('上级菜单不存在');
       }
     }
-    await this.menuRepoitory.save(dto);
+    const newMenu = this.menuRepoitory.create(dto);
+    await this.menuRepoitory.save(newMenu);
   }
 
   /**
@@ -96,7 +97,8 @@ export class MenuService {
     if (existKeyMenu) {
       throw new BusinessException('当前菜单 Key 已存在');
     }
-    await this.menuRepoitory.update({ id: dto.id }, dto);
+    const newMenu = this.menuRepoitory.create(dto);
+    await this.menuRepoitory.update({ id: dto.id }, newMenu);
   }
 
   /**

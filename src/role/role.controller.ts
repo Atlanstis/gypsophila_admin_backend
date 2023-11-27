@@ -41,4 +41,10 @@ export class RoleController {
   async delete(@Query('id', numberParse('id')) id: number) {
     return await this.roleService.delete(id);
   }
+
+  /** 获取可以分配的角色 */
+  @Get('/assignable')
+  async assignable() {
+    return await this.roleService.assignable();
+  }
 }

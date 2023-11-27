@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Role, RoleIsDefaultEnum } from 'src/entities';
-import { Repository } from 'typeorm';
+import { Not, Repository } from 'typeorm';
 import { RoleDto, RoleEditDto } from './dto';
 import { BusinessException } from 'src/core';
+import { RoleEnum } from 'src/enum';
 
 @Injectable()
 export class RoleService {
@@ -38,7 +39,8 @@ export class RoleService {
     if (existedRole) {
       throw new BusinessException('角色名已存在');
     }
-    await this.roleRepository.save({ name: dto.name });
+    const newRole = this.roleRepository.create({ ...dto });
+    await this.roleRepository.save(newRole);
   }
 
   /**
@@ -50,7 +52,8 @@ export class RoleService {
     if (!existedRole) {
       throw new BusinessException('角色不存在');
     }
-    await this.roleRepository.update({ id: dto.id }, { name: dto.name });
+    const updateRole = this.roleRepository.create(dto);
+    await this.roleRepository.update({ id: dto.id }, updateRole);
   }
 
   /**
@@ -66,5 +69,13 @@ export class RoleService {
       throw new BusinessException('内置角色不能删除');
     }
     await this.roleRepository.delete({ id });
+  }
+
+  /**
+   * 获取可以分配的角色
+   * @returns 除超级管理员外的角色
+   */
+  async assignable() {
+    return await this.roleRepository.find({ where: { id: Not(RoleEnum.Admin) } });
   }
 }

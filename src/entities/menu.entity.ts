@@ -1,4 +1,5 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { TimeBase } from './base';
 
 /** 顶级菜单 */
 export const TOP_LEVEL_MENU_FLAG = 0;
@@ -8,7 +9,7 @@ export const MENU_KEY_MAX_LENGTH = 32;
 export const MENU_NAME_MAX_LENGTH = 16;
 
 @Entity()
-export class Menu {
+export class Menu extends TimeBase {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -20,20 +21,4 @@ export class Menu {
 
   @Column({ name: 'parent_id', comment: '父菜单 id', type: 'int', default: TOP_LEVEL_MENU_FLAG })
   parentId: number;
-
-  @Column({
-    name: 'create_time',
-    type: 'timestamp',
-    select: false,
-    default: () => 'CURRENT_TIMESTAMP',
-  })
-  createTime: Date;
-
-  @Column({
-    name: 'update_time',
-    type: 'timestamp',
-    select: false,
-    default: () => 'CURRENT_TIMESTAMP',
-  })
-  updateTime: Date;
 }

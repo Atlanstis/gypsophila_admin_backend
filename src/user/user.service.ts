@@ -47,7 +47,8 @@ export class UserService {
       throw new BusinessException('该用户名已存在');
     }
     dto.password = await argon.hash(dto.password);
-    await this.userRepository.save({ ...dto, roles: [] });
+    const newUser = this.userRepository.create({ ...dto, roles: [] });
+    await this.userRepository.save(newUser);
     return null;
   }
 
@@ -60,7 +61,12 @@ export class UserService {
     if (!existedUser) {
       throw new BusinessException('该用户不存在');
     }
-    await this.userRepository.update({ id: existedUser.id }, { ...dto });
+    // 用户名不可编辑
+    if (existedUser.username !== dto.username) {
+      throw new BusinessException('用户名不可编辑');
+    }
+    const newUser = this.userRepository.create(dto);
+    await this.userRepository.update({ id: existedUser.id }, newUser);
     return null;
   }
 

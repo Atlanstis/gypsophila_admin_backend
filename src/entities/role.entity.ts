@@ -1,5 +1,6 @@
 import { Column, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Menu } from './menu.entity';
+import { TimeBase } from './base';
 
 export enum RoleIsDefaultEnum {
   /** 内置角色 */
@@ -9,7 +10,7 @@ export enum RoleIsDefaultEnum {
 }
 
 @Entity()
-export class Role {
+export class Role extends TimeBase {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -30,18 +31,4 @@ export class Role {
     name: 'role_menu',
   })
   menus: Menu[];
-
-  @Column({
-    name: 'create_time',
-    type: 'timestamp',
-    default: () => 'CURRENT_TIMESTAMP',
-  })
-  createTime: Date;
-
-  @Column({
-    name: 'update_time',
-    type: 'timestamp',
-    default: () => 'CURRENT_TIMESTAMP',
-  })
-  updateTime: Date;
 }
