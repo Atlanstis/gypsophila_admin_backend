@@ -61,7 +61,7 @@ export class AuthService {
   async refresh(token: string) {
     const error = new UnauthorizedException({
       code: ResponseCode.Unauthorized,
-      message: '请重新登录',
+      message: '认证已失效，请重新登录',
     });
     if (!token) {
       throw error;
