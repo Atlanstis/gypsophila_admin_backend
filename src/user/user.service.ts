@@ -11,12 +11,15 @@ import {
 } from 'typeorm';
 import { UserAddDto, UserEditDto } from './dto';
 import { BusinessException } from 'src/core';
+import { RoleService } from 'src/role/role.service';
+import { handleRoleJudge } from './helper';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    private readonly roleService: RoleService,
   ) {}
 
   /**
@@ -46,10 +49,10 @@ export class UserService {
     if (existedUser) {
       throw new BusinessException('该用户名已存在');
     }
+    const role = await handleRoleJudge(this.roleService, dto.role, '此角色不允许添加');
     dto.password = await argon.hash(dto.password);
-    const newUser = this.userRepository.create({ ...dto, roles: [] });
+    const newUser = this.userRepository.create({ ...dto, roles: [role] });
     await this.userRepository.save(newUser);
-    return null;
   }
 
   /**
@@ -57,7 +60,7 @@ export class UserService {
    * @param dto 用户信息
    */
   async edit(dto: UserEditDto) {
-    const existedUser = await this.findOneByUser({ id: dto.id });
+    const existedUser = await this.findOneByUser({ id: dto.id }, {}, { roles: true });
     if (!existedUser) {
       throw new BusinessException('该用户不存在');
     }
@@ -65,9 +68,9 @@ export class UserService {
     if (existedUser.username !== dto.username) {
       throw new BusinessException('用户名不可编辑');
     }
-    const newUser = this.userRepository.create(dto);
-    await this.userRepository.update({ id: existedUser.id }, newUser);
-    return null;
+    const role = await handleRoleJudge(this.roleService, dto.role, '不允许修改为此角色');
+    const newUser = this.userRepository.create({ ...existedUser, ...dto, roles: [role] });
+    await this.userRepository.save(newUser);
   }
 
   /**

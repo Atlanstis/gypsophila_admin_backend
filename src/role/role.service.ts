@@ -78,4 +78,13 @@ export class RoleService {
   async assignable() {
     return await this.roleRepository.find({ where: { id: Not(RoleEnum.Admin) } });
   }
+
+  /**
+   * 根据 id 获取角色
+   * @param id 角色 id
+   * @returns 角色
+   */
+  async findRoleById(id: number) {
+    return await this.roleRepository.findOne({ where: { id } });
+  }
 }

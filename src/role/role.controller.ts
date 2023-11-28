@@ -43,7 +43,7 @@ export class RoleController {
   }
 
   /** 获取可以分配的角色 */
-  @Get('/assignable')
+  @Get('/list/assignable')
   async assignable() {
     return await this.roleService.assignable();
   }
