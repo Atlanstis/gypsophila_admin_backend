@@ -106,6 +106,9 @@ export class RoleService {
     if (!role) {
       throw new BusinessException('该角色不存在');
     }
+    if (role.id === RoleEnum.Admin) {
+      throw new BusinessException('管理员权限不能编辑');
+    }
     const menus = await this.menuService.getMenuByKey(dto.menus);
     const saveRole = this.roleRepository.create({ ...role, menus });
     await this.roleRepository.save(saveRole);
