@@ -2,20 +2,14 @@ import { Column, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn } from 't
 import { Menu } from './menu.entity';
 import { TimeBase } from './base';
 import { User } from './user.entity';
-
-export enum RoleIsDefaultEnum {
-  /** 内置角色 */
-  YES = 1,
-  /** 非内置角色 */
-  NO = 0,
-}
+import { ROLE_LENGTH, RoleIsDefaultEnum } from 'src/constants';
 
 @Entity()
 export class Role extends TimeBase {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ comment: '角色名', length: 16, unique: true })
+  @Column({ comment: '角色名', length: ROLE_LENGTH.NAME_MAX, unique: true })
   name: string;
 
   @Column({

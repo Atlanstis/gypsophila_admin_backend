@@ -1,9 +1,10 @@
 import { IsArray, IsInt, IsNotEmpty, Length } from 'class-validator';
+import { ROLE_LENGTH } from 'src/constants';
 
 export class RoleDto {
   /** 角色名 */
   @IsNotEmpty({ message: '角色名不能为空' })
-  @Length(1, 16, { message: '角色名长度为 1 - 16 位' })
+  @Length(1, ROLE_LENGTH.NAME_MAX, { message: `角色名长度为 1 - ${ROLE_LENGTH.NAME_MAX} 位` })
   name: string;
 }
 

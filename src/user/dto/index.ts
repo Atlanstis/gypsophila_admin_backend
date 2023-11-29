@@ -1,14 +1,19 @@
 import { IsNotEmpty, Length, IsInt } from 'class-validator';
+import { USER_LENGTH } from 'src/constants';
 
 export class UserDto {
   @IsNotEmpty({ message: '用户名不能为空' })
-  @Length(0, 16, { message: '用户名长度为 0 - 16 位' })
+  @Length(0, USER_LENGTH.USERNAME_MAX, {
+    message: `用户名长度为 0 - ${USER_LENGTH.USERNAME_MAX} 位`,
+  })
   /** 用户名 */
   username: string;
 
   /** 昵称 */
   @IsNotEmpty({ message: '昵称不能为空' })
-  @Length(0, 10, { message: '昵称长度为 0 - 10 位' })
+  @Length(0, USER_LENGTH.NICKMAX_MAX, {
+    message: `昵称长度为 0 - ${USER_LENGTH.NICKMAX_MAX} 位`,
+  })
   nickname: string;
 
   @IsNotEmpty({ message: '角色不能为空' })

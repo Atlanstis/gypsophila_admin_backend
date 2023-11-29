@@ -1,11 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Role, RoleIsDefaultEnum } from 'src/entities';
+import { Role } from 'src/entities';
 import { Not, Repository } from 'typeorm';
 import { RoleDto, RoleEditDto, RoleMenuEditDto } from './dto';
 import { BusinessException } from 'src/core';
 import { RoleEnum } from 'src/enum';
 import { MenuService } from 'src/menu/menu.service';
+import { RoleIsDefaultEnum } from 'src/constants';
 
 @Injectable()
 export class RoleService {

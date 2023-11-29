@@ -1,5 +1,5 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
-import { MENU_LENGTH_ENUM, TOP_LEVEL_MENU_FLAG } from 'src/constants';
+import { MENU_LENGTH, TOP_LEVEL_MENU_FLAG } from 'src/constants';
 import { TimeBase } from './base';
 
 @Entity()
@@ -7,10 +7,10 @@ export class Menu extends TimeBase {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ comment: '菜单key', width: MENU_LENGTH_ENUM.KEY_MAX, unique: true })
+  @Column({ comment: '菜单key', width: MENU_LENGTH.KEY_MAX, unique: true })
   key: string;
 
-  @Column({ comment: '菜单名称', length: MENU_LENGTH_ENUM.NAME_MAX })
+  @Column({ comment: '菜单名称', length: MENU_LENGTH.NAME_MAX })
   name: string;
 
   @Column({ name: 'parent_id', comment: '父菜单 id', type: 'int', default: TOP_LEVEL_MENU_FLAG })
