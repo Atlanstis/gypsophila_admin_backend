@@ -1,6 +1,7 @@
 import { Column, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Menu } from './menu.entity';
 import { TimeBase } from './base';
+import { User } from './user.entity';
 
 export enum RoleIsDefaultEnum {
   /** 内置角色 */
@@ -31,4 +32,10 @@ export class Role extends TimeBase {
     name: 'role_menu',
   })
   menus: Menu[];
+
+  @ManyToMany(() => User)
+  @JoinTable({
+    name: 'user_role',
+  })
+  users: User[];
 }

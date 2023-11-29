@@ -63,12 +63,18 @@ export class RoleService {
    * @param id 角色 id
    */
   async delete(id: number) {
-    const existedRole = await this.roleRepository.findOne({ where: { id: id } });
-    if (!existedRole) {
+    const role = await this.roleRepository.findOne({
+      where: { id: id },
+      relations: { users: true },
+    });
+    if (!role) {
       throw new BusinessException('角色不存在');
     }
-    if (existedRole.isDefault === RoleIsDefaultEnum.YES) {
+    if (role.isDefault === RoleIsDefaultEnum.YES) {
       throw new BusinessException('内置角色不能删除');
+    }
+    if (role.users.length) {
+      throw new BusinessException('当前角色已被用户关联，无法删除');
     }
     await this.roleRepository.delete({ id });
   }
