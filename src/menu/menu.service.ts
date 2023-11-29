@@ -1,15 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Menu, TOP_LEVEL_MENU_FLAG } from 'src/entities';
+import { Menu } from 'src/entities';
 import { FindOptionsSelect, In, Not, Repository } from 'typeorm';
 import { MenuDto, MenuEditDto } from './dto';
 import { BusinessException } from 'src/core';
-
-type MenuBusiness = {
-  [P in Exclude<keyof Menu, 'createTime' | 'updateTime'>]: Menu[P];
-} & {
-  children?: MenuBusiness[];
-};
+import { TOP_LEVEL_MENU_FLAG } from 'src/constants';
+import { sortMenuChildren } from './helper';
 
 const select: FindOptionsSelect<Menu> = { id: true, key: true, name: true, parentId: true };
 
@@ -35,28 +31,25 @@ export class MenuService {
       skip: (page - 1) * size,
       take: size,
       order: {
-        createTime: 'ASC',
+        id: 'ASC',
       },
     });
-    const parentIds = list.map((menu) => menu.id);
-    const children = await this.menuRepoitory.find({
-      select,
-      where: {
-        parentId: In(parentIds),
-      },
-    });
-    const menus: MenuBusiness[] = list;
-    children.forEach((child) => {
-      const father = menus.find((menu) => menu.id === child.parentId);
-      if (father) {
-        if (father.children) {
-          father.children.push(child);
-        } else {
-          father.children = [child];
-        }
-      }
-    });
+    const children = await this.getChildrenMenu(list);
+    const menus = sortMenuChildren(list, children);
     return { list: menus, total };
+  }
+
+  /** 获取所有菜单 */
+  async listAll() {
+    const topMenus = await this.menuRepoitory.find({
+      select,
+      where: { parentId: TOP_LEVEL_MENU_FLAG },
+      order: {
+        id: 'ASC',
+      },
+    });
+    const children = await this.getChildrenMenu(topMenus);
+    return sortMenuChildren(topMenus, children);
   }
 
   /**
@@ -127,5 +120,34 @@ export class MenuService {
         parentId: TOP_LEVEL_MENU_FLAG,
       },
     });
+  }
+
+  /**
+   * 根据 key 获取菜单组
+   * @param menus key 数组
+   * @returns 菜单组
+   */
+  async getMenuByKey(menus: string[]) {
+    return await this.menuRepoitory.find({
+      where: {
+        key: In(menus),
+      },
+    });
+  }
+
+  /**
+   * 获取顶级菜单的子菜单
+   * @param topMenus 顶级菜单
+   * @returns 菜单
+   */
+  async getChildrenMenu(topMenus: Menu[]) {
+    const parentIds = topMenus.map((menu) => menu.id);
+    const children = await this.menuRepoitory.find({
+      select,
+      where: {
+        parentId: In(parentIds),
+      },
+    });
+    return children;
   }
 }

@@ -2,15 +2,17 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Role, RoleIsDefaultEnum } from 'src/entities';
 import { Not, Repository } from 'typeorm';
-import { RoleDto, RoleEditDto } from './dto';
+import { RoleDto, RoleEditDto, RoleMenuEditDto } from './dto';
 import { BusinessException } from 'src/core';
 import { RoleEnum } from 'src/enum';
+import { MenuService } from 'src/menu/menu.service';
 
 @Injectable()
 export class RoleService {
   constructor(
     @InjectRepository(Role)
     private readonly roleRepository: Repository<Role>,
+    private readonly menuService: MenuService,
   ) {}
 
   /**
@@ -77,6 +79,36 @@ export class RoleService {
    */
   async assignable() {
     return await this.roleRepository.find({ where: { id: Not(RoleEnum.Admin) } });
+  }
+
+  /**
+   * 获取该角色下可以访问的菜单
+   * @param id 角色 id
+   * @returns 授权菜单
+   */
+  async menu(id: number) {
+    const role = await this.roleRepository.findOne({
+      select: { menus: true },
+      where: { id },
+      relations: { menus: true },
+    });
+    if (!role) {
+      throw new BusinessException('该角色不存在');
+    }
+    return role.menus.map((item) => item.key);
+  }
+
+  /**
+   * 编辑该角色下可以访问的菜单
+   */
+  async menuEdit(dto: RoleMenuEditDto) {
+    const role = await this.findRoleById(dto.id);
+    if (!role) {
+      throw new BusinessException('该角色不存在');
+    }
+    const menus = await this.menuService.getMenuByKey(dto.menus);
+    const saveRole = this.roleRepository.create({ ...role, menus });
+    await this.roleRepository.save(saveRole);
   }
 
   /**

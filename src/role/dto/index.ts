@@ -1,4 +1,4 @@
-import { IsInt, IsNotEmpty, Length } from 'class-validator';
+import { IsArray, IsInt, IsNotEmpty, Length } from 'class-validator';
 
 export class RoleDto {
   /** 角色名 */
@@ -12,4 +12,17 @@ export class RoleEditDto extends RoleDto {
   @IsInt({ message: 'id 格式不正确' })
   /** 角色 id */
   id: number;
+}
+
+export class RoleMenuDto {
+  @IsNotEmpty({ message: 'id 不能为空' })
+  @IsInt({ message: 'id 格式不正确' })
+  /** 角色 id */
+  id: number;
+}
+
+export class RoleMenuEditDto extends RoleMenuDto {
+  @IsNotEmpty({ message: '菜单不能为空' })
+  @IsArray({ message: '菜单格式不正确' })
+  menus: string[];
 }

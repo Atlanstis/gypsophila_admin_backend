@@ -1,7 +1,7 @@
 import { Body, Controller, Get, ParseIntPipe, Post, Query, UseGuards } from '@nestjs/common';
 import { RoleService } from './role.service';
 import { BusinessException, JwtGuard, PageDto } from 'src/core';
-import { RoleDto, RoleEditDto } from './dto';
+import { RoleDto, RoleEditDto, RoleMenuDto, RoleMenuEditDto } from './dto';
 
 const numberParse = (parameter) =>
   new ParseIntPipe({
@@ -44,7 +44,21 @@ export class RoleController {
 
   /** 获取可以分配的角色 */
   @Get('/list/assignable')
+  @UseGuards(JwtGuard)
   async assignable() {
     return await this.roleService.assignable();
+  }
+
+  /** 获取该角色下可以访问的菜单 */
+  @Post('/menu')
+  @UseGuards(JwtGuard)
+  async menu(@Body() dto: RoleMenuDto) {
+    return await this.roleService.menu(dto.id);
+  }
+
+  /** 编辑该角色下可以访问的菜单 */
+  @Post('/menu/edit')
+  async menuEdit(@Body() dto: RoleMenuEditDto) {
+    return await this.roleService.menuEdit(dto);
   }
 }
