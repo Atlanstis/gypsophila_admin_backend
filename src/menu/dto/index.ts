@@ -1,16 +1,16 @@
-import { IsNotEmpty, IsNumber, Length } from 'class-validator';
-import { MENU_LENGTH } from 'src/constants';
+import { IsInt, IsNotEmpty, IsNumber, Length } from 'class-validator';
+import { MENU_LENGTH, PERMISSION_LENGTH } from 'src/constants';
 
 export class MenuDto {
   @IsNotEmpty({ message: '菜单名称不能为空' })
-  @Length(1, MENU_LENGTH.KEY_MAX, {
-    message: `菜单名称长度为 1 - ${MENU_LENGTH.KEY_MAX} 个字符`,
+  @Length(1, MENU_LENGTH.NAME_MAX, {
+    message: `菜单名称长度为 1 - ${MENU_LENGTH.NAME_MAX} 个字符`,
   })
   /** 菜单名称 */
   name: string;
   @IsNotEmpty({ message: '菜单 Key 不能为空' })
-  @Length(1, MENU_LENGTH.NAME_MAX, {
-    message: `菜单 Key 长度为 1 - ${MENU_LENGTH.NAME_MAX} 个字符`,
+  @Length(1, MENU_LENGTH.KEY_MAX, {
+    message: `菜单 Key 长度为 1 - ${MENU_LENGTH.KEY_MAX} 个字符`,
   })
   /** 菜单 Key */
   key: string;
@@ -22,4 +22,32 @@ export class MenuDto {
 export class MenuEditDto extends MenuDto {
   @IsNotEmpty({ message: '菜单 id 不能为空' })
   id: number;
+}
+
+export class PermissionDto {
+  @IsNotEmpty({ message: '权限 Key 不能为空' })
+  @Length(1, PERMISSION_LENGTH.KEY_MAX, {
+    message: `权限 Key 长度为 1 - ${PERMISSION_LENGTH.KEY_MAX}`,
+  })
+  key: string;
+
+  @IsNotEmpty({ message: '权限名称不能为空' })
+  @Length(1, PERMISSION_LENGTH.NAME_MAX, {
+    message: `权限 Key 长度为 1 - ${PERMISSION_LENGTH.NAME_MAX}`,
+  })
+  name: string;
+  @IsNotEmpty({ message: '菜单 id 不能为空' })
+  @IsInt({ message: '菜单 id 格式错误' })
+  menuId: number;
+}
+
+export class PermissionEditDto extends PermissionDto {
+  @IsNotEmpty({ message: '权限 id 不能为空' })
+  id: number;
+}
+
+export class MenuIdDto {
+  @IsNotEmpty({ message: '菜单 id 不能为空' })
+  @IsInt({ message: '菜单 id 格式错误' })
+  menuId: number;
 }

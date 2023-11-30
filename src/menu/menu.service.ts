@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Menu } from 'src/entities';
+import { Menu, Permission } from 'src/entities';
 import { FindOptionsSelect, In, Not, Repository } from 'typeorm';
-import { MenuDto, MenuEditDto } from './dto';
+import { MenuDto, MenuEditDto, PermissionDto, PermissionEditDto } from './dto';
 import { BusinessException } from 'src/core';
 import { TOP_LEVEL_MENU_FLAG } from 'src/constants';
 import { sortMenuChildren } from './helper';
@@ -14,6 +14,8 @@ export class MenuService {
   constructor(
     @InjectRepository(Menu)
     private readonly menuRepoitory: Repository<Menu>,
+    @InjectRepository(Permission)
+    private readonly permissionRepository: Repository<Permission>,
   ) {}
 
   /**
@@ -79,7 +81,7 @@ export class MenuService {
    */
   async edit(dto: MenuEditDto) {
     // 判断当前菜单是否存在
-    const existMenu = await this.menuRepoitory.findOne({ where: { id: dto.id } });
+    const existMenu = await await this.getMenuById(dto.id);
     if (!existMenu) {
       throw new BusinessException('该菜单不存在');
     }
@@ -100,7 +102,7 @@ export class MenuService {
    */
   async delete(id: number) {
     // 判断当前菜单是否存在
-    const existMenu = await this.menuRepoitory.findOne({ where: { id } });
+    const existMenu = await this.getMenuById(id);
     if (!existMenu) {
       throw new BusinessException('该菜单不存在');
     }
@@ -149,5 +151,83 @@ export class MenuService {
       },
     });
     return children;
+  }
+
+  /**
+   * 根据 id 获取菜单
+   * @param id 菜单 id
+   * @returns 菜单
+   */
+  async getMenuById(id: number) {
+    return await this.menuRepoitory.findOne({
+      select,
+      where: { id },
+    });
+  }
+
+  /**
+   * 菜单增加权限选项
+   * @param dto 权限
+   */
+  async permissionAdd(dto: PermissionDto) {
+    const menu = await this.getMenuById(dto.menuId);
+    if (!menu) {
+      throw new BusinessException('该菜单不存在');
+    }
+    const existPermission = await this.permissionRepository.findOne({ where: { key: dto.key } });
+    if (existPermission) {
+      throw new BusinessException('该权限 Key 已存在');
+    }
+    const permission = this.permissionRepository.create({ ...dto, menu });
+    await this.permissionRepository.save(permission);
+  }
+
+  /**
+   * 菜单权限选项编辑
+   * @param dto 权限
+   */
+  async permissionEdit(dto: PermissionEditDto) {
+    const menu = await this.getMenuById(dto.menuId);
+    if (!menu) {
+      throw new BusinessException('该菜单不存在');
+    }
+    const existPermission = await this.permissionRepository.findOne({ where: { key: dto.key } });
+    if (existPermission && existPermission.id !== dto.id) {
+      throw new BusinessException('该权限 Key 已存在');
+    }
+    const permission = this.permissionRepository.create({ ...dto, menu });
+    await this.permissionRepository.save(permission);
+  }
+
+  /**
+   * 菜单权限选项删除
+   * @param id 权限 id
+   */
+  async permissionDelete(id: number) {
+    const permission = await this.permissionRepository.findOne({
+      where: { id },
+    });
+    if (!permission) {
+      throw new BusinessException('该权限不存在');
+    }
+    await this.permissionRepository.delete({ id });
+  }
+
+  /**
+   * 获取菜单权限选项
+   * @param menuId 菜单 id
+   */
+  async permissionList(menuId: number) {
+    const menu = await this.menuRepoitory.findOne({
+      select: { id: true },
+      where: { id: menuId },
+      relations: {
+        permissions: true,
+      },
+    });
+    if (!menu) {
+      throw new BusinessException('该菜单不存在');
+    }
+    return menu.permissions;
   }
 }

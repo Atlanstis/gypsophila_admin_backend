@@ -21,3 +21,26 @@ export class TimeBase {
     this.updateTime = new Date();
   }
 }
+
+export class TimeNotSelectBase {
+  @Column({
+    name: 'create_time',
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP',
+    select: false,
+  })
+  createTime: Date;
+
+  @Column({
+    name: 'update_time',
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP',
+    select: false,
+  })
+  updateTime: Date;
+
+  @BeforeUpdate()
+  updateDates() {
+    this.updateTime = new Date();
+  }
+}

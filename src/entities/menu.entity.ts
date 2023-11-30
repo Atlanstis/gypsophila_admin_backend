@@ -1,6 +1,7 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { MENU_LENGTH, TOP_LEVEL_MENU_FLAG } from 'src/constants';
 import { TimeBase } from './base';
+import { Permission } from './permission.entity';
 
 @Entity()
 export class Menu extends TimeBase {
@@ -15,4 +16,7 @@ export class Menu extends TimeBase {
 
   @Column({ name: 'parent_id', comment: '父菜单 id', type: 'int', default: TOP_LEVEL_MENU_FLAG })
   parentId: number;
+
+  @OneToMany(() => Permission, (permission) => permission.menu)
+  permissions: Permission[];
 }

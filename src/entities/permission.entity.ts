@@ -1,0 +1,22 @@
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { TimeNotSelectBase } from './base';
+import { Menu } from './menu.entity';
+import { PERMISSION_LENGTH } from 'src/constants';
+
+@Entity()
+export class Permission extends TimeNotSelectBase {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column({ length: PERMISSION_LENGTH.KEY_MAX, comment: '权限标识', unique: true })
+  key: string;
+
+  @Column({ length: PERMISSION_LENGTH.NAME_MAX, comment: '权限名称' })
+  name: string;
+
+  @JoinColumn({
+    name: 'menu_id',
+  })
+  @ManyToOne(() => Menu, (menu) => menu.permissions)
+  menu: Menu;
+}
