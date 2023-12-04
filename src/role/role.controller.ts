@@ -50,15 +50,15 @@ export class RoleController {
   }
 
   /** 获取该角色下可以访问的菜单 */
-  @Post('/menu')
+  @Post('/menu/permission')
   @UseGuards(JwtGuard)
-  async menu(@Body() dto: RoleMenuDto) {
-    return await this.roleService.menu(dto.id);
+  async menuPermission(@Body() dto: RoleMenuDto) {
+    return await this.roleService.menuPermission(dto.id);
   }
 
   /** 编辑该角色下可以访问的菜单 */
-  @Post('/menu/edit')
+  @Post('/menu/permission/edit')
   async menuEdit(@Body() dto: RoleMenuEditDto) {
-    return await this.roleService.menuEdit(dto);
+    return await this.roleService.menuPermissionEdit(dto);
   }
 }

@@ -21,15 +21,6 @@ export class MenuController {
     return await this.menuService.list(dto.page, dto.size);
   }
 
-  /**
-   * 获取所有菜单
-   * @returns 菜单
-   */
-  @Post('/list/all')
-  async listAll() {
-    return await this.menuService.listAll();
-  }
-
   /** 获取一级菜单数据 */
   @Get('/list/top')
   @UseGuards(JwtGuard)

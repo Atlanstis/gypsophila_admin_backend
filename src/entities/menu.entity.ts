@@ -1,10 +1,10 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { MENU_LENGTH, TOP_LEVEL_MENU_FLAG } from 'src/constants';
-import { TimeBase } from './base';
+import { TimeNotSelectBase } from './base';
 import { Permission } from './permission.entity';
 
 @Entity()
-export class Menu extends TimeBase {
+export class Menu extends TimeNotSelectBase {
   @PrimaryGeneratedColumn()
   id: number;
 

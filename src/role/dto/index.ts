@@ -1,4 +1,4 @@
-import { IsArray, IsInt, IsNotEmpty, Length } from 'class-validator';
+import { IsArray, IsInt, IsNotEmpty, IsObject, Length } from 'class-validator';
 import { ROLE_LENGTH } from 'src/constants';
 
 export class RoleDto {
@@ -26,4 +26,7 @@ export class RoleMenuEditDto extends RoleMenuDto {
   @IsNotEmpty({ message: '菜单不能为空' })
   @IsArray({ message: '菜单格式不正确' })
   menus: string[];
+  @IsNotEmpty({ message: '权限不能为空' })
+  @IsObject({ message: '权限格式不正确' })
+  permissions: Record<string, string[]>;
 }

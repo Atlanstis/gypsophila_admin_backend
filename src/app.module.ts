@@ -8,7 +8,7 @@ import { ENV_VARS } from './enum';
 import { LogModule } from './log/log.module';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
-import { Menu, Role, User, Permission } from './entities';
+import { Menu, Role, User, Permission, RoleMenuPermission } from './entities';
 import { RedisModule } from './redis/redis.module';
 import { RoleModule } from './role/role.module';
 import { MenuModule } from './menu/menu.module';
@@ -36,7 +36,7 @@ import { MenuModule } from './menu/menu.module';
           type: 'mysql',
           ...mysqlConfig,
           logging: true,
-          entities: [User, Role, Menu, Permission],
+          entities: [User, Role, Menu, Permission, RoleMenuPermission],
           poolSize: 10,
           dateStrings: true,
         };

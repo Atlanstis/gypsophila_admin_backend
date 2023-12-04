@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Role } from 'src/entities';
-import { Not, Repository } from 'typeorm';
+import { Menu, Permission, Role, RoleMenuPermission } from 'src/entities';
+import { In, Not, Repository } from 'typeorm';
 import { RoleDto, RoleEditDto, RoleMenuEditDto } from './dto';
 import { BusinessException } from 'src/core';
 import { RoleEnum } from 'src/enum';
@@ -13,6 +13,12 @@ export class RoleService {
   constructor(
     @InjectRepository(Role)
     private readonly roleRepository: Repository<Role>,
+    @InjectRepository(Menu)
+    private readonly menuRepository: Repository<Menu>,
+    @InjectRepository(Permission)
+    private readonly permissionRepository: Repository<Permission>,
+    @InjectRepository(RoleMenuPermission)
+    private readonly roleMenuPermissionRepository: Repository<RoleMenuPermission>,
     private readonly menuService: MenuService,
   ) {}
 
@@ -93,7 +99,8 @@ export class RoleService {
    * @param id 角色 id
    * @returns 授权菜单
    */
-  async menu(id: number) {
+  async menuPermission(id: number) {
+    /** 获取该角色下可访问的菜单 */
     const role = await this.roleRepository.findOne({
       select: { menus: true },
       where: { id },
@@ -102,13 +109,38 @@ export class RoleService {
     if (!role) {
       throw new BusinessException('该角色不存在');
     }
-    return role.menus.map((item) => item.key);
+    /** 获取各菜单的权限 */
+    const rmps = await this.roleMenuPermissionRepository
+      .createQueryBuilder('rmp')
+      .leftJoinAndSelect('rmp.menu', 'menu')
+      .leftJoinAndSelect('rmp.permission', 'permission')
+      .where('rmp.role_id = :roleId', { roleId: id })
+      .getMany();
+    const map: Record<string, string[]> = {};
+    rmps.forEach(({ menu, permission }) => {
+      const menuKey = menu.key;
+      const permissionKey = permission.key;
+      if (!map[menuKey]) {
+        map[menuKey] = [permissionKey];
+      } else {
+        map[menuKey].push(permissionKey);
+      }
+    });
+
+    /** 获取所有菜单及下面的菜单 */
+    const list = await this.menuService.getMenuPermissions();
+
+    return {
+      list,
+      menus: role.menus.map((item) => item.key),
+      permissions: map,
+    };
   }
 
   /**
    * 编辑该角色下可以访问的菜单
    */
-  async menuEdit(dto: RoleMenuEditDto) {
+  async menuPermissionEdit(dto: RoleMenuEditDto) {
     const role = await this.findRoleById(dto.id);
     if (!role) {
       throw new BusinessException('该角色不存在');
@@ -116,9 +148,50 @@ export class RoleService {
     if (role.id === RoleEnum.Admin) {
       throw new BusinessException('管理员权限不能编辑');
     }
+    /** 保存角色可访问的菜单 */
     const menus = await this.menuService.getMenuByKey(dto.menus);
     const saveRole = this.roleRepository.create({ ...role, menus });
     await this.roleRepository.save(saveRole);
+    /** 删除已存在的权限 */
+    await this.roleMenuPermissionRepository
+      .createQueryBuilder('rpm')
+      .delete()
+      .where('role_id=:roleId', { roleId: role.id })
+      .execute();
+    /** 保存新的权限 */
+    const { permissions } = dto;
+    const arr: [string, string][] = [];
+    const menuKeyArr: string[] = [];
+    const prmKeyArr: string[] = [];
+    Object.keys(permissions).forEach((menuKey) => {
+      if (!menuKeyArr.includes(menuKey)) menuKeyArr.push(menuKey);
+      permissions[menuKey].forEach((prmKey) => {
+        if (!prmKeyArr.includes(prmKey)) prmKeyArr.push(prmKey);
+        arr.push([menuKey, prmKey]);
+      });
+    });
+    const ms = await this.menuRepository.find({ where: { key: In(menuKeyArr) } });
+    const ps = await this.permissionRepository.find({ where: { key: In(prmKeyArr) } });
+    const msMap: Record<string, Menu> = {};
+    const psMap: Record<string, Permission> = {};
+    ms.forEach((menu) => {
+      msMap[menu.key] = menu;
+    });
+    ps.forEach((permission) => {
+      psMap[permission.key] = permission;
+    });
+    const rmps: RoleMenuPermission[] = [];
+    arr.forEach(([menuKey, prmKey]) => {
+      if (msMap[menuKey] && psMap[prmKey]) {
+        const rmp = this.roleMenuPermissionRepository.create({
+          role,
+          menu: msMap[menuKey],
+          permission: psMap[prmKey],
+        });
+        rmps.push(rmp);
+      }
+    });
+    await this.roleMenuPermissionRepository.save(rmps);
   }
 
   /**

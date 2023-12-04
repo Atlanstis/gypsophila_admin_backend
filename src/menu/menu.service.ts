@@ -41,16 +41,19 @@ export class MenuService {
     return { list: menus, total };
   }
 
-  /** 获取所有菜单 */
-  async listAll() {
+  /** 获取所有菜单及下面的菜单 */
+  async getMenuPermissions() {
     const topMenus = await this.menuRepoitory.find({
       select,
       where: { parentId: TOP_LEVEL_MENU_FLAG },
       order: {
         id: 'ASC',
       },
+      relations: {
+        permissions: true,
+      },
     });
-    const children = await this.getChildrenMenu(topMenus);
+    const children = await this.getChildrenMenu(topMenus, true);
     return sortMenuChildren(topMenus, children);
   }
 
@@ -140,14 +143,18 @@ export class MenuService {
   /**
    * 获取顶级菜单的子菜单
    * @param topMenus 顶级菜单
+   * @param hasPermission 是否关联查询权限
    * @returns 菜单
    */
-  async getChildrenMenu(topMenus: Menu[]) {
+  async getChildrenMenu(topMenus: Menu[], hasPermission: boolean = false) {
     const parentIds = topMenus.map((menu) => menu.id);
     const children = await this.menuRepoitory.find({
       select,
       where: {
         parentId: In(parentIds),
+      },
+      relations: {
+        permissions: hasPermission,
       },
     });
     return children;
