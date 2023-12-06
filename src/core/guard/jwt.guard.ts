@@ -5,11 +5,11 @@ import { RedisService } from 'src/redis/redis.service';
 import { UnauthorizedException } from 'src/core';
 import { ResponseCode } from 'src/typings';
 
-@Injectable()
 /**
  * jwt 守卫：
  * 验证 jwt 是否符合格式
  */
+@Injectable()
 export class JwtGuard implements CanActivate {
   @Inject(JwtService)
   private jwtService: JwtService;

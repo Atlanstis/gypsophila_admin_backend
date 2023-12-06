@@ -110,12 +110,7 @@ export class RoleService {
       throw new BusinessException('该角色不存在');
     }
     /** 获取各菜单的权限 */
-    const rmps = await this.roleMenuPermissionRepository
-      .createQueryBuilder('rmp')
-      .leftJoinAndSelect('rmp.menu', 'menu')
-      .leftJoinAndSelect('rmp.permission', 'permission')
-      .where('rmp.role_id = :roleId', { roleId: id })
-      .getMany();
+    const rmps = await this.getPermissionByRoleIds([id]);
     const map: Record<string, string[]> = {};
     rmps.forEach(({ menu, permission }) => {
       const menuKey = menu.key;
@@ -144,9 +139,6 @@ export class RoleService {
     const role = await this.findRoleById(dto.id);
     if (!role) {
       throw new BusinessException('该角色不存在');
-    }
-    if (role.id === RoleEnum.Admin) {
-      throw new BusinessException('管理员权限不能编辑');
     }
     /** 保存角色可访问的菜单 */
     const menus = await this.menuService.getMenuByKey(dto.menus);
@@ -192,6 +184,21 @@ export class RoleService {
       }
     });
     await this.roleMenuPermissionRepository.save(rmps);
+  }
+
+  /**
+   * 根据角色，获取操作权限
+   * @param roleIds 角色 id 列表
+   * @returns 权限
+   */
+  async getPermissionByRoleIds(roleIds: number[]) {
+    const rmps = await this.roleMenuPermissionRepository
+      .createQueryBuilder('rmp')
+      .leftJoinAndSelect('rmp.menu', 'menu')
+      .leftJoinAndSelect('rmp.permission', 'permission')
+      .where('rmp.role_id IN (:...roleIds)', { roleIds })
+      .getMany();
+    return rmps;
   }
 
   /**

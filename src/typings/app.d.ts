@@ -5,5 +5,6 @@ declare namespace App {
   interface JwtPayload {
     username: string;
     id: string;
+    roleIds: number[];
   }
 }

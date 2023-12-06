@@ -30,13 +30,21 @@ export class AuthService {
    * @returns 认证信息
    */
   async login(username: string, password: string) {
-    const user = await this.userService.findOneByUser({ username }, { id: true, password: true });
+    const user = await this.userService.findOneByUser(
+      { username },
+      { id: true, password: true, roles: true },
+      { roles: true },
+    );
     if (!user) {
       throw new BusinessException('用户名不存在');
     }
     const isValid = await argon.verify(user.password, password);
     if (isValid) {
-      return await this.registerToken(username, user.id);
+      return await this.registerToken(
+        username,
+        user.id,
+        user.roles.map((role) => role.id),
+      );
     }
     throw new BusinessException('用户名或密码错误');
   }
@@ -76,11 +84,7 @@ export class AuthService {
     if (!cachetoken || cachetoken !== token) {
       throw error;
     }
-    payload = {
-      id: payload.id,
-      username: payload.username,
-    };
-    return await this.registerToken(payload.username, payload.id);
+    return await this.registerToken(payload.username, payload.id, payload.roleIds);
   }
 
   /**
@@ -117,12 +121,12 @@ export class AuthService {
    * @param id 用户id
    * @returns token 对象
    */
-  async registerToken(username: string, id: string) {
+  async registerToken(username: string, id: string, roleIds: number[]) {
     const { accessExpire, refreshExpire } = this.configService.get<{
       accessExpire: number;
       refreshExpire: number;
     }>(ENV_VARS.TokenExpire);
-    const payload: App.JwtPayload = { username, id };
+    const payload: App.JwtPayload = { username, id, roleIds };
     const accessToken = await this.jwtService.signAsync({
       ...payload,
       uuid: uuidv4(),
