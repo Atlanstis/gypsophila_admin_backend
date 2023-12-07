@@ -1,6 +1,6 @@
 # mysql 配置
 mysql:
-  host: '127.0.0.1'
+  host: 'mysql-container'
   port: 3306
   username: 'root'
   password: 'j!Y6hTwR'
@@ -8,7 +8,7 @@ mysql:
   synchronize: false
 # redis 配置
 redis:
-  host: '127.0.0.1'
+  host: 'redis-container'
   port: 6379
 # 运行端口
 port: 3000
