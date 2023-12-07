@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Menu, Permission } from 'src/entities';
+import { Menu, Permission, RoleMenuPermission } from 'src/entities';
 import { FindOptionsSelect, In, Not, Repository } from 'typeorm';
 import { MenuDto, MenuEditDto, PermissionDto, PermissionEditDto } from './dto';
 import { BusinessException } from 'src/core';
@@ -16,6 +16,8 @@ export class MenuService {
     private readonly menuRepoitory: Repository<Menu>,
     @InjectRepository(Permission)
     private readonly permissionRepository: Repository<Permission>,
+    @InjectRepository(RoleMenuPermission)
+    private readonly rmpRepository: Repository<RoleMenuPermission>,
   ) {}
 
   /**
@@ -216,6 +218,15 @@ export class MenuService {
     });
     if (!permission) {
       throw new BusinessException('该权限不存在');
+    }
+    /** 判断当前权限是否被使用 */
+    const rmp = await this.rmpRepository
+      .createQueryBuilder('rmp')
+      .select('rmp.id')
+      .where('rmp.permission_id = :id', { id })
+      .getMany();
+    if (rmp.length > 0) {
+      throw new BusinessException('该权限已被引用，无法删除');
     }
     await this.permissionRepository.delete({ id });
   }

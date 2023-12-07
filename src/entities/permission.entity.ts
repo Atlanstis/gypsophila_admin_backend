@@ -1,7 +1,7 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { TimeNotSelectBase } from './base';
 import { Menu } from './menu.entity';
-import { PERMISSION_LENGTH } from 'src/constants';
+import { PERMISSION_LENGTH, PermissionTypeMenu } from 'src/constants';
 
 @Entity()
 export class Permission extends TimeNotSelectBase {
@@ -13,6 +13,14 @@ export class Permission extends TimeNotSelectBase {
 
   @Column({ length: PERMISSION_LENGTH.NAME_MAX, comment: '权限名称' })
   name: string;
+
+  @Column({
+    type: 'enum',
+    enum: PermissionTypeMenu,
+    default: PermissionTypeMenu.Other,
+    comment: '权限类型',
+  })
+  type: number;
 
   @JoinColumn({
     name: 'menu_id',

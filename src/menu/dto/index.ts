@@ -1,5 +1,5 @@
-import { IsInt, IsNotEmpty, IsNumber, Length } from 'class-validator';
-import { MENU_LENGTH, PERMISSION_LENGTH } from 'src/constants';
+import { IsEnum, IsInt, IsNotEmpty, IsNumber, Length } from 'class-validator';
+import { MENU_LENGTH, PERMISSION_LENGTH, PermissionTypeMenu } from 'src/constants';
 
 export class MenuDto {
   @IsNotEmpty({ message: '菜单名称不能为空' })
@@ -39,6 +39,10 @@ export class PermissionDto {
   @IsNotEmpty({ message: '菜单 id 不能为空' })
   @IsInt({ message: '菜单 id 格式错误' })
   menuId: number;
+
+  @IsNotEmpty({ message: '权限类型不能为空' })
+  @IsEnum(PermissionTypeMenu, { message: '权限类型错误' })
+  type: number;
 }
 
 export class PermissionEditDto extends PermissionDto {
