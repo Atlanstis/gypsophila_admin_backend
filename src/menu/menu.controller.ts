@@ -34,7 +34,7 @@ export class MenuController {
   /** 获取一级菜单数据 */
   @Get('/list/top')
   @UseGuards(PermissionGuard)
-  @RequirePermission('MenuAdd')
+  @RequirePermission(['MenuAdd', 'MenuEdit'])
   async listTop() {
     return await this.menuService.listTop();
   }

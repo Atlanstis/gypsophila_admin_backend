@@ -265,6 +265,6 @@ export class MenuService {
       .leftJoinAndSelect('rmp.permission', 'permission')
       .where('rmp.menu_id = :menuId and rmp.role_id IN (:...roleIds)', { menuId: menu.id, roleIds })
       .getMany();
-    return getMenuOperationPermission(rmps);
+    return getMenuOperationPermission(rmps, key);
   }
 }

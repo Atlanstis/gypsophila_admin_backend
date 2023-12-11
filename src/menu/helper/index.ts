@@ -1,5 +1,5 @@
 import { PermissionTypeMenu } from 'src/constants';
-import { Menu, RoleMenuPermission } from 'src/entities';
+import { Menu, Permission, RoleMenuPermission } from 'src/entities';
 
 export type MenuBusiness = Omit<Menu, 'createTime' | 'updateTime'> & {
   children?: MenuBusiness[];
@@ -7,10 +7,11 @@ export type MenuBusiness = Omit<Menu, 'createTime' | 'updateTime'> & {
 
 /** 页面操作权限 */
 type MenuOperationPermission = {
-  canAdd: boolean;
-  canEdit: boolean;
-  canDelete: boolean;
-  canList: boolean;
+  canAdd?: boolean;
+  canEdit?: boolean;
+  canDelete?: boolean;
+  canList?: boolean;
+  canAllocation?: boolean;
 };
 
 /**
@@ -18,15 +19,13 @@ type MenuOperationPermission = {
  * @param rmps 权限列表
  * @returns 操作权限
  */
-export function getMenuOperationPermission(rmps: RoleMenuPermission[]) {
-  const operationPermission: MenuOperationPermission = {
-    canAdd: false,
-    canDelete: false,
-    canEdit: false,
-    canList: false,
-  };
+export function getMenuOperationPermission(rmps: RoleMenuPermission[], key: string) {
+  const operationPermission: MenuOperationPermission = {};
 
-  const actions: [(type: PermissionTypeMenu) => boolean, () => void][] = [
+  const actions: [
+    (type: PermissionTypeMenu, permission: Permission, key: string) => boolean,
+    () => void,
+  ][] = [
     [
       (type) => type === PermissionTypeMenu.Add,
       () => {
@@ -51,13 +50,27 @@ export function getMenuOperationPermission(rmps: RoleMenuPermission[]) {
         operationPermission.canDelete = true;
       },
     ],
+    /** 角色管理-是否可以控制权限 */
+    [
+      (type, permision, key) => key === 'Management_Role' && permision.key === 'RolePermission',
+      () => {
+        operationPermission.canAllocation = true;
+      },
+    ],
+    /** 菜单管理-是否可以操作权限 */
+    [
+      (type, permision, key) => key === 'Management_Menu' && permision.key === 'MenuPermission',
+      () => {
+        operationPermission.canAllocation = true;
+      },
+    ],
   ];
 
   rmps.forEach((rmp) => {
     const { type } = rmp.permission;
     actions.some((item) => {
       const [flagFunc, action] = item;
-      const flag = flagFunc(type);
+      const flag = flagFunc(type, rmp.permission, key);
       if (flag) {
         action();
       }
