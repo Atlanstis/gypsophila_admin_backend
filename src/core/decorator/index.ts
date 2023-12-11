@@ -1,4 +1,8 @@
 import { SetMetadata } from '@nestjs/common';
 
-export const RequirePermission = (permission: string) =>
-  SetMetadata('require-permission', permission);
+export const RequirePermission = (permission: string | string[]) => {
+  if (typeof permission === 'string') {
+    permission = [permission];
+  }
+  return SetMetadata('require-permission', permission);
+};

@@ -55,3 +55,8 @@ export class MenuIdDto {
   @IsInt({ message: '菜单 id 格式错误' })
   menuId: number;
 }
+
+export class MenuKeyDto {
+  @IsNotEmpty({ message: '菜单 Key 不能为空' })
+  key: string;
+}

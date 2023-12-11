@@ -47,10 +47,10 @@ export class RoleController {
     return await this.roleService.delete(id);
   }
 
-  /** 获取可以分配的角色 */
+  /** 获取可以分配的角色，使用于用户新增编辑 */
   @Get('/list/assignable')
   @UseGuards(PermissionGuard)
-  @RequirePermission('RolePermission')
+  @RequirePermission(['UserAdd', 'UserEdit'])
   async assignable() {
     return await this.roleService.assignable();
   }

@@ -19,12 +19,22 @@ export class PermissionGuard implements CanActivate {
     const permission = this.reflector.getAllAndOverride('require-permission', [
       context.getHandler(),
       context.getClass(),
-    ]);
+    ]) as string[];
 
-    const permissions = (await this.roleService.getPermissionByRoleIds(request.user.roleIds)).map(
-      (rmp) => rmp.permission.key,
-    );
-    if (!permissions.includes(permission)) {
+    const hasPermissions = (
+      await this.roleService.getPermissionByRoleIds(request.user.roleIds)
+    ).map((rmp) => rmp.permission.key);
+
+    let flag: boolean = false;
+
+    permission.forEach((p) => {
+      const isIn = hasPermissions.includes(p);
+      if (isIn) {
+        flag = true;
+        return flag;
+      }
+    });
+    if (!flag) {
       throw new BusinessException('无访问该接口的权限');
     }
     return true;

@@ -5,7 +5,7 @@ import { FindOptionsSelect, In, Not, Repository } from 'typeorm';
 import { MenuDto, MenuEditDto, PermissionDto, PermissionEditDto } from './dto';
 import { BusinessException } from 'src/core';
 import { TOP_LEVEL_MENU_FLAG } from 'src/constants';
-import { sortMenuChildren } from './helper';
+import { getMenuOperationPermission, sortMenuChildren } from './helper';
 
 const select: FindOptionsSelect<Menu> = { id: true, key: true, name: true, parentId: true };
 
@@ -247,5 +247,24 @@ export class MenuService {
       throw new BusinessException('该菜单不存在');
     }
     return menu.permissions;
+  }
+
+  /**
+   * 获取当前用户当前页面的操作权限
+   * @param key 当前菜单 Key
+   * @param roleIds 角色列表
+   * @returns 操作权限
+   */
+  async permissionSearch(key: string, roleIds: number[]) {
+    const menu = await this.menuRepoitory.findOneBy({ key });
+    if (!menu) {
+      throw new BusinessException('当前菜单 Key 不存在');
+    }
+    const rmps = await this.rmpRepository
+      .createQueryBuilder('rmp')
+      .leftJoinAndSelect('rmp.permission', 'permission')
+      .where('rmp.menu_id = :menuId and rmp.role_id IN (:...roleIds)', { menuId: menu.id, roleIds })
+      .getMany();
+    return getMenuOperationPermission(rmps);
   }
 }

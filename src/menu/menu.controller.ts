@@ -1,7 +1,15 @@
-import { Body, Controller, Get, ParseIntPipe, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, ParseIntPipe, Post, Query, Req, UseGuards } from '@nestjs/common';
+import { Request } from 'express';
 import { MenuService } from './menu.service';
 import { BusinessException, JwtGuard, PageDto, PermissionGuard, RequirePermission } from 'src/core';
-import { MenuDto, MenuEditDto, MenuIdDto, PermissionDto, PermissionEditDto } from './dto';
+import {
+  MenuDto,
+  MenuEditDto,
+  MenuIdDto,
+  MenuKeyDto,
+  PermissionDto,
+  PermissionEditDto,
+} from './dto';
 
 const numberParse = (parameter) =>
   new ParseIntPipe({
@@ -85,5 +93,11 @@ export class MenuController {
   @RequirePermission('MenuPermission')
   async permissionList(@Body() dto: MenuIdDto) {
     return await this.menuService.permissionList(dto.menuId);
+  }
+
+  /** 获取当前用户当前页面的操作权限 */
+  @Post('/operation/permission')
+  async permissionSearch(@Body() dto: MenuKeyDto, @Req() req: Request) {
+    return await this.menuService.permissionSearch(dto.key, req.user.roleIds);
   }
 }
