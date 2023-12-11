@@ -11,12 +11,13 @@ const numberParse = (parameter) =>
   });
 
 @Controller('role')
+@UseGuards(JwtGuard)
 export class RoleController {
   constructor(private readonly roleService: RoleService) {}
 
   /** 获取角色列表 */
   @Post('/list')
-  @UseGuards(JwtGuard, PermissionGuard)
+  @UseGuards(PermissionGuard)
   @RequirePermission('RoleList')
   async list(@Body() dto: PageDto) {
     return await this.roleService.list(dto.page, dto.size);
@@ -24,41 +25,48 @@ export class RoleController {
 
   /** 新增角色 */
   @Post('/add')
-  @UseGuards(JwtGuard)
+  @UseGuards(PermissionGuard)
+  @RequirePermission('RoleAdd')
   async add(@Body() dto: RoleDto) {
     return await this.roleService.add(dto);
   }
 
   /** 编辑角色 */
   @Post('/edit')
-  @UseGuards(JwtGuard)
+  @UseGuards(PermissionGuard)
+  @RequirePermission('RoleEdit')
   async edit(@Body() dto: RoleEditDto) {
     return await this.roleService.edit(dto);
   }
 
   /** 删除角色 */
   @Get('/delete')
-  @UseGuards(JwtGuard)
+  @UseGuards(PermissionGuard)
+  @RequirePermission('RoleDelete')
   async delete(@Query('id', numberParse('id')) id: number) {
     return await this.roleService.delete(id);
   }
 
   /** 获取可以分配的角色 */
   @Get('/list/assignable')
-  @UseGuards(JwtGuard)
+  @UseGuards(PermissionGuard)
+  @RequirePermission('RolePermission')
   async assignable() {
     return await this.roleService.assignable();
   }
 
   /** 获取该角色下可以访问的菜单 */
   @Post('/menu/permission')
-  @UseGuards(JwtGuard)
+  @UseGuards(PermissionGuard)
+  @RequirePermission('RolePermission')
   async menuPermission(@Body() dto: RoleMenuDto) {
     return await this.roleService.menuPermission(dto.id);
   }
 
   /** 编辑该角色下可以访问的菜单 */
   @Post('/menu/permission/edit')
+  @UseGuards(PermissionGuard)
+  @RequirePermission('RolePermission')
   async menuEdit(@Body() dto: RoleMenuEditDto) {
     return await this.roleService.menuPermissionEdit(dto);
   }

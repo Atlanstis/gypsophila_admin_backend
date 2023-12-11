@@ -1,36 +1,41 @@
 import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UserAddDto, UserEditDto } from './dto';
-import { JwtGuard, PageDto } from 'src/core';
+import { JwtGuard, PageDto, PermissionGuard, RequirePermission } from 'src/core';
 
 @Controller('user')
+@UseGuards(JwtGuard)
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   /** 用户列表 */
   @Post('/list')
-  @UseGuards(JwtGuard)
+  @UseGuards(PermissionGuard)
+  @RequirePermission('UserList')
   async list(@Body() dto: PageDto) {
     return this.userService.list(dto.page, dto.size);
   }
 
   /** 新增用户 */
   @Post('/add')
-  @UseGuards(JwtGuard)
+  @UseGuards(PermissionGuard)
+  @RequirePermission('UserAdd')
   async add(@Body() user: UserAddDto) {
     return this.userService.add(user);
   }
 
   /** 编辑用户 */
   @Post('/edit')
-  @UseGuards(JwtGuard)
+  @UseGuards(PermissionGuard)
+  @RequirePermission('UserEdit')
   async edit(@Body() user: UserEditDto) {
     return this.userService.edit(user);
   }
 
   /** 删除用户 */
   @Get('delete')
-  @UseGuards(JwtGuard)
+  @UseGuards(PermissionGuard)
+  @RequirePermission('UserDelete')
   async delete(@Query('id') id: string) {
     return this.userService.delete(id);
   }

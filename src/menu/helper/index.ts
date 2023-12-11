@@ -1,8 +1,6 @@
 import { Menu } from 'src/entities';
 
-export type MenuBusiness = {
-  [P in Exclude<keyof Menu, 'createTime' | 'updateTime'>]: Menu[P];
-} & {
+export type MenuBusiness = Omit<Menu, 'createTime' | 'updateTime'> & {
   children?: MenuBusiness[];
 };
 
