@@ -4,8 +4,8 @@ mysql:
   port: 3306
   username: 'root'
   password: 'j!Y6hTwR'
-  database: 'gypsophila'
-  synchronize: true
+  database: 'test'
+  synchronize: false
 # redis 配置
 redis:
   host: 'localhost'
