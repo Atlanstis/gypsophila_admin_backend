@@ -8,10 +8,10 @@ import { ENV_VARS } from './enum';
 import { LogModule } from './log/log.module';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
-// import { Menu, Role, User, Permission, RoleMenuPermission } from './entities';
 import { RedisModule } from './redis/redis.module';
 import { RoleModule } from './role/role.module';
 import { MenuModule } from './menu/menu.module';
+import { ormConfig } from 'ormconfig';
 
 @Module({
   imports: [
@@ -27,22 +27,7 @@ import { MenuModule } from './menu/menu.module';
         NODE_ENV: Joi.string().valid('development', 'production').required(),
       }),
     }),
-    TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) => {
-        const mysqlConfig = configService.get<Environment.MysqlConfig>(ENV_VARS.MYSQL);
-        return {
-          type: 'mysql',
-          ...mysqlConfig,
-          logging: true,
-          // entities: [User, Role, Menu, Permission, RoleMenuPermission],
-          entities: [],
-          poolSize: 10,
-          dateStrings: true,
-        };
-      },
-    }),
+    TypeOrmModule.forRoot(ormConfig),
     RedisModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
