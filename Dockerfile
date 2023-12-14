@@ -6,6 +6,7 @@ WORKDIR /app
 COPY . .
 
 RUN npm i -g pnpm
+RUN npm config set registry https://mirrors.cloud.tencent.com/npm/
 RUN pnpm install
 RUN pnpm build
 
@@ -20,6 +21,7 @@ COPY --from=build-stage /app/package.json /app/package.json
 WORKDIR /app
 
 RUN npm i -g pnpm
+RUN npm config set registry https://mirrors.cloud.tencent.com/npm/
 RUN pnpm install
 
 EXPOSE 3000
