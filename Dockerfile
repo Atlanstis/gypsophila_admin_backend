@@ -26,4 +26,4 @@ RUN pnpm install
 
 EXPOSE 3000
 
-CMD [ "npm", "run", "start:prod" ]
+CMD [ "pnpm", "run", "start:prod" ]

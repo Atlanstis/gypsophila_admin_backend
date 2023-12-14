@@ -1,6 +1,16 @@
 version: '3.8'
 services:
-  nest-app:
+  frontend-app:
+    build:
+      context: ../gypsophila_admin_frontend
+      dockerfile: ./Dockerfile
+    depends_on:
+      - backend-app
+    ports:
+      - '80:80'
+    networks:
+      - common-network
+  backend-app:
     build:
       context: ./
       dockerfile: ./Dockerfile
@@ -16,7 +26,7 @@ services:
     ports:
       - '3306:3306'
     volumes:
-      - /Users/gyposphila/Documents/new-docker/mysql:/var/lib/mysql
+      - /root/gypsophila-admin/docker/mysql:/var/lib/mysql
     environment:
       MYSQL_ROOT_PASSWORD: 'j!Y6hTwR'
       TZ: 'Asia/Shanghai'
@@ -27,7 +37,7 @@ services:
     ports:
       - '6379:6379'
     volumes:
-      - /Users/gyposphila/Documents/new-docker/redis:/data
+      - /root/gypsophila-admin/docker/redis:/data
     networks:
       - common-network
 networks:
