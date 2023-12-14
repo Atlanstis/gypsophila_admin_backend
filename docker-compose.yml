@@ -8,6 +8,9 @@ services:
       - backend-app
     ports:
       - '80:80'
+      - '443:443'
+    volumes:
+      - /root/gypsophila-admin/cert:/cert
     networks:
       - common-network
   backend-app:
