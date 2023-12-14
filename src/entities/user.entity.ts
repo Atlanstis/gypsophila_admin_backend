@@ -1,7 +1,7 @@
 import { Column, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Role } from './role.entity';
 import { TimeBase } from './base';
-import { USER_LENGTH } from 'src/constants';
+import { USER_LENGTH } from '../constants';
 
 @Entity()
 export class User extends TimeBase {

@@ -1,7 +1,7 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { TimeNotSelectBase } from './base';
 import { Menu } from './menu.entity';
-import { PERMISSION_LENGTH, PermissionTypeMenu } from 'src/constants';
+import { PERMISSION_LENGTH, PermissionTypeMenu } from '../constants';
 
 @Entity()
 export class Permission extends TimeNotSelectBase {

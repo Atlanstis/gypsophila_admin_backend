@@ -1,13 +1,23 @@
 import { DataSource, DataSourceOptions } from 'typeorm';
-import config from 'src/utils/config';
-// import { Menu, Role, User, Permission, RoleMenuPermission } from 'src/entities';
+import config from './src/utils/config';
+import { Menu, Role, User, Permission, RoleMenuPermission } from './src/entities';
 
-const mysqlConfing = config().mysql as Environment.MysqlConfig;
+const mysqlConfing = config().mysql as {
+  host: string;
+  port: number;
+  username: string;
+  password: string;
+  database: string;
+  synchronize: boolean;
+};
 
 export const ormConfig: DataSourceOptions = {
   type: 'mysql',
-  entities: [],
+  entities: [Menu, Role, User, Permission, RoleMenuPermission],
   ...mysqlConfing,
+  dateStrings: true,
+  poolSize: 10,
+  logging: true,
 };
 
-export default new DataSource({ ...ormConfig, migrations: ['src/migrations/** '] });
+export default new DataSource({ ...ormConfig, migrations: ['migrations/**'] });

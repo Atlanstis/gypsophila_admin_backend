@@ -2,7 +2,7 @@ import { Column, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn } from 't
 import { Menu } from './menu.entity';
 import { TimeBase } from './base';
 import { User } from './user.entity';
-import { ROLE_LENGTH, RoleIsDefaultEnum } from 'src/constants';
+import { ROLE_LENGTH, RoleIsDefaultEnum } from '../constants';
 
 @Entity()
 export class Role extends TimeBase {
