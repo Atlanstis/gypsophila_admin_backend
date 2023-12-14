@@ -1,5 +1,5 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { MENU_LENGTH, TOP_LEVEL_MENU_FLAG } from 'src/constants';
+import { MENU_LENGTH, TOP_LEVEL_MENU_FLAG } from '../constants';
 import { TimeNotSelectBase } from './base';
 import { Permission } from './permission.entity';
 

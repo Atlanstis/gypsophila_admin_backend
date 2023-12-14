@@ -5,7 +5,7 @@ mysql:
   username: 'root'
   password: 'j!Y6hTwR'
   database: 'gypsophila'
-  synchronize: true
+  synchronize: false
 # redis 配置
 redis:
   host: 'localhost'
