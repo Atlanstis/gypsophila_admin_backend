@@ -4,14 +4,16 @@ import { Repository } from 'typeorm';
 import { PsGame } from 'src/entities/ps-game.entity';
 import { getElFromUrl } from 'src/utils/cheerio';
 import {
-  Platform,
+  type PerfectDifficulty,
+  type Platform,
   PsGameRank,
   PsTopic,
   PsTrophy,
   PsTrophyGroup,
   PsnineGame,
-} from '../classes/psnine-game';
-import { getTrophyNumFromEl, getIdFromUrl } from './helpers';
+  SearchPsGame,
+} from './class';
+import { getIdFromUrl, getTrophyNumFromEl } from './helpers';
 
 @Injectable()
 export class PsnineService {
@@ -67,12 +69,7 @@ export class PsnineService {
             let progress = $(childEl).find('.progress div').text();
             progress = progress.substring(0, progress.length - 1);
             game.progress = progress ? Number(progress) : 0;
-            game.trophyGot = {
-              platinum: getTrophyNumFromEl($(childEl), '.text-platinum'),
-              gold: getTrophyNumFromEl($(childEl), '.text-gold'),
-              silver: getTrophyNumFromEl($(childEl), '.text-silver'),
-              bronze: getTrophyNumFromEl($(childEl), '.text-bronze'),
-            };
+            game.trophyGot = getTrophyNumFromEl($(childEl));
           }
         });
         return game;
@@ -103,12 +100,7 @@ export class PsnineService {
         trophyGroup.thumbnail = $title.find('img').attr('src');
         trophyGroup.name = $title.find('p').text();
         const $trophyNum = $title.find('em');
-        trophyGroup.trophyNum = {
-          platinum: getTrophyNumFromEl($trophyNum, '.text-platinum'),
-          gold: getTrophyNumFromEl($trophyNum, '.text-gold'),
-          silver: getTrophyNumFromEl($trophyNum, '.text-silver'),
-          bronze: getTrophyNumFromEl($trophyNum, '.text-bronze'),
-        };
+        trophyGroup.trophyNum = getTrophyNumFromEl($trophyNum);
         const $trophies = $(el).find('tr').slice(1);
         trophyGroup.trophies = $trophies
           .map(function (ti, tEl) {
@@ -219,6 +211,70 @@ export class PsnineService {
       .toArray<PsGameRank>();
     return {
       list,
+    };
+  }
+
+  /**
+   * PSNINE 游戏搜索
+   * @param keyword 搜索关键字
+   * @param page 查询页码
+   * @returns 页面数据
+   */
+  async gameSearch(keyword: string, page?: number) {
+    let url = `https://psnine.com/psngame?title=${keyword}`;
+    if (page) {
+      url += `&page=${page}`;
+    }
+    const $ = await getElFromUrl(url);
+    const $list = $('table tbody').find('tr');
+    const list = $list
+      .map(function (i, el) {
+        const game = new SearchPsGame();
+        const $tds = $(el).find('td');
+        $tds.each(function (tdI, tdEl) {
+          if (tdI === 0) {
+            /** 缩略图 */
+            game.thumbnail = $(tdEl).find('img').attr('src');
+            /** url */
+            game.url = $(tdEl).find('a').attr('href');
+            /** id */
+            game.id = getIdFromUrl(game.url);
+          } else if (tdI === 1) {
+            const $title = $(tdEl).find('a');
+            /** 游戏名称 */
+            game.name = $title.text();
+            /** 版本 */
+            const $next = $title.next();
+            game.version = $next.is('em')
+              ? $next
+                  .text()
+                  .split('\n')
+                  .filter((v) => v)
+                  .map((v) => v.trim())
+              : [];
+            /** 奖杯数量 */
+            game.trophyNum = getTrophyNumFromEl($(tdEl).find('em'));
+            game.platforms = $(tdEl)
+              .children('span')
+              .toArray()
+              .map((el) => $(el).text() as Platform);
+          } else if (tdI === 2) {
+            /** 完美难度 */
+            game.perfectDiffucuity = $(tdEl).find('span').text() as PerfectDifficulty;
+            /** 完美率 */
+            game.perfectRate = Number($(tdEl).find('em').text().replace('%完美', ''));
+          } else if (tdI === 3) {
+            /** 游玩人数 */
+            game.players = Number($(tdEl).text().replace('人玩过', ''));
+          }
+        });
+        return game;
+      })
+      .toArray<SearchPsGame>();
+    const total = Number($('.page .h-p').text().replace('条', ''));
+    return {
+      list,
+      total,
     };
   }
 }

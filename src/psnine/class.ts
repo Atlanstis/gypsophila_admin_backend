@@ -1,6 +1,9 @@
 /**平台信息 */
 export type Platform = 'PS3' | 'PSV' | 'PS4' | 'PS5';
 
+/** 完美困难度 */
+export type PerfectDifficulty = '极易' | '容易' | '普通' | '麻烦' | '困难' | '地狱';
+
 /** 奖杯数量信息 */
 export type TrophyNum = {
   /** 白金奖杯数 */
@@ -100,4 +103,27 @@ export class PsGameRank {
   completionRate: string;
   /** 使用时间 */
   usedTime: string;
+}
+
+export class SearchPsGame {
+  /** psnine 游戏 id */
+  id: number;
+  /** 游戏名称 */
+  name: string;
+  /** 详细地址 */
+  url: string;
+  /** 缩略图 */
+  thumbnail: string;
+  /** 上线平台 */
+  platforms: Platform[];
+  /** 奖杯数量 */
+  trophyNum: TrophyNum;
+  /** 完美难度 */
+  perfectDiffucuity: PerfectDifficulty;
+  /** 完美率  */
+  perfectRate: number;
+  /** 游玩人数 */
+  players: number;
+  /** 版本 */
+  version: string[];
 }
