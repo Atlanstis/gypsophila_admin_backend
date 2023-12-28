@@ -1,6 +1,5 @@
 import * as cheerio from 'cheerio';
-import type { TrophyNum } from './class';
-
+import { type TrophyNum, type Platform } from '../class';
 /** 获取奖杯数 */
 export function getTrophyNumFromEl($el: cheerio.Cheerio<cheerio.Element>): TrophyNum {
   return {
@@ -31,4 +30,22 @@ export function getIdFromUrl(url: string) {
   }
   const id = url.split('/').pop();
   return id ? Number(id) : 0;
+}
+
+/** 获取上线平台信息 */
+export function getPlatformsFromEl($el: cheerio.Cheerio<cheerio.Element>, $) {
+  return $el
+    .children('span')
+    .toArray()
+    .map((el) => $(el).text() as Platform);
+}
+
+/** 获取版本信息 */
+export function getVersionFromEl($el: cheerio.Cheerio<cheerio.Element>) {
+  return $el
+    .find('em')
+    .text()
+    .split('\n')
+    .filter((v) => v)
+    .map((v) => v.trim());
 }

@@ -1,6 +1,6 @@
 {
   "name": "gypsophila_admin_backend",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "",
   "author": "",
   "private": true,
@@ -16,7 +16,7 @@
     "typeorm-d": "cross-env NODE_ENV=development typeorm-ts-node-esm -d ./ormconfig.ts",
     "migration:run": "pnpm run typeorm-d migration:run",
     "migration:revert": "pnpm run typeorm-d migration:revert",
-    "migration:create": "pnpm run typeorm migration:create ./migrations/insert-data",
+    "migration:create": "pnpm run typeorm migration:create ./migrations/v1.0.1",
     "migration:generate:create": "pnpm run typeorm-d migration:generate ./migrations/create-table",
     "migration:generate:alert": "pnpm run typeorm-d migration:generate ./migrations/alert-table",
     "typeorm:prod": "cross-env NODE_ENV=production typeorm-ts-node-commonjs -d ./dist/ormconfig.js",
