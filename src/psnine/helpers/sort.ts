@@ -21,6 +21,15 @@ export function getDetailBaseInfo(id: number, url: string, $: cheerio.CheerioAPI
   game.platforms = getPlatformsFromEl($next, $);
   /** 版本 */
   game.version = getVersionFromEl($next);
+  /** 游戏名称 */
+  $next.find('span').remove();
+  $next.find('em').remove();
+  const name = $next.text();
+  const regex = /《(.*?)》/;
+  const match = name.match(regex);
+  if (match) {
+    game.name = match[1];
+  }
   /** 奖杯数量 */
   $next = $next.next();
   game.trophyNum = getTrophyNumFromEl($next);
