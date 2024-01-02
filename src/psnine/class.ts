@@ -99,11 +99,13 @@ export class PsTrophy {
 
 export class PsnineTrophy extends PsTrophy {
   /** 奖杯 id */
-  psnineId: number;
+  id: number;
   /** 提示数量 */
   tipNums: number;
   /** 完成率 */
   complateRate: number;
+  /** 详情地址 */
+  url: string;
 }
 
 export class PsTrophyGroup {

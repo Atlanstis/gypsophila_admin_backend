@@ -95,7 +95,9 @@ function sortDetailTrophy($el: cheerio.Cheerio<cheerio.Element>, $: cheerio.Chee
       /** 奖杯缩略图 */
       trophy.thumbnail = $(childEl).find('img').attr('src');
       /** psnine 奖杯 Id */
-      trophy.psnineId = getIdFromUrl($(childEl).find('a').attr('href'));
+      trophy.id = getIdFromUrl($(childEl).find('a').attr('href'));
+      /** 详情地址 */
+      trophy.url = $(childEl).find('a').attr('href');
     } else if (ci === 1) {
       /** 奖杯描述 */
       trophy.description = $(childEl).find('.text-gray').text();
