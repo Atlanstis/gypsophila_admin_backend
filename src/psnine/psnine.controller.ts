@@ -1,14 +1,14 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, ParseIntPipe, Post, Query, UseGuards } from '@nestjs/common';
 import { PsnineService } from './psnine.service';
-import { JwtGuard } from 'src/core';
+import { BusinessException, JwtGuard } from 'src/core';
 import { GameDto, GameSearchDto } from './dto';
 
-// const numberParse = (parameter) =>
-//   new ParseIntPipe({
-//     exceptionFactory: () => {
-//       throw new BusinessException(`${parameter} 参数错误`);
-//     },
-//   });
+const numberParse = (parameter) =>
+  new ParseIntPipe({
+    exceptionFactory: () => {
+      throw new BusinessException(`${parameter} 参数错误`);
+    },
+  });
 
 @Controller('psnine')
 @UseGuards(JwtGuard)
@@ -25,10 +25,11 @@ export class PsnineController {
   //   return await this.psnineService.getGameTrophy(Number(gameId));
   // }
 
-  // @Get('/game/topic')
-  // async getGameTopic(@Query('gameId', numberParse('gameId')) gameId: number) {
-  //   return await this.psnineService.getGameTopic(Number(gameId));
-  // }
+  /** PSNINE 游戏主题 */
+  @Get('/game/topic')
+  async getGameTopic(@Query('id', numberParse('id')) id: number) {
+    return await this.psnineService.getGameTopic(id);
+  }
 
   // @Get('/game/rank')
   // async getGameRank(@Query('gameId', numberParse('gameId')) gameId: number) {

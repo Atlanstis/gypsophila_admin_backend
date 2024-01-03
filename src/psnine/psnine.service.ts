@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { PsGame } from 'src/entities/ps-game.entity';
 import { getElFromUrl } from 'src/utils/cheerio';
-import { type PerfectDifficulty, type Platform, PsnineSearchGame } from './class';
+import { type PerfectDifficulty, type Platform, PsnineSearchGame, PsnineGameTopic } from './class';
 import {
   getDetailTrophyGroups,
   getIdFromUrl,
@@ -143,36 +143,39 @@ export class PsnineService {
   // }
 
   /**
-   * 获取游戏相关讨论
+   * 获取游戏主题
    * @param gameId 游戏 id
-   * @returns 讨论信息
+   * @returns 游戏主题信息
    */
-  // async getGameTopic(gameId: number) {
-  //   const url = `https://psnine.com/psngame/${gameId}/topic`;
-  //   const $ = await getElFromUrl(url);
-  //   const $TopicList = $('.box .list li');
-  //   const list = $TopicList
-  //     .map(function (i, el) {
-  //       const topic = new PsTopic();
-  //       topic.title = $(el).find('.title a').text();
-  //       topic.url = $(el).find('.title a').attr('href');
-  //       const $meta = $(el).find('.meta');
-  //       $meta.find('a').remove('a');
-  //       const publicationTime = $meta
-  //         .text()
-  //         .replace(/\n|[ ]+/g, '')
-  //         .trim();
-  //       topic.publicationTime = `${publicationTime.slice(0, 10)} ${publicationTime.slice(10)}`;
-  //       topic.discussTimes = Number($(el).find('.rep.r').text());
-  //       return topic;
-  //     })
-  //     .toArray<PsTopic>();
-  //   const totalText = $('.page .disabled a').text().replace('条', '');
-  //   return {
-  //     list,
-  //     total: Number(totalText),
-  //   };
-  // }
+  async getGameTopic(gameId: number) {
+    const url = `https://psnine.com/psngame/${gameId}/topic`;
+    const $ = await getElFromUrl(url);
+    /** 判断游戏是否存在 */
+    judgeGameExist($);
+    const $TopicList = $('.box .list li');
+    const list = $TopicList
+      .map(function (i, el) {
+        const topic = new PsnineGameTopic();
+        topic.title = $(el).find('.title a').text();
+        topic.url = $(el).find('.title a').attr('href');
+        topic.id = getIdFromUrl(topic.url);
+        const $meta = $(el).find('.meta');
+        $meta.find('a').remove();
+        const publicationTime = $meta
+          .text()
+          .replace(/\n|[ ]+/g, '')
+          .trim();
+        topic.publicationTime = `${publicationTime.slice(0, 10)} ${publicationTime.slice(10, 15)}`;
+        topic.discussTimes = Number($(el).find('.rep.r').text());
+        return topic;
+      })
+      .toArray<PsnineGameTopic>();
+    const totalText = $('.page .disabled a').text().replace('条', '');
+    return {
+      list,
+      total: Number(totalText),
+    };
+  }
 
   /**
    * 获取游戏游玩排名信息

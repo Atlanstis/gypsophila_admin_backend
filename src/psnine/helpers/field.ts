@@ -1,5 +1,6 @@
 import * as cheerio from 'cheerio';
 import { type TrophyNum, type Platform } from '../class';
+
 /** 获取奖杯数 */
 export function getTrophyNumFromEl($el: cheerio.Cheerio<cheerio.Element>): TrophyNum {
   return {
@@ -22,7 +23,9 @@ export function getTrophyNumFromClassName(
 }
 
 /**
- * 从 url 地址中，获取游戏 id
+ * 从 url 地址中获取 id
+ * 满足以下格式的可获取:
+ * 例: https://psnine.com/topic/37646
  */
 export function getIdFromUrl(url: string) {
   if (url.indexOf('?')) {

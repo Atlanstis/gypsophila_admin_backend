@@ -59,17 +59,18 @@ export type TrophyNum = {
 //   trophies: PsTrophy[];
 // }
 
-// /** 讨论信息 */
-// export class PsTopic {
-//   /** 标题 */
-//   title: string;
-//   /** 详细地址 */
-//   url: string;
-//   /** 发布时间 */
-//   publicationTime: string;
-//   /** 讨论数 */
-//   discussTimes: number;
-// }
+/** 游戏主题信息 */
+export class PsnineGameTopic {
+  id: number;
+  /** 标题 */
+  title: string;
+  /** 详细地址 */
+  url: string;
+  /** 发布时间 */
+  publicationTime: string;
+  /** 讨论数 */
+  discussTimes: number;
+}
 
 // /** 游玩排名信息 */
 // export class PsGameRank {
