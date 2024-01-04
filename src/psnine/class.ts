@@ -72,17 +72,19 @@ export class PsnineGameTopic {
   discussTimes: number;
 }
 
-// /** 游玩排名信息 */
-// export class PsGameRank {
-//   /** 排名顺序 */
-//   index: number;
-//   /** 完成时间 */
-//   completionTime: string;
-//   /** 完成进度 */
-//   completionRate: string;
-//   /** 使用时间 */
-//   usedTime: string;
-// }
+/** 游玩排名信息 */
+export class PsnineGameRank {
+  /** 排名顺序 */
+  index: number;
+  /** 完成时间 */
+  completionTime: string;
+  /** 完成进度 */
+  completionRate: number;
+  /** 使用时间(单位:秒) */
+  usedSecords: number;
+  /** 使用时间(字符串) */
+  usedTime: string;
+}
 
 /** 奖杯 */
 export class PsTrophy {

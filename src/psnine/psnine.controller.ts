@@ -1,7 +1,7 @@
 import { Body, Controller, Get, ParseIntPipe, Post, Query, UseGuards } from '@nestjs/common';
 import { PsnineService } from './psnine.service';
 import { BusinessException, JwtGuard } from 'src/core';
-import { GameDto, GameSearchDto } from './dto';
+import { GameDto, GameRankDto, GameSearchDto } from './dto';
 
 const numberParse = (parameter) =>
   new ParseIntPipe({
@@ -31,10 +31,11 @@ export class PsnineController {
     return await this.psnineService.getGameTopic(id);
   }
 
-  // @Get('/game/rank')
-  // async getGameRank(@Query('gameId', numberParse('gameId')) gameId: number) {
-  //   return await this.psnineService.getGameRank(gameId);
-  // }
+  /** PSNINE 游戏排行 */
+  @Post('/game/rank')
+  async getGameRank(@Body() dto: GameRankDto) {
+    return await this.psnineService.getGameRank(dto.id, dto.page);
+  }
 
   /** PSNINE 游戏搜索 */
   @Post('/game/search')

@@ -1,4 +1,6 @@
 import * as cheerio from 'cheerio';
+import BigNumber from 'bignumber.js';
+import * as dayjs from 'dayjs';
 import { type TrophyNum, type Platform } from '../class';
 
 /** 获取奖杯数 */
@@ -51,4 +53,55 @@ export function getVersionFromEl($el: cheerio.Cheerio<cheerio.Element>) {
     .split('\n')
     .filter((v) => v)
     .map((v) => v.trim());
+}
+
+/**
+ * 将文本字符串转换为秒
+ * @param str 文本
+ * @description 例如：'3秒' -> 3; '3分钟' -> 180
+ * @returns 秒数
+ */
+export function getSecordsFromText(str: string) {
+  let secords = 0;
+  function bigCalc(num: number) {
+    return Number(new BigNumber(num).toFixed(0));
+  }
+  const actions: [(str: string) => RegExpMatchArray, (num: string) => number][] = [
+    [(str: string) => str.match(/(\d+\.?\d*)秒/), (num: string) => bigCalc(Number(num) * 1)],
+    [(str: string) => str.match(/(\d+\.?\d*)分钟/), (num: string) => bigCalc(Number(num) * 60)],
+    [(str: string) => str.match(/(\d+\.?\d*)小时/), (num: string) => bigCalc(Number(num) * 3600)],
+    [
+      (str: string) => str.match(/(\d+\.?\d*)天/),
+      (num: string) => bigCalc(Number(num) * 24 * 3600),
+    ],
+    [
+      (str: string) => str.match(/(\d+\.?\d*)个月/),
+      (num: string) => bigCalc(Number(num) * 24 * 3600 * 30),
+    ],
+    [
+      (str: string) => str.match(/(\d+\.?\d*)年/),
+      (num: string) => bigCalc(Number(num) * 24 * 3600 * 365),
+    ],
+  ];
+  actions.some((action) => {
+    const [matchFn, coverFn] = action;
+    const result = matchFn(str);
+    if (result) {
+      secords = coverFn(result[1]);
+      return true;
+    } else {
+      return false;
+    }
+  });
+  return secords;
+}
+
+/**
+ * 转换发布时间格式，将 12 小时制，转成 24小时制
+ * @description 将 23-03-29 4:34 pm 转换成 2023-03-29 04:34
+ * @param time 转换前的格式
+ * @returns 转换后的格式
+ */
+export function coverCompletionTime(time: string) {
+  return dayjs(`20${time}`, 'YYYY-MM-DD hh:mm a').format('YYYY-MM-DD HH:mm');
 }

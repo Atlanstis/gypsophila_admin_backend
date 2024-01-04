@@ -3,13 +3,21 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { PsGame } from 'src/entities/ps-game.entity';
 import { getElFromUrl } from 'src/utils/cheerio';
-import { type PerfectDifficulty, type Platform, PsnineSearchGame, PsnineGameTopic } from './class';
+import {
+  type PerfectDifficulty,
+  type Platform,
+  PsnineSearchGame,
+  PsnineGameTopic,
+  PsnineGameRank,
+} from './class';
 import {
   getDetailTrophyGroups,
   getIdFromUrl,
   getDetailBaseInfo,
   getTrophyNumFromEl,
   judgeGameExist,
+  getSecordsFromText,
+  coverCompletionTime,
 } from './helpers';
 
 @Injectable()
@@ -179,40 +187,52 @@ export class PsnineService {
 
   /**
    * 获取游戏游玩排名信息
-   * @param gameId 游戏 id
+   * @param id 游戏 id
+   * @param page 页码
    * @returns 排名信息
    */
-  // async getGameRank(gameId: number) {
-  //   const url = `https://psnine.com/psngame/${gameId}/rank`;
-  //   const $ = await getElFromUrl(url);
-  //   const $ranks = $('table.list').find('tr');
-  //   const list = $ranks
-  //     .map(function (i, el) {
-  //       const psGameRank = new PsGameRank();
-  //       const $tds = $(el).find('td');
-  //       $tds.each(function (tdI, tdEl) {
-  //         if (tdI === 0) {
-  //           // 获取排名顺序
-  //           psGameRank.index = Number($(tdEl).find('strong').text());
-  //         } else if (tdI === 2) {
-  //           // 获取完成时间
-  //           psGameRank.completionTime = $(tdEl).find('em').text();
-  //         } else if (tdI === 3) {
-  //           // 获取使用时间
-  //           $(tdEl).find('em').remove('em');
-  //           psGameRank.usedTime = $(tdEl).text();
-  //         } else if (tdI === 4) {
-  //           // 获取完成进度
-  //           psGameRank.completionRate = $(tdEl).find('.progress').text();
-  //         }
-  //       });
-  //       return psGameRank;
-  //     })
-  //     .toArray<PsGameRank>();
-  //   return {
-  //     list,
-  //   };
-  // }
+  async getGameRank(id: number, page: number) {
+    let url = `https://psnine.com/psngame/${id}/rank`;
+    if (page) {
+      url += `?page=${page}`;
+    }
+    const $ = await getElFromUrl(url);
+    /** 判断游戏是否存在 */
+    judgeGameExist($);
+    const $ranks = $('table.list').find('tr');
+    const list = $ranks
+      .map(function (i, el) {
+        const psGameRank = new PsnineGameRank();
+        const $tds = $(el).find('td');
+        $tds.each(function (tdI, tdEl) {
+          if (tdI === 0) {
+            /** 排名顺序 */
+            psGameRank.index = Number($(tdEl).find('strong').text());
+          } else if (tdI === 2) {
+            /** 完成时间 */
+            psGameRank.completionTime = coverCompletionTime($(tdEl).find('em').text());
+          } else if (tdI === 3) {
+            /** 使用时间 */
+            $(tdEl).find('em').remove('em');
+            const usedTime = $(tdEl).text();
+            psGameRank.usedTime = usedTime;
+            if (usedTime) {
+              psGameRank.usedSecords = getSecordsFromText(usedTime);
+            }
+          } else if (tdI === 4) {
+            /** 完成进度 */
+            psGameRank.completionRate = Number($(tdEl).find('.progress').text().replace('%', ''));
+          }
+        });
+        return psGameRank;
+      })
+      .toArray<PsnineGameRank>();
+    const total = Number($('.page .disabled.h-p').text().replace('条', ''));
+    return {
+      list,
+      total,
+    };
+  }
 
   /**
    * PSNINE 游戏搜索

@@ -100,7 +100,7 @@ function sortDetailTrophy($el: cheerio.Cheerio<cheerio.Element>, $: cheerio.Chee
       trophy.url = $(childEl).find('a').attr('href');
     } else if (ci === 1) {
       /** 奖杯描述 */
-      trophy.description = $(childEl).find('.text-gray').text();
+      trophy.description = $(childEl).children('em').text();
       /** 奖杯顺序 */
       trophy.order = Number($(childEl).find('.h-p').text().substring(1));
       /** 奖杯名称 */
