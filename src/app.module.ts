@@ -11,6 +11,7 @@ import { UserModule } from './user/user.module';
 import { RedisModule } from './redis/redis.module';
 import { RoleModule } from './role/role.module';
 import { MenuModule } from './menu/menu.module';
+import { SettingModule } from './setting/setting.module';
 import { ormConfig } from 'ormconfig';
 
 @Module({
@@ -45,6 +46,7 @@ import { ormConfig } from 'ormconfig';
     UserModule,
     RoleModule,
     MenuModule,
+    SettingModule,
   ],
   controllers: [],
   providers: [],

@@ -1,6 +1,6 @@
 import { DataSource, DataSourceOptions } from 'typeorm';
 import config from './src/utils/config';
-import { Menu, Role, User, Permission, RoleMenuPermission } from './src/entities';
+import { Menu, Role, User, Permission, RoleMenuPermission, SystemSetting } from './src/entities';
 
 const mysqlConfing = config().mysql as {
   host: string;
@@ -13,7 +13,7 @@ const mysqlConfing = config().mysql as {
 
 export const ormConfig: DataSourceOptions = {
   type: 'mysql',
-  entities: [Menu, Role, User, Permission, RoleMenuPermission],
+  entities: [Menu, Role, User, Permission, RoleMenuPermission, SystemSetting],
   ...mysqlConfing,
   dateStrings: true,
   poolSize: 10,
