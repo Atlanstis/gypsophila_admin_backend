@@ -1,22 +1,18 @@
 version: '3.8'
 services:
   frontend-app:
-    build:
-      context: ../gypsophila_admin_frontend
-      dockerfile: ./Dockerfile
+    image: gypsophila/gypsophila_admin_frontend:1.0.1
     depends_on:
       - backend-app
     ports:
       - '80:80'
       - '443:443'
     volumes:
-      - /root/gypsophila-admin/cert:/cert
+      - ../cert:/cert
     networks:
       - common-network
   backend-app:
-    build:
-      context: ./
-      dockerfile: ./Dockerfile
+    image: gypsophila/gypsophila_admin_backend:1.0.1
     depends_on:
       - mysql-container
       - redis-container
@@ -29,7 +25,7 @@ services:
     ports:
       - '3306:3306'
     volumes:
-      - /root/gypsophila-admin/docker/mysql:/var/lib/mysql
+      - ../docker/mysql:/var/lib/mysql
     environment:
       MYSQL_ROOT_PASSWORD: 'j!Y6hTwR'
       TZ: 'Asia/Shanghai'
@@ -40,7 +36,7 @@ services:
     ports:
       - '6379:6379'
     volumes:
-      - /root/gypsophila-admin/docker/redis:/data
+      - ../docker/redis:/data
     networks:
       - common-network
 networks:
