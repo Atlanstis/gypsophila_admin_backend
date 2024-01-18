@@ -1,7 +1,7 @@
 import { Body, Controller, Get, ParseIntPipe, Post, Query, UseGuards } from '@nestjs/common';
 import { PsnineService } from './psnine.service';
 import { BusinessException, JwtGuard } from 'src/core';
-import { GameSearchDto } from './dto';
+import { GameDto, GameRankDto, GameSearchDto } from './dto';
 
 const numberParse = (parameter) =>
   new ParseIntPipe({
@@ -15,29 +15,37 @@ const numberParse = (parameter) =>
 export class PsnineController {
   constructor(private readonly psnineService: PsnineService) {}
 
-  @Get('gamelist')
-  async getGameList(@Query('page', numberParse('page')) page: number) {
-    return await this.psnineService.getGameList(Number(page));
-  }
+  // @Get('gamelist')
+  // async getGameList(@Query('page', numberParse('page')) page: number) {
+  //   return await this.psnineService.getGameList(Number(page));
+  // }
 
-  @Get('/game/trophy')
-  async getGameTrophy(@Query('gameId', numberParse('gameId')) gameId: number) {
-    return await this.psnineService.getGameTrophy(Number(gameId));
-  }
+  // @Get('/game/trophy')
+  // async getGameTrophy(@Query('gameId', numberParse('gameId')) gameId: number) {
+  //   return await this.psnineService.getGameTrophy(Number(gameId));
+  // }
 
+  /** PSNINE 游戏主题 */
   @Get('/game/topic')
-  async getGameTopic(@Query('gameId', numberParse('gameId')) gameId: number) {
-    return await this.psnineService.getGameTopic(Number(gameId));
+  async getGameTopic(@Query('id', numberParse('id')) id: number) {
+    return await this.psnineService.getGameTopic(id);
   }
 
-  @Get('/game/rank')
-  async getGameRank(@Query('gameId', numberParse('gameId')) gameId: number) {
-    return await this.psnineService.getGameRank(gameId);
+  /** PSNINE 游戏排行 */
+  @Post('/game/rank')
+  async getGameRank(@Body() dto: GameRankDto) {
+    return await this.psnineService.getGameRank(dto.id, dto.page);
   }
 
   /** PSNINE 游戏搜索 */
   @Post('/game/search')
   async gameSearch(@Body() dto: GameSearchDto) {
     return await this.psnineService.gameSearch(dto.keyword, dto.page);
+  }
+
+  /** PSNINE 游戏详情 */
+  @Post('/game/detail')
+  async gameDetail(@Body() dto: GameDto) {
+    return await this.psnineService.gameDetail(dto.id);
   }
 }
