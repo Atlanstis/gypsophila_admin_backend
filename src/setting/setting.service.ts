@@ -4,6 +4,7 @@ import { WEBSITE_NAME, WEBSITE_RECORD_NUMBER, WEBSITE_SHOW_RECORD_NUMBER } from 
 import { SystemSetting } from 'src/entities';
 import { In, Repository } from 'typeorm';
 import { WebsiteDto } from './dto';
+import { RoleService } from 'src/role/role.service';
 
 /** 网站设置-字段对应 */
 const transferMap = {
@@ -17,6 +18,7 @@ export class SettingService {
   constructor(
     @InjectRepository(SystemSetting)
     private readonly settingRepository: Repository<SystemSetting>,
+    private readonly roleService: RoleService,
   ) {}
 
   /** 获取网站配置 */
@@ -48,5 +50,10 @@ export class SettingService {
           : dto[transferMap[item.key]];
     });
     await this.settingRepository.save(list);
+  }
+
+  async getSettingCommonTabs(roleIds: number[]) {
+    const rmps = await this.roleService.getPermissionByRoleIds(roleIds);
+    return rmps.filter((rmp) => rmp.menu.key === 'Setting_Common').map((rmp) => rmp.permission.key);
   }
 }
