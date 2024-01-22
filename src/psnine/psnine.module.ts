@@ -8,5 +8,6 @@ import { PsGame } from 'src/entities/ps-game.entity';
   imports: [TypeOrmModule.forFeature([PsGame])],
   controllers: [PsnineController],
   providers: [PsnineService],
+  exports: [PsnineService],
 })
 export class PsnineModule {}

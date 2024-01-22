@@ -19,6 +19,7 @@ import {
   getSecordsFromText,
   coverCompletionTime,
 } from './helpers';
+import { BusinessException } from 'src/core';
 
 @Injectable()
 export class PsnineService {
@@ -312,5 +313,22 @@ export class PsnineService {
     /** 奖杯信息 */
     game.trophyGroup = getDetailTrophyGroups($);
     return game;
+  }
+
+  /**
+   * 根据 psnId 获取用户基本信息
+   * @param psnId psnId
+   */
+  async getProfileDetail(psnId: string) {
+    const url = `https://psnine.com/psnid/${psnId}`;
+    try {
+      const $ = await getElFromUrl(url);
+      return {
+        psnId,
+        avatar: $('.psnzz .avabig').attr('src'),
+      };
+    } catch {
+      throw new BusinessException('当前 psnId 不存在');
+    }
   }
 }
