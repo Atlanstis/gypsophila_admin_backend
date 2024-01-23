@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PsnProfile } from 'src/entities';
 import { PsnineService } from 'src/psnine/psnine.service';
-import { Repository } from 'typeorm';
+import { FindOptionsRelations, Repository } from 'typeorm';
 
 @Injectable()
 export class PsnService {
@@ -14,25 +14,12 @@ export class PsnService {
 
   /** 获取 psn 用户信息 */
   async getProfile(id: string) {
-    return await this.psnProfileRepository.findOne({
-      where: {
-        user: {
-          id,
-        },
-      },
-    });
+    return await this.findProfileByUserId(id);
   }
 
   /** 绑定 psn 用户信息 */
   async profileBind(psnId: string, id: string) {
-    let profile = await this.psnProfileRepository.findOne({
-      relations: { user: true },
-      where: {
-        user: {
-          id,
-        },
-      },
-    });
+    let profile = await this.findProfileByUserId(id, { user: true });
     if (profile) {
       profile.psnId = psnId;
     } else {
@@ -40,5 +27,17 @@ export class PsnService {
       profile = this.psnProfileRepository.create({ psnId, avatar, user: { id } });
     }
     await this.psnProfileRepository.save(profile);
+  }
+
+  /** 根据用户 id 获取 psn 信息 */
+  async findProfileByUserId(id: string, relations: FindOptionsRelations<PsnProfile> = {}) {
+    return await this.psnProfileRepository.findOne({
+      relations,
+      where: {
+        user: {
+          id,
+        },
+      },
+    });
   }
 }
