@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { PsnService } from './psn.service';
-import { PsnIdDto } from './dto';
+import { PageDto, PsnIdDto } from './dto';
 import { Request } from 'express';
 import { JwtGuard } from 'src/core';
 
@@ -19,5 +19,11 @@ export class PsnController {
   @Post('/profile/bind')
   async profileBind(@Body() dto: PsnIdDto, @Req() req: Request) {
     return await this.psnService.profileBind(dto.psnId, req.user.id);
+  }
+
+  /** 获取可以同步的游戏列表 */
+  @Post('/synchronizeable/game')
+  async getSynchronizeableGame(@Body() dto: PageDto, @Req() req: Request) {
+    return await this.psnService.getSynchronizeableGame(req.user.id, dto.page);
   }
 }

@@ -1,7 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { PsGame } from 'src/entities/ps-game.entity';
 import { getElFromUrl } from 'src/utils/cheerio';
 import {
   type PerfectDifficulty,
@@ -9,6 +6,7 @@ import {
   PsnineSearchGame,
   PsnineGameTopic,
   PsnineGameRank,
+  PsnineSyncGame,
 } from './class';
 import {
   getDetailTrophyGroups,
@@ -23,70 +21,79 @@ import { BusinessException } from 'src/core';
 
 @Injectable()
 export class PsnineService {
-  @InjectRepository(PsGame)
-  private readonly psGameRepository: Repository<PsGame>;
-
   /**
-   * 获取 PSNINE 上的游戏列表
+   * 获取 psnId 已在 PSNINE 上同步过的游戏列表
+   * @param psnId psnId
    * @param page 页码
    * @returns 游戏数据
    */
-  // async getGameList(page: number) {
-  //   const url = `https://psnine.com/psnid/kiceous/psngame?page=${page}`;
-  //   const $ = await getElFromUrl(url);
-  //   const $page = $('.page').first();
-  //   const totalText = $page.find('.disabled').text().replace('条', '');
-  //   const total = totalText ? Number(totalText) : 0;
-  //   const pages = $page.find('li').length - 1;
-  //   const games = $('table.list')
-  //     .find('tr')
-  //     .map(function (i, el) {
-  //       const game = new PsnineGame();
-  //       const $children = $(el).children();
-  //       $children.each(function (ci, childEl) {
-  //         if (ci === 0) {
-  //           game.url = $(childEl).find('a').attr('href');
-  //           game.id = getIdFromUrl(game.url);
-  //           const $img = $(childEl).find('img');
-  //           game.thumbnail = $img.attr('src');
-  //           game.originName = $img.attr('alt');
-  //         }
-  //         if (ci === 1) {
-  //           game.name = $(childEl).find('a').text();
-  //           const $platforms = $(childEl).find('span');
-  //           game.platforms = $platforms
-  //             .map(function (pi, pEl) {
-  //               return $(pEl).text() as Platform;
-  //             })
-  //             .toArray<Platform>();
-  //           game.lastTrophyTime = $(childEl).find('small').text();
-  //         }
-  //         if (ci === 2) {
-  //           $(childEl).find('em').remove('em');
-  //           game.usedTime = $(childEl).text();
-  //         }
-  //         if (ci === 3) {
-  //           game.difficulty = $(childEl).find('span').text() as PerfectDifficulty;
-  //           let perfectRate = $(childEl).find('em').text();
-  //           perfectRate = perfectRate.substring(0, perfectRate.length - 3);
-  //           game.perfectRate = perfectRate ? Number(perfectRate) : 0;
-  //         }
-  //         if (ci === 4) {
-  //           let progress = $(childEl).find('.progress div').text();
-  //           progress = progress.substring(0, progress.length - 1);
-  //           game.progress = progress ? Number(progress) : 0;
-  //           game.trophyGot = getTrophyNumFromEl($(childEl));
-  //         }
-  //       });
-  //       return game;
-  //     })
-  //     .toArray();
-  //   return {
-  //     total,
-  //     pages,
-  //     list: games,
-  //   };
-  // }
+  async getPsnineUserGame(psnId: string, page: number) {
+    const url = `https://psnine.com/psnid/${psnId}/psngame?page=${page}`;
+    const $ = await getElFromUrl(url);
+    const $page = $('.page').first();
+    const totalText = $page.find('.disabled').text().replace('条', '');
+    const total = totalText ? Number(totalText) : 0;
+    const pages = $page.find('li').length - 1;
+    const games = $('table.list')
+      .find('tr')
+      .map(function (i, el) {
+        const game = new PsnineSyncGame();
+        const $children = $(el).children();
+        $children.each(function (ci, childEl) {
+          if (ci === 0) {
+            game.url = $(childEl).find('a').attr('href');
+            game.id = getIdFromUrl(game.url);
+            const $img = $(childEl).find('img');
+            game.thumbnail = $img.attr('src');
+            game.originName = $img.attr('alt');
+          }
+          if (ci === 1) {
+            const $title = $(childEl).find('a');
+            /** 游戏名称 */
+            game.name = $title.text();
+            /** 版本 */
+            const $next = $title.next();
+            game.version = $next.is('em')
+              ? $next
+                  .text()
+                  .split('\n')
+                  .filter((v) => v)
+                  .map((v) => v.trim())
+              : [];
+            const $platforms = $(childEl).find('span');
+            game.platforms = $platforms
+              .map(function (pi, pEl) {
+                return $(pEl).text() as Platform;
+              })
+              .toArray<Platform>();
+            game.lastTrophyTime = $(childEl).find('small').text();
+          }
+          if (ci === 2) {
+            $(childEl).find('em').remove('em');
+            game.usedTime = $(childEl).text();
+          }
+          if (ci === 3) {
+            game.perfectDiffucuity = $(childEl).find('span').text() as PerfectDifficulty;
+            let perfectRate = $(childEl).find('em').text();
+            perfectRate = perfectRate.substring(0, perfectRate.length - 3);
+            game.perfectRate = perfectRate ? Number(perfectRate) : 0;
+          }
+          if (ci === 4) {
+            let progress = $(childEl).find('.progress div').text();
+            progress = progress.substring(0, progress.length - 1);
+            game.progress = progress ? Number(progress) : 0;
+            game.trophyGot = getTrophyNumFromEl($(childEl));
+          }
+        });
+        return game;
+      })
+      .toArray<PsnineSyncGame>();
+    return {
+      total,
+      pages,
+      list: games,
+    };
+  }
 
   /**
    * 获取奖杯信息

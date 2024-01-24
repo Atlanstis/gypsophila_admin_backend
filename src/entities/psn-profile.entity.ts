@@ -8,7 +8,7 @@ export class PsnProfile extends TimeNotSelectBase {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ comment: 'Psn Id', width: PSN_PROFILE_LENGTH.PSN_ID_MAX })
+  @Column({ name: 'psn_id', comment: 'Psn Id', width: PSN_PROFILE_LENGTH.PSN_ID_MAX, unique: true })
   psnId: string;
 
   @Column({ comment: '头像地址', width: PSN_PROFILE_LENGTH.AVATAR_MAX })

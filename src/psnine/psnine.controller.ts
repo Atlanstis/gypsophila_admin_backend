@@ -15,11 +15,6 @@ const numberParse = (parameter) =>
 export class PsnineController {
   constructor(private readonly psnineService: PsnineService) {}
 
-  // @Get('gamelist')
-  // async getGameList(@Query('page', numberParse('page')) page: number) {
-  //   return await this.psnineService.getGameList(Number(page));
-  // }
-
   // @Get('/game/trophy')
   // async getGameTrophy(@Query('gameId', numberParse('gameId')) gameId: number) {
   //   return await this.psnineService.getGameTrophy(Number(gameId));
