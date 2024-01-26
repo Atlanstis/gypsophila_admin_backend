@@ -1,16 +1,41 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BusinessException } from 'src/core';
-import { PsnProfile } from 'src/entities';
+import {
+  PsnGame,
+  PsnGameLink,
+  PsnProfile,
+  PsnProfileGame,
+  PsnProfileGameTrophy,
+  PsnTrophy,
+  PsnTrophyGroup,
+  PsnTrophyLink,
+} from 'src/entities';
+import { PsnineTrophy } from 'src/psnine/class';
 import { PsnineService } from 'src/psnine/psnine.service';
-import { FindOptionsRelations, Repository } from 'typeorm';
+import { DataSource, FindOptionsRelations, In, Repository } from 'typeorm';
 
 @Injectable()
 export class PsnService {
   constructor(
     @InjectRepository(PsnProfile)
     private readonly psnProfileRepository: Repository<PsnProfile>,
+    @InjectRepository(PsnGame)
+    private readonly psnGameRepository: Repository<PsnGame>,
+    @InjectRepository(PsnGameLink)
+    private readonly psnGameLinkRepository: Repository<PsnGameLink>,
+    @InjectRepository(PsnTrophyGroup)
+    private readonly psnTrophyGroupRepository: Repository<PsnTrophyGroup>,
+    @InjectRepository(PsnTrophy)
+    private readonly psnTrophyRepository: Repository<PsnTrophy>,
+    @InjectRepository(PsnTrophyLink)
+    private readonly psnTrophyLinkRepository: Repository<PsnTrophyLink>,
+    @InjectRepository(PsnProfileGame)
+    private readonly psnProfileGameRepository: Repository<PsnProfileGame>,
+    @InjectRepository(PsnProfileGameTrophy)
+    private readonly psnProfileGameTrophyRepository: Repository<PsnProfileGameTrophy>,
     private readonly psnineService: PsnineService,
+    private dataSource: DataSource,
   ) {}
 
   /** 获取 psn 用户信息 */
@@ -36,15 +61,15 @@ export class PsnService {
 
   /**
    * 根据用户 id 获取 psn 信息
-   * @param id 用户 id
+   * @param userId 用户 id
    * @param relations 关联查询条件
    */
-  async findProfileByUserId(id: string, relations: FindOptionsRelations<PsnProfile> = {}) {
+  async findProfileByUserId(userId: string, relations: FindOptionsRelations<PsnProfile> = {}) {
     return await this.psnProfileRepository.findOne({
       relations,
       where: {
         user: {
-          id,
+          id: userId,
         },
       },
     });
@@ -52,14 +77,193 @@ export class PsnService {
 
   /**
    * 获取可以同步的游戏列表
-   * @param id 用户 id
+   * @param userId 用户 id
    * @param page 页码
    */
-  async getSynchronizeableGame(id: string, page: number) {
-    const profile = await this.findProfileByUserId(id, { user: true });
+  async getSynchronizeableGame(userId: string, page: number) {
+    const profile = await this.findProfileByUserId(userId, { user: true });
     if (!profile) {
       throw new BusinessException('请先绑定 psnId');
     }
-    return await this.psnineService.getPsnineUserGame(profile.psnId, page);
+    // 获取 psnine 该 psnId 下的游戏
+    const pageData = await this.psnineService.getPsnineUserGame(profile.psnId, page);
+    // 获取已在系统中同步过的游戏
+    const Synchronized = await this.psnProfileGameRepository.find({
+      where: { profile: { id: profile.id } },
+      relations: {
+        game: {
+          link: true,
+        },
+      },
+    });
+    const SynchronizedIds = Synchronized.map((item) => item.game.link.psnineId);
+    // 更改已同步状态
+    pageData.list = pageData.list.map((item) => ({
+      ...item,
+      isSync: SynchronizedIds.includes(item.id),
+    }));
+    return pageData;
+  }
+
+  /** 同步游戏 */
+  async gameSync(userId: string, gameId: number) {
+    const profile = await this.findProfileByUserId(userId, { user: true });
+    if (!profile) {
+      throw new BusinessException('请先绑定 psnId');
+    }
+    // 使用事务，发生错误时，回滚操作
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      // 查找数据库是否存在游戏
+      let game = await this.psnGameRepository.findOne({ where: { link: { psnineId: gameId } } });
+      let profileGame: PsnProfileGame | null = null;
+      if (!game) {
+        // 不存在，查询游戏信息
+        const { name, originName, thumbnail, platforms, url, trophyNum, trophyGroup } =
+          await this.psnineService.gameDetail(gameId, profile.psnId);
+        // 保存游戏关联数据
+        const link = this.psnGameLinkRepository.create({ psnineId: gameId, psnineUrl: url });
+        await queryRunner.manager.save(link);
+        // 保存游戏数据
+        game = this.psnGameRepository.create({
+          name,
+          originName,
+          thumbnail,
+          platforms,
+          platinum: trophyNum.platinum,
+          gold: trophyNum.gold,
+          silver: trophyNum.silver,
+          bronze: trophyNum.bronze,
+          link,
+        });
+        await queryRunner.manager.save(game);
+        // 保存用户游戏同步信息
+        profileGame = this.psnProfileGameRepository.create({
+          profile,
+          game,
+        });
+        await queryRunner.manager.save(profileGame);
+        // 遍历保存奖杯组、奖杯信息、用户获得奖杯信息
+        for (const groupItem of trophyGroup) {
+          const {
+            name,
+            thumbnail,
+            isDLC,
+            trophyNum: { platinum, gold, silver, bronze },
+            trophies,
+          } = groupItem;
+          // 保存奖杯组
+          const group = this.psnTrophyGroupRepository.create({
+            name,
+            thumbnail,
+            isDLC,
+            platinum,
+            gold,
+            silver,
+            bronze,
+            game,
+          });
+          await queryRunner.manager.save(group);
+          // 保存奖杯信息，奖杯关联信息，用户获得奖杯信息
+          for (const trophyItem of trophies) {
+            const { order, name, description, trophyType, id, url, thumbnail, completeTime } =
+              trophyItem;
+            // 保存奖杯信息
+            const psnTrophy = this.psnTrophyRepository.create({
+              order,
+              name,
+              description,
+              type: trophyType,
+              group,
+              thumbnail,
+            });
+            await queryRunner.manager.save(psnTrophy);
+            // 保存奖杯关联信息
+            const psnTrophyLink = this.psnTrophyLinkRepository.create({
+              psnineTrophyId: id,
+              psnineUrl: url,
+              trophy: psnTrophy,
+            });
+            await queryRunner.manager.save(psnTrophyLink);
+            // 保存用户获得的奖杯信息
+            if (completeTime) {
+              const psnProfileGameTrophy = this.psnProfileGameTrophyRepository.create({
+                profileGame,
+                trophy: psnTrophy,
+                completeTime: completeTime ? new Date(completeTime) : null,
+              });
+              await queryRunner.manager.save(psnProfileGameTrophy);
+            }
+          }
+        }
+      } else {
+        // 游戏已存在
+        // 1.查询用户是否已同步该信息
+        profileGame = await this.psnProfileGameRepository.findOne({
+          where: { profile: { id: profile.id }, game: { id: game.id } },
+        });
+        if (profileGame) {
+          // 2. 已同步，则跳过后续操作
+          throw new BusinessException('该游戏已同步，请勿重复操作');
+        } else {
+          // 3. 未同步，进行同步游戏与奖杯信息
+          // 3.1 同步用户游戏
+          profileGame = this.psnProfileGameRepository.create({
+            profile,
+            game,
+          });
+          await queryRunner.manager.save(profileGame);
+          // 3.2 获取游戏信息
+          const { trophyGroup } = await this.psnineService.gameDetail(gameId, profile.psnId);
+          // 3.3 同步奖杯数据
+          // 3.3.1 获取所有已获得奖杯数据
+          const psnineTrophies: PsnineTrophy[] = [];
+          for (const groupItem of trophyGroup) {
+            for (const trophyItem of groupItem.trophies) {
+              if (trophyItem.completeTime) {
+                psnineTrophies.push(trophyItem);
+              }
+            }
+          }
+          // 3.3.2 获取本地数据库中相关奖杯数据
+          const psnineTrophyIds: number[] = psnineTrophies.map((item) => item.id);
+          const existedTrophies = await this.psnTrophyRepository.find({
+            relations: { link: true },
+            where: {
+              link: {
+                psnineTrophyId: In(psnineTrophyIds),
+              },
+            },
+          });
+          // 3.3.3 创建本地数据库中相关奖杯数据
+          const map: Record<number, PsnTrophy> = {};
+          existedTrophies.forEach((item) => {
+            map[item.link.psnineTrophyId] = item;
+          });
+          const psnProfileGameTrophies: PsnProfileGameTrophy[] = [];
+          for (const trophyItem of psnineTrophies) {
+            const trophy = map[trophyItem.id];
+            if (map[trophyItem.id]) {
+              psnProfileGameTrophies.push(
+                this.psnProfileGameTrophyRepository.create({
+                  completeTime: new Date(trophyItem.completeTime),
+                  profileGame,
+                  trophy,
+                }),
+              );
+            }
+          }
+          await queryRunner.manager.save(psnProfileGameTrophies);
+        }
+        await queryRunner.commitTransaction();
+      }
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      throw err;
+    } finally {
+      await queryRunner.release();
+    }
   }
 }

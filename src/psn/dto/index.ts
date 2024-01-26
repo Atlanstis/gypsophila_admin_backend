@@ -14,3 +14,9 @@ export class PageDto {
   @IsNumber({}, { message: 'page 类型错误' })
   page?: number;
 }
+
+export class PsnineGameDto {
+  @IsNotEmpty({ message: 'id 不能为空' })
+  @IsNumber({}, { message: 'id 类型错误' })
+  gameId: number;
+}

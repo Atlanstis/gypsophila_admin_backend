@@ -43,8 +43,7 @@ export class PsnineGameRank {
   usedTime: string;
 }
 
-/** 奖杯 */
-export class PsTrophy {
+export class PsnineTrophy {
   /** 奖杯名称 */
   name: string;
   /** 奖杯类型 */
@@ -55,20 +54,19 @@ export class PsTrophy {
   description: string;
   /** 奖杯顺序 */
   order: number;
-}
-
-export class PsnineTrophy extends PsTrophy {
   /** 奖杯 id */
   id: number;
   /** 提示数量 */
   tipNums: number;
   /** 完成率 */
-  complateRate: number;
+  completeRate: number;
   /** 详情地址 */
   url: string;
+  /** 完成时间 */
+  completeTime: string;
 }
 
-export class PsTrophyGroup {
+export class PsnineTrophyGroup {
   /** 奖杯组名称 */
   name: string;
   /** 缩略图 */
@@ -78,7 +76,7 @@ export class PsTrophyGroup {
   /** 是否 DLC */
   isDLC: boolean;
   /** 奖杯信息 */
-  trophies: PsTrophy[];
+  trophies: PsnineTrophy[];
 }
 
 export class PSGame {
@@ -123,7 +121,7 @@ export class PsnineGame extends PSGame {
   /** 版本 */
   version: string[];
   /** 奖杯组信息 */
-  trophyGroup: PsTrophyGroup[];
+  trophyGroup: PsnineTrophyGroup[];
 }
 
 /** 同步 psn 游戏 */

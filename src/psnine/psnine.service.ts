@@ -16,6 +16,7 @@ import {
   judgeGameExist,
   getSecordsFromText,
   coverCompletionTime,
+  getVersionFromEl,
 } from './helpers';
 import { BusinessException } from 'src/core';
 
@@ -53,13 +54,7 @@ export class PsnineService {
             game.name = $title.text();
             /** 版本 */
             const $next = $title.next();
-            game.version = $next.is('em')
-              ? $next
-                  .text()
-                  .split('\n')
-                  .filter((v) => v)
-                  .map((v) => v.trim())
-              : [];
+            game.version = $next.is('em') ? getVersionFromEl($next) : [];
             const $platforms = $(childEl).find('span');
             game.platforms = $platforms
               .map(function (pi, pEl) {
@@ -273,13 +268,7 @@ export class PsnineService {
             game.name = $title.text();
             /** 版本 */
             const $next = $title.next();
-            game.version = $next.is('em')
-              ? $next
-                  .text()
-                  .split('\n')
-                  .filter((v) => v)
-                  .map((v) => v.trim())
-              : [];
+            game.version = $next.is('em') ? getVersionFromEl($next) : [];
             /** 奖杯数量 */
             game.trophyNum = getTrophyNumFromEl($(tdEl).find('em'));
             game.platforms = $(tdEl)
@@ -310,13 +299,16 @@ export class PsnineService {
    * PSNINE 游戏详情
    * @param id psnine 游戏 ID
    */
-  async gameDetail(id: number) {
-    const url = `https://psnine.com/psngame/${id}`;
+  async gameDetail(gameId: number, psnId?: string) {
+    let url = `https://psnine.com/psngame/${gameId}`;
+    if (psnId) {
+      url += `?psnid=${psnId}`;
+    }
     const $ = await getElFromUrl(url);
     /** 判断游戏是否存在 */
     judgeGameExist($);
     /** 基本信息 */
-    const game = getDetailBaseInfo(id, url, $);
+    const game = getDetailBaseInfo(gameId, url, $);
     /** 奖杯信息 */
     game.trophyGroup = getDetailTrophyGroups($);
     return game;

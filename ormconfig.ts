@@ -8,6 +8,13 @@ import {
   RoleMenuPermission,
   SystemSetting,
   PsnProfile,
+  PsnGame,
+  PsnGameLink,
+  PsnTrophyGroup,
+  PsnTrophy,
+  PsnTrophyLink,
+  PsnProfileGame,
+  PsnProfileGameTrophy,
 } from './src/entities';
 
 const mysqlConfing = config().mysql as {
@@ -21,7 +28,22 @@ const mysqlConfing = config().mysql as {
 
 export const ormConfig: DataSourceOptions = {
   type: 'mysql',
-  entities: [Menu, Role, User, Permission, RoleMenuPermission, SystemSetting, PsnProfile],
+  entities: [
+    Menu,
+    Role,
+    User,
+    Permission,
+    RoleMenuPermission,
+    SystemSetting,
+    PsnProfile,
+    PsnGame,
+    PsnGameLink,
+    PsnTrophyGroup,
+    PsnTrophy,
+    PsnTrophyLink,
+    PsnProfileGame,
+    PsnProfileGameTrophy,
+  ],
   ...mysqlConfing,
   dateStrings: true,
   poolSize: 10,

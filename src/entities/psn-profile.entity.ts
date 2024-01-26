@@ -1,9 +1,12 @@
-import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, OneToMany, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { TimeNotSelectBase } from './base';
 import { User } from './user.entity';
 import { PSN_PROFILE_LENGTH } from '../constants';
+import { PsnProfileGame } from './psn-profile-game.entity';
 
-@Entity()
+@Entity({
+  name: 'psn_profile',
+})
 export class PsnProfile extends TimeNotSelectBase {
   @PrimaryGeneratedColumn()
   id: number;
@@ -29,4 +32,7 @@ export class PsnProfile extends TimeNotSelectBase {
   @OneToOne(() => User)
   @JoinColumn()
   user: User;
+
+  @OneToMany(() => PsnProfileGame, (profileGames) => profileGames.profile)
+  profileGames: PsnProfileGame[];
 }

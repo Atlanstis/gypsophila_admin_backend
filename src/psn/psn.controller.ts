@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { PsnService } from './psn.service';
-import { PageDto, PsnIdDto } from './dto';
+import { PageDto, PsnIdDto, PsnineGameDto } from './dto';
 import { Request } from 'express';
 import { JwtGuard } from 'src/core';
 
@@ -25,5 +25,10 @@ export class PsnController {
   @Post('/synchronizeable/game')
   async getSynchronizeableGame(@Body() dto: PageDto, @Req() req: Request) {
     return await this.psnService.getSynchronizeableGame(req.user.id, dto.page);
+  }
+
+  @Post('/game/sync')
+  async gameSync(@Body() dto: PsnineGameDto, @Req() req: Request) {
+    return await this.psnService.gameSync(req.user.id, dto.gameId);
   }
 }

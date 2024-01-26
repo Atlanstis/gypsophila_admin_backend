@@ -1,0 +1,39 @@
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { TimeNotSelectBase } from './base';
+import { PsnProfile } from './psn-profile.entity';
+import { PsnGame } from './psn-game.entity';
+import { PsnProfileGameTrophy } from './psn-profile-game-trophy.entity';
+
+@Entity({ name: 'psn_profile_game' })
+export class PsnProfileGame extends TimeNotSelectBase {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
+
+  @Column({ name: 'is_favor', comment: '是否收藏', default: () => false })
+  isFavor: boolean;
+
+  @Column({
+    name: 'sync_time',
+    comment: '同步时间',
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP',
+  })
+  syncTime: Date;
+
+  @ManyToOne(() => PsnProfile, (profile) => profile.profileGames, {
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  })
+  @JoinColumn({ name: 'psn_profile_id' })
+  profile: PsnProfile;
+
+  @ManyToOne(() => PsnGame, (game) => game.profileGames, {
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  })
+  @JoinColumn({ name: 'psn_game_id' })
+  game: PsnGame;
+
+  @OneToMany(() => PsnProfileGameTrophy, (profileGameTrophies) => profileGameTrophies.profileGame)
+  profileGameTrophies: PsnProfileGameTrophy[];
+}
