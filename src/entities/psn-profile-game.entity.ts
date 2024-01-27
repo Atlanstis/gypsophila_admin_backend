@@ -20,6 +20,18 @@ export class PsnProfileGame extends TimeNotSelectBase {
   })
   syncTime: Date;
 
+  @Column({ name: 'platinum_got', comment: '获得白金奖杯数量', default: 0 })
+  platinumGot: number;
+
+  @Column({ name: 'gold_got', comment: '获得金奖杯数量', default: 0 })
+  goldGot: number;
+
+  @Column({ name: 'silver_got', comment: '获得银奖杯数量', default: 0 })
+  silverGot: number;
+
+  @Column({ name: 'bronze_got', comment: '获得铜奖杯数量', default: 0 })
+  bronzeGot: number;
+
   @ManyToOne(() => PsnProfile, (profile) => profile.profileGames, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',

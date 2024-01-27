@@ -22,13 +22,20 @@ export class PsnController {
   }
 
   /** 获取可以同步的游戏列表 */
-  @Post('/synchronizeable/game')
-  async getSynchronizeableGame(@Body() dto: PageDto, @Req() req: Request) {
-    return await this.psnService.getSynchronizeableGame(req.user.id, dto.page);
+  @Post('/game/synchronizeable')
+  async getGameSynchronizeable(@Body() dto: PageDto, @Req() req: Request) {
+    return await this.psnService.getGameSynchronizeable(req.user.id, dto.page);
   }
 
+  /** 同步游戏 */
   @Post('/game/sync')
   async gameSync(@Body() dto: PsnineGameDto, @Req() req: Request) {
     return await this.psnService.gameSync(req.user.id, dto.gameId);
+  }
+
+  /** 获取已经同步的游戏 */
+  @Post('/game/synchronized')
+  async gameSynchronized(@Req() req: Request) {
+    return await this.psnService.gameSynchronized(req.user.id);
   }
 }

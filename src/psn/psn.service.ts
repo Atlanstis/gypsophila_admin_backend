@@ -80,7 +80,7 @@ export class PsnService {
    * @param userId 用户 id
    * @param page 页码
    */
-  async getSynchronizeableGame(userId: string, page: number) {
+  async getGameSynchronizeable(userId: string, page: number) {
     const profile = await this.findProfileByUserId(userId, { user: true });
     if (!profile) {
       throw new BusinessException('请先绑定 psnId');
@@ -114,8 +114,8 @@ export class PsnService {
     // 使用事务，发生错误时，回滚操作
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
-    await queryRunner.startTransaction();
     try {
+      await queryRunner.startTransaction();
       // 查找数据库是否存在游戏
       let game = await this.psnGameRepository.findOne({ where: { link: { psnineId: gameId } } });
       let profileGame: PsnProfileGame | null = null;
@@ -145,6 +145,12 @@ export class PsnService {
           game,
         });
         await queryRunner.manager.save(profileGame);
+        const map = {
+          platinum: 0,
+          gold: 0,
+          silver: 0,
+          bronze: 0,
+        };
         // 遍历保存奖杯组、奖杯信息、用户获得奖杯信息
         for (const groupItem of trophyGroup) {
           const {
@@ -194,10 +200,17 @@ export class PsnService {
                 trophy: psnTrophy,
                 completeTime: completeTime ? new Date(completeTime) : null,
               });
+              map[psnTrophy.type]++;
               await queryRunner.manager.save(psnProfileGameTrophy);
             }
           }
         }
+        // 更新已获得的奖杯数量
+        profileGame.platinumGot = map['platinum'];
+        profileGame.goldGot = map['gold'];
+        profileGame.silverGot = map['silver'];
+        profileGame.bronzeGot = map['bronze'];
+        await queryRunner.manager.save(profileGame);
       } else {
         // 游戏已存在
         // 1.查询用户是否已同步该信息
@@ -215,6 +228,13 @@ export class PsnService {
             game,
           });
           await queryRunner.manager.save(profileGame);
+          // 记录获得的奖杯数量
+          const numMap = {
+            platinum: 0,
+            gold: 0,
+            silver: 0,
+            bronze: 0,
+          };
           // 3.2 获取游戏信息
           const { trophyGroup } = await this.psnineService.gameDetail(gameId, profile.psnId);
           // 3.3 同步奖杯数据
@@ -246,6 +266,7 @@ export class PsnService {
           for (const trophyItem of psnineTrophies) {
             const trophy = map[trophyItem.id];
             if (map[trophyItem.id]) {
+              numMap[trophy.type]++;
               psnProfileGameTrophies.push(
                 this.psnProfileGameTrophyRepository.create({
                   completeTime: new Date(trophyItem.completeTime),
@@ -256,14 +277,36 @@ export class PsnService {
             }
           }
           await queryRunner.manager.save(psnProfileGameTrophies);
+          // 3.3.4 更新已获得的奖杯数量
+          profileGame.platinumGot = numMap['platinum'];
+          profileGame.goldGot = numMap['gold'];
+          profileGame.silverGot = numMap['silver'];
+          profileGame.bronzeGot = numMap['bronze'];
+          await queryRunner.manager.save(profileGame);
         }
-        await queryRunner.commitTransaction();
       }
+      await queryRunner.commitTransaction();
     } catch (err) {
       await queryRunner.rollbackTransaction();
       throw err;
     } finally {
       await queryRunner.release();
     }
+  }
+
+  /** 获取已经同步的游戏 */
+  async gameSynchronized(userId: string) {
+    const profile = await this.findProfileByUserId(userId, { user: true });
+    if (!profile) {
+      throw new BusinessException('请先绑定 psnId');
+    }
+    return await this.psnProfileGameRepository.find({
+      relations: {
+        game: {
+          link: true,
+        },
+      },
+      where: { profile: { id: profile.id } },
+    });
   }
 }
