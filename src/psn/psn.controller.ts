@@ -2,10 +2,11 @@ import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { PsnService } from './psn.service';
 import { PageDto, PsnIdDto, PsnProfileGameDto, PsnineGameDto } from './dto';
 import { Request } from 'express';
-import { JwtGuard } from 'src/core';
+import { JwtGuard, PermissionGuard, RequirePermission } from 'src/core';
 
 @Controller('psn')
-@UseGuards(JwtGuard)
+@UseGuards(JwtGuard, PermissionGuard)
+@RequirePermission('PsnProfileOperation')
 export class PsnController {
   constructor(private readonly psnService: PsnService) {}
 
