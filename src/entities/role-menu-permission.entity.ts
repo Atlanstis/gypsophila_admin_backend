@@ -11,18 +11,27 @@ export class RoleMenuPermission {
   @JoinColumn({
     name: 'role_id',
   })
-  @ManyToOne(() => Role, (role) => role.id)
+  @ManyToOne(() => Role, (role) => role.id, {
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  })
   role: Role;
 
   @JoinColumn({
     name: 'menu_id',
   })
-  @ManyToOne(() => Menu, (menu) => menu.id)
+  @ManyToOne(() => Menu, (menu) => menu.id, {
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  })
   menu: Menu;
 
   @JoinColumn({
     name: 'permission_id',
   })
-  @ManyToOne(() => Permission, (permission) => permission.id)
+  @ManyToOne(() => Permission, (permission) => permission.id, {
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  })
   permission: Permission;
 }

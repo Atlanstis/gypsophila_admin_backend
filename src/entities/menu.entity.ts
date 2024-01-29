@@ -8,7 +8,7 @@ export class Menu extends TimeNotSelectBase {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ comment: '菜单key', width: MENU_LENGTH.KEY_MAX, unique: true })
+  @Column({ width: MENU_LENGTH.KEY_MAX, unique: true })
   key: string;
 
   @Column({ comment: '菜单名称', length: MENU_LENGTH.NAME_MAX })

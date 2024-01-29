@@ -13,7 +13,7 @@ import {
 } from 'src/entities';
 import { PsnineTrophy } from 'src/psnine/class';
 import { PsnineService } from 'src/psnine/psnine.service';
-import { DataSource, FindOptionsRelations, In, Repository, QueryRunner } from 'typeorm';
+import { DataSource, FindOptionsRelations, In, Repository } from 'typeorm';
 import { PsnProfileGameDto } from './dto';
 
 @Injectable()
@@ -286,10 +286,10 @@ export class PsnService {
           await queryRunner.manager.save(profileGame);
         }
       }
-      // 更新用户获得的奖杯数量
-      await this.updateProfileTrophyCount(profile.id, profile, queryRunner);
       // 提交事务
       await queryRunner.commitTransaction();
+      // 更新用户获得的奖杯数量
+      await this.updateProfileTrophyCount(profile.id, profile);
     } catch (err) {
       await queryRunner.rollbackTransaction();
       throw err;
@@ -301,7 +301,7 @@ export class PsnService {
   /**
    * 更新用户获得的奖杯数量
    */
-  async updateProfileTrophyCount(userId: number, profile: PsnProfile, queryRunner: QueryRunner) {
+  async updateProfileTrophyCount(userId: number, profile: PsnProfile) {
     // 1.查找用户，已同步游戏获得的奖杯数量总和
     const { platinumGot, goldGot, silverGot, bronzeGot } = await this.psnProfileGameRepository
       .createQueryBuilder('ppg')
@@ -316,7 +316,7 @@ export class PsnService {
     profile.silver = silverGot;
     profile.bronze = bronzeGot;
     // 3.更新数量
-    await queryRunner.manager.save(profile);
+    await this.psnProfileRepository.save(profile);
   }
 
   /** 获取已经同步的游戏 */
