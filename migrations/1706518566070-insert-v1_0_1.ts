@@ -26,6 +26,12 @@ export class InsertV1021706518566070 implements MigrationInterface {
     await queryRunner.query(
       `INSERT INTO \`gypsophila\`.\`role_menu\` (\`roleId\`, \`menuId\`) VALUES (1, 12);`,
     );
+    await queryRunner.query(
+      `INSERT INTO \`gypsophila\`.\`permission\` (\`id\`, \`key\`, \`name\`, \`type\`, \`menu_id\`) VALUES (15, 'WebsiteSetting', '网站设置', '0', 12);`,
+    );
+    await queryRunner.query(
+      `INSERT INTO \`gypsophila\`.\`role_menu_permission\` (\`role_id\`, \`menu_id\`, \`permission_id\`) VALUES (1, 12, 15);`,
+    );
     /** 增加系统配置字段 */
     await queryRunner.query(
       `INSERT INTO \`gypsophila\`.\`system_setting\` (\`id\`, \`key\`, \`value\`, \`description\`) VALUES (1, 'WEBSITE_NAME', 'G 中文站', '网站名称');`,
