@@ -21,10 +21,10 @@ export class InsertV1021706518456742 implements MigrationInterface {
       `INSERT INTO \`gypsophila\`.\`menu\` (\`id\`, \`key\`, \`name\`, \`parent_id\`) VALUES (3, 'PlayStation_Profile', 'PSN 概览', 2);`,
     );
     await queryRunner.query(
-      `INSERT INTO \`gypsophila\`.\`menu\` (\`id\`, \`key\`, \`name\`, \`parent_id\`) VALUES (4, 'PlayStation_Game', '游戏', 2);`,
+      `INSERT INTO \`gypsophila\`.\`menu\` (\`id\`, \`key\`, \`name\`, \`parent_id\`) VALUES (4, 'PlayStation_Game', 'PSN 游戏', 2);`,
     );
     await queryRunner.query(
-      `INSERT INTO \`gypsophila\`.\`menu\` (\`id\`, \`key\`, \`name\`, \`parent_id\`) VALUES (5, 'PlayStation_Search', '搜索', 2);`,
+      `INSERT INTO \`gypsophila\`.\`menu\` (\`id\`, \`key\`, \`name\`, \`parent_id\`) VALUES (5, 'PlayStation_Search', '游戏查找', 2);`,
     );
     await queryRunner.query(
       `INSERT INTO \`gypsophila\`.\`menu\` (\`id\`, \`key\`, \`name\`, \`parent_id\`) VALUES (6, 'Management', '系统管理', 0);`,
