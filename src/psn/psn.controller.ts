@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { PsnService } from './psn.service';
-import { PageDto, PsnIdDto, PsnineGameDto } from './dto';
+import { PageDto, PsnIdDto, PsnProfileGameDto, PsnineGameDto } from './dto';
 import { Request } from 'express';
 import { JwtGuard } from 'src/core';
 
@@ -35,7 +35,13 @@ export class PsnController {
 
   /** 获取已经同步的游戏 */
   @Post('/game/synchronized')
-  async gameSynchronized(@Req() req: Request) {
-    return await this.psnService.gameSynchronized(req.user.id);
+  async gameSynchronized(@Body() dto: PageDto, @Req() req: Request) {
+    return await this.psnService.gameSynchronized(req.user.id, dto.page);
+  }
+
+  /** 收藏/取消收藏 游戏 */
+  @Post('/game/favor')
+  async gameFavor(@Body() dto: PsnProfileGameDto, @Req() req: Request) {
+    return await this.psnService.gameFavor(req.user.id, dto.ppgId);
   }
 }

@@ -20,3 +20,8 @@ export class PsnineGameDto {
   @IsNumber({}, { message: 'id 类型错误' })
   gameId: number;
 }
+
+export class PsnProfileGameDto {
+  @IsNotEmpty({ message: 'ppgId 不能为空' })
+  ppgId: string;
+}

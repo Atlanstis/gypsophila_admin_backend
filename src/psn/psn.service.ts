@@ -13,7 +13,8 @@ import {
 } from 'src/entities';
 import { PsnineTrophy } from 'src/psnine/class';
 import { PsnineService } from 'src/psnine/psnine.service';
-import { DataSource, FindOptionsRelations, In, Repository } from 'typeorm';
+import { DataSource, FindOptionsRelations, In, Repository, QueryRunner } from 'typeorm';
+import { PsnProfileGameDto } from './dto';
 
 @Injectable()
 export class PsnService {
@@ -285,6 +286,9 @@ export class PsnService {
           await queryRunner.manager.save(profileGame);
         }
       }
+      // 更新用户获得的奖杯数量
+      await this.updateProfileTrophyCount(profile.id, profile, queryRunner);
+      // 提交事务
       await queryRunner.commitTransaction();
     } catch (err) {
       await queryRunner.rollbackTransaction();
@@ -294,19 +298,67 @@ export class PsnService {
     }
   }
 
+  /**
+   * 更新用户获得的奖杯数量
+   */
+  async updateProfileTrophyCount(userId: number, profile: PsnProfile, queryRunner: QueryRunner) {
+    // 1.查找用户，已同步游戏获得的奖杯数量总和
+    const { platinumGot, goldGot, silverGot, bronzeGot } = await this.psnProfileGameRepository
+      .createQueryBuilder('ppg')
+      .select(
+        'SUM(ppg.platinumGot) as platinumGot, SUM(ppg.goldGot) as goldGot, SUM(ppg.silverGot) as silverGot, SUM(ppg.bronzeGot) as bronzeGot',
+      )
+      .where({ profile: { id: userId } })
+      .getRawOne();
+    // 2.赋值
+    profile.platinum = platinumGot;
+    profile.gold = goldGot;
+    profile.silver = silverGot;
+    profile.bronze = bronzeGot;
+    // 3.更新数量
+    await queryRunner.manager.save(profile);
+  }
+
   /** 获取已经同步的游戏 */
-  async gameSynchronized(userId: string) {
+  async gameSynchronized(userId: string, page: number) {
+    const size = 12;
     const profile = await this.findProfileByUserId(userId, { user: true });
     if (!profile) {
       throw new BusinessException('请先绑定 psnId');
     }
-    return await this.psnProfileGameRepository.find({
+    const [list, total] = await this.psnProfileGameRepository.findAndCount({
       relations: {
         game: {
           link: true,
         },
       },
+      skip: (page - 1) * size,
+      take: size,
       where: { profile: { id: profile.id } },
+      order: {
+        syncTime: 'ASC',
+      },
     });
+    return { list, total };
+  }
+
+  /**
+   * 收藏/取消收藏 游戏
+   * @param userId 用户 Id
+   * @param ppgId 已收藏游戏 id
+   */
+  async gameFavor(userId: string, ppgId: PsnProfileGameDto['ppgId']) {
+    const profile = await this.findProfileByUserId(userId, { user: true });
+    if (!profile) {
+      throw new BusinessException('请先绑定 psnId');
+    }
+    const psnProfileGame = await this.psnProfileGameRepository.findOne({
+      where: { id: ppgId, profile: { id: profile.id } },
+    });
+    if (!psnProfileGame) {
+      throw new BusinessException('该用户未同步此游戏');
+    }
+    psnProfileGame.isFavor = !psnProfileGame.isFavor;
+    await this.psnProfileGameRepository.save(psnProfileGame);
   }
 }
