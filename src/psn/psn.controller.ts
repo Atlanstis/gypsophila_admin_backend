@@ -2,7 +2,7 @@ import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { PsnService } from './psn.service';
 import { PageDto, PsnIdDto, PsnProfileGameDto, PsnineGameDto } from './dto';
 import { Request } from 'express';
-import { JwtGuard, PermissionGuard, RequirePermission } from 'src/core';
+import { JwtGuard, PermissionGuard, RequirePermission, CommonPageDto } from 'src/core';
 
 @Controller('psn')
 @UseGuards(JwtGuard)
@@ -55,5 +55,11 @@ export class PsnController {
   @RequirePermission('PsnProfileOperation')
   async gameFavor(@Body() dto: PsnProfileGameDto, @Req() req: Request) {
     return await this.psnService.gameFavor(req.user.id, dto.ppgId);
+  }
+
+  /** 获取游戏列表 */
+  @Post('/game/list')
+  async getGameList(@Body() dto: CommonPageDto) {
+    return await this.psnService.getGameList(dto.page, dto.size);
   }
 }

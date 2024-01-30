@@ -1,5 +1,5 @@
 import { Column, Entity, OneToMany, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { TimeNotSelectBase } from './base';
+import { TimeBase } from './base';
 import { PsnGameLink } from './psn-game-link.entity';
 import { PsnTrophyGroup } from './psn-trophy-group.entity';
 import { PsnProfileGame } from './psn-profile-game.entity';
@@ -9,7 +9,7 @@ export type PLATFORM = 'PS3' | 'PSV' | 'PS4' | 'PS5';
 @Entity({
   name: 'psn_game',
 })
-export class PsnGame extends TimeNotSelectBase {
+export class PsnGame extends TimeBase {
   @PrimaryGeneratedColumn()
   id: number;
 

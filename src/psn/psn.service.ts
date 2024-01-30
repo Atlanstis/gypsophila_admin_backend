@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { BusinessException } from 'src/core';
+import { BusinessException, CommonPageDto } from 'src/core';
 import {
   PsnGame,
   PsnGameLink,
@@ -360,5 +360,25 @@ export class PsnService {
     }
     psnProfileGame.isFavor = !psnProfileGame.isFavor;
     await this.psnProfileGameRepository.save(psnProfileGame);
+  }
+
+  /**
+   * 获取游戏列表
+   * @param page 分页
+   * @param size 每页数量
+   */
+  async getGameList(page: CommonPageDto['page'], size: CommonPageDto['size']) {
+    const [list, total] = await this.psnGameRepository.findAndCount({
+      relations: { link: true },
+      skip: (page - 1) * size,
+      take: size,
+      order: {
+        updateTime: 'DESC',
+      },
+    });
+    return {
+      list,
+      total,
+    };
   }
 }

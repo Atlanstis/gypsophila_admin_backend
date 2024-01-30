@@ -1,6 +1,12 @@
 import { Body, Controller, Get, ParseIntPipe, Post, Query, UseGuards } from '@nestjs/common';
 import { RoleService } from './role.service';
-import { BusinessException, JwtGuard, PageDto, PermissionGuard, RequirePermission } from 'src/core';
+import {
+  BusinessException,
+  JwtGuard,
+  CommonPageDto,
+  PermissionGuard,
+  RequirePermission,
+} from 'src/core';
 import { RoleDto, RoleEditDto, RoleMenuDto, RoleMenuEditDto } from './dto';
 
 const numberParse = (parameter) =>
@@ -19,7 +25,7 @@ export class RoleController {
   @Post('/list')
   @UseGuards(PermissionGuard)
   @RequirePermission('RoleList')
-  async list(@Body() dto: PageDto) {
+  async list(@Body() dto: CommonPageDto) {
     return await this.roleService.list(dto.page, dto.size);
   }
 

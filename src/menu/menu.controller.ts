@@ -1,7 +1,13 @@
 import { Body, Controller, Get, ParseIntPipe, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { Request } from 'express';
 import { MenuService } from './menu.service';
-import { BusinessException, JwtGuard, PageDto, PermissionGuard, RequirePermission } from 'src/core';
+import {
+  BusinessException,
+  JwtGuard,
+  CommonPageDto,
+  PermissionGuard,
+  RequirePermission,
+} from 'src/core';
 import {
   MenuDto,
   MenuEditDto,
@@ -27,7 +33,7 @@ export class MenuController {
   @Post('/list')
   @UseGuards(PermissionGuard)
   @RequirePermission('MenuList')
-  async list(@Body() dto: PageDto) {
+  async list(@Body() dto: CommonPageDto) {
     return await this.menuService.list(dto.page, dto.size);
   }
 
