@@ -13,6 +13,14 @@ export class PsnProfileGame extends TimeNotSelectBase {
   isFavor: boolean;
 
   @Column({
+    name: 'favor_time',
+    comment: '收藏时间',
+    type: 'timestamp',
+    default: null,
+  })
+  favorTime: Date;
+
+  @Column({
     name: 'sync_time',
     comment: '同步时间',
     type: 'timestamp',

@@ -57,6 +57,14 @@ export class PsnController {
     return await this.psnService.gameFavor(req.user.id, dto.ppgId);
   }
 
+  /** 获取收藏的游戏列表 */
+  @Get('/game/favor/list')
+  @UseGuards(PermissionGuard)
+  @RequirePermission('PsnProfileOperation')
+  async gameFavorList(@Req() req: Request) {
+    return await this.psnService.gameFavorList(req.user.id);
+  }
+
   /** 获取游戏列表 */
   @Post('/game/list')
   async getGameList(@Body() dto: CommonPageDto) {

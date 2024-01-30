@@ -359,7 +359,21 @@ export class PsnService {
       throw new BusinessException('该用户未同步此游戏');
     }
     psnProfileGame.isFavor = !psnProfileGame.isFavor;
+    psnProfileGame.favorTime = psnProfileGame.isFavor ? new Date() : null;
     await this.psnProfileGameRepository.save(psnProfileGame);
+  }
+
+  /** 获取收藏的游戏列表 */
+  async gameFavorList(userId: string) {
+    const profile = await this.findProfileByUserId(userId, { user: true });
+    if (!profile) {
+      throw new BusinessException('请先绑定 psnId');
+    }
+    return await this.psnProfileGameRepository.find({
+      relations: { game: true },
+      where: { isFavor: true, profile: { id: profile.id } },
+      order: { favorTime: 'DESC' },
+    });
   }
 
   /**
