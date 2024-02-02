@@ -2,7 +2,7 @@ import { MigrationInterface, QueryRunner } from 'typeorm';
 
 export class InsertV1021706523974198 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
-    /** admin 账号增加 PSN 概览权限 */
+    /** admin 账号增加 PSN 概览操作权限 */
     await queryRunner.query(
       `INSERT INTO \`gypsophila\`.\`permission\` (\`id\`, \`key\`, \`name\`, \`type\`, \`menu_id\`) VALUES (16, 'PsnProfileOperation', '概览操作', '0', 3);`,
     );

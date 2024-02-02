@@ -70,4 +70,10 @@ export class PsnController {
   async getGameList(@Body() dto: CommonPageDto) {
     return await this.psnService.getGameList(dto.page, dto.size);
   }
+
+  /** 获取用户的游戏信息 */
+  @Post('/profile/game')
+  async getProfileGame(@Body() dto: PsnProfileGameDto, @Req() req: Request) {
+    return await this.psnService.getProfileGame(dto.ppgId, req.user.id);
+  }
 }

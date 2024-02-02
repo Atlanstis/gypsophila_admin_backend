@@ -34,6 +34,9 @@ export class PsnTrophy extends TimeNotSelectBase {
   @Column({ comment: '奖杯类型', type: 'enum', enum: ['platinum', 'gold', 'silver', 'bronze'] })
   type: TrophyType;
 
+  /** 完成信息 */
+  completeInfo?: PsnProfileGameTrophy;
+
   @ManyToOne(() => PsnTrophyGroup, (group) => group.trophies, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',

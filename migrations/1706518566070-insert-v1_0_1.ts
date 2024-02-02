@@ -34,7 +34,7 @@ export class InsertV1021706518566070 implements MigrationInterface {
     );
     /** 增加系统配置字段 */
     await queryRunner.query(
-      `INSERT INTO \`gypsophila\`.\`system_setting\` (\`id\`, \`key\`, \`value\`, \`description\`) VALUES (1, 'WEBSITE_NAME', 'G 中文站', '网站名称');`,
+      `INSERT INTO \`gypsophila\`.\`system_setting\` (\`id\`, \`key\`, \`value\`, \`description\`) VALUES (1, 'WEBSITE_NAME', 'G中文站', '网站名称');`,
     );
     await queryRunner.query(
       `INSERT INTO \`gypsophila\`.\`system_setting\` (\`id\`, \`key\`, \`value\`, \`description\`) VALUES (2, 'WEBSITE_RECORD_NUMBER', '', '备案号');`,

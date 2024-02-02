@@ -395,4 +395,65 @@ export class PsnService {
       total,
     };
   }
+
+  /**
+   * 获取用户的游戏信息
+   * @param ppgId 游戏id
+   * @param userId 用户 id
+   */
+  async getProfileGame(ppgId: PsnProfileGameDto['ppgId'], userId: string) {
+    const profile = await this.findProfileByUserId(userId, { user: true });
+    if (!profile) {
+      throw new BusinessException('请先绑定 psnId');
+    }
+    const profileGame = await this.psnProfileGameRepository.findOne({
+      where: { id: ppgId, profile: { id: profile.id } },
+    });
+    if (!profileGame) {
+      throw new BusinessException('未找到该游戏');
+    }
+    // 获取游戏信息
+    const game = await this.psnGameRepository.findOne({
+      relations: {
+        link: true,
+      },
+      where: { profileGames: { id: profileGame.id } },
+    });
+    profileGame.game = game;
+    // 获取奖杯组信息
+    const trophyGroups = await this.psnTrophyGroupRepository.find({
+      relations: {
+        trophies: {
+          link: true,
+        },
+      },
+      where: {
+        game: { id: game.id },
+      },
+    });
+    // 获取已获得的奖杯
+    const trophiesGot = await this.psnProfileGameTrophyRepository.find({
+      select: { trophy: { id: true } },
+      relations: {
+        trophy: true,
+      },
+      where: {
+        profileGame: { id: profileGame.id },
+      },
+    });
+    const map: Record<number, PsnProfileGameTrophy> = {};
+    trophiesGot.forEach((t) => {
+      map[t.trophy.id] = t;
+      delete t.trophy;
+    });
+    trophyGroups.forEach((group) => {
+      group.trophies.forEach((trophy) => {
+        if (map[trophy.id]) {
+          trophy.completeInfo = map[trophy.id];
+        }
+      });
+    });
+    game.trophyGroups = trophyGroups;
+    return profileGame;
+  }
 }
