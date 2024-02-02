@@ -9,7 +9,7 @@ export class PsnProfileGame extends TimeNotSelectBase {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ name: 'is_favor', comment: '是否收藏', default: () => false })
+  @Column({ name: 'is_favor', comment: '是否收藏', default: false })
   isFavor: boolean;
 
   @Column({
