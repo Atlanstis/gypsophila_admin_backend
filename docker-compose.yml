@@ -1,7 +1,7 @@
 version: '3.8'
 services:
   frontend-app:
-    image: gypsophila/gypsophila_admin_frontend:1.0.1
+    image: gypsophila/gypsophila_admin_frontend:1.0.2
     depends_on:
       - backend-app
     ports:
@@ -12,7 +12,7 @@ services:
     networks:
       - common-network
   backend-app:
-    image: gypsophila/gypsophila_admin_backend:1.0.1
+    image: gypsophila/gypsophila_admin_backend:1.0.2
     depends_on:
       - mysql-container
       - redis-container
