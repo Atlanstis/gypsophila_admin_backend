@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BusinessException } from 'src/core';
-import { PsnProfile, PsnProfileGame, PsnProfileGameGuide } from 'src/entities';
+import { PsnProfileGame, PsnProfileGameGuide } from 'src/entities';
 import { Repository } from 'typeorm';
 import {
   PsnProfileGameDto,
@@ -14,8 +14,6 @@ import { PsnService } from './psn.service';
 @Injectable()
 export class PsnProfileGameGuideService {
   constructor(
-    @InjectRepository(PsnProfile)
-    private readonly psnProfileRepository: Repository<PsnProfile>,
     @InjectRepository(PsnProfileGame)
     private readonly psnProfileGameRepository: Repository<PsnProfileGame>,
     @InjectRepository(PsnProfileGameGuide)
