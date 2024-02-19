@@ -1,6 +1,14 @@
 import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { PsnService } from './psn.service';
-import { PageDto, PsnIdDto, PsnProfileGameDto, PsnineGameDto } from './dto';
+import {
+  PageDto,
+  PsnIdDto,
+  PsnProfileGameDto,
+  PsnProfileGameGuideDeleteDto,
+  PsnProfileGameGuideDto,
+  PsnProfileGameGuideEditDto,
+  PsnineGameDto,
+} from './dto';
 import { Request } from 'express';
 import { JwtGuard, PermissionGuard, RequirePermission, CommonPageDto } from 'src/core';
 
@@ -75,5 +83,30 @@ export class PsnController {
   @Post('/profile/game')
   async getProfileGame(@Body() dto: PsnProfileGameDto, @Req() req: Request) {
     return await this.psnService.getProfileGame(dto.ppgId, req.user.id);
+  }
+
+  /** 添加游戏攻略 */
+  @Post('/profile/game/guide/add')
+  async profileGameGuideAdd(@Body() dto: PsnProfileGameGuideDto, @Req() req: Request) {
+    return await this.psnService.profileGameGuideAdd(dto, req.user.id);
+  }
+
+  /** 编辑游戏攻略 */
+  @Post('/profile/game/guide/edit')
+  async profileGameGuideEdit(@Body() dto: PsnProfileGameGuideEditDto, @Req() req: Request) {
+    return await this.psnService.profileGameGuideEdit(dto, req.user.id);
+  }
+
+  /** 游戏攻略列表 */
+  @Post('/profile/game/guide/list')
+  async profileGameGuideList(@Body() dto: PsnProfileGameDto, @Req() req: Request) {
+    return await this.psnService.profileGameGuideList(dto, req.user.id);
+  }
+
+  /** 游戏攻略列表 */
+  /** 游戏攻略列表 */
+  @Post('/profile/game/guide/delete')
+  async profileGameGuideDelete(@Body() dto: PsnProfileGameGuideDeleteDto, @Req() req: Request) {
+    return await this.psnService.profileGameGuideDelete(dto, req.user.id);
   }
 }

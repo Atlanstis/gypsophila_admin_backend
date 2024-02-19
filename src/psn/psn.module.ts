@@ -11,6 +11,7 @@ import {
   PsnTrophyLink,
   PsnProfileGame,
   PsnProfileGameTrophy,
+  PsnProfileGameGuide,
 } from 'src/entities';
 import { PsnineModule } from 'src/psnine/psnine.module';
 
@@ -25,6 +26,7 @@ import { PsnineModule } from 'src/psnine/psnine.module';
       PsnTrophyLink,
       PsnProfileGame,
       PsnProfileGameTrophy,
+      PsnProfileGameGuide,
     ]),
     PsnineModule,
   ],

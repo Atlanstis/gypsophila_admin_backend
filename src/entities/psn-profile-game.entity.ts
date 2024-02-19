@@ -3,6 +3,7 @@ import { TimeNotSelectBase } from './base';
 import { PsnProfile } from './psn-profile.entity';
 import { PsnGame } from './psn-game.entity';
 import { PsnProfileGameTrophy } from './psn-profile-game-trophy.entity';
+import { PsnProfileGameGuide } from './psn-profile-game-guide.entity';
 
 @Entity({ name: 'psn_profile_game' })
 export class PsnProfileGame extends TimeNotSelectBase {
@@ -56,4 +57,7 @@ export class PsnProfileGame extends TimeNotSelectBase {
 
   @OneToMany(() => PsnProfileGameTrophy, (profileGameTrophies) => profileGameTrophies.profileGame)
   profileGameTrophies: PsnProfileGameTrophy[];
+
+  @OneToMany(() => PsnProfileGameGuide, (guide) => guide.profileGame)
+  guides: PsnProfileGameGuide[];
 }

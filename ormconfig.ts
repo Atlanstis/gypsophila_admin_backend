@@ -15,6 +15,7 @@ import {
   PsnTrophyLink,
   PsnProfileGame,
   PsnProfileGameTrophy,
+  PsnProfileGameGuide,
 } from './src/entities';
 
 const mysqlConfing = config().mysql as {
@@ -43,6 +44,7 @@ export const ormConfig: DataSourceOptions = {
     PsnTrophyLink,
     PsnProfileGame,
     PsnProfileGameTrophy,
+    PsnProfileGameGuide,
   ],
   ...mysqlConfing,
   dateStrings: true,
