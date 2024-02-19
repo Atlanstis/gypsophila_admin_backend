@@ -214,60 +214,87 @@ export class PsnService {
         await queryRunner.manager.save(profileGame);
       } else {
         // 游戏已存在
-        // 1.查询用户是否已同步该信息
+        // 查询用户是否已同步该信息
         profileGame = await this.psnProfileGameRepository.findOne({
           where: { profile: { id: profile.id }, game: { id: game.id } },
         });
-        if (profileGame) {
-          // 2. 已同步，则跳过后续操作
-          throw new BusinessException('该游戏已同步，请勿重复操作');
-        } else {
-          // 3. 未同步，进行同步游戏与奖杯信息
-          // 3.1 同步用户游戏
+        // 未同步，创建用户游戏信息
+        if (!profileGame) {
           profileGame = this.psnProfileGameRepository.create({
             profile,
             game,
           });
           await queryRunner.manager.save(profileGame);
-          // 记录获得的奖杯数量
-          const numMap = {
-            platinum: 0,
-            gold: 0,
-            silver: 0,
-            bronze: 0,
-          };
-          // 3.2 获取游戏信息
-          const { trophyGroup } = await this.psnineService.gameDetail(gameId, profile.psnId);
-          // 3.3 同步奖杯数据
-          // 3.3.1 获取所有已获得奖杯数据
-          const psnineTrophies: PsnineTrophy[] = [];
-          for (const groupItem of trophyGroup) {
-            for (const trophyItem of groupItem.trophies) {
-              if (trophyItem.completeTime) {
-                psnineTrophies.push(trophyItem);
-              }
+        }
+        // 获取待同步的游戏信息
+        const { trophyGroup } = await this.psnineService.gameDetail(gameId, profile.psnId);
+        // 记录获得的奖杯数量
+        const numMap = {
+          platinum: 0,
+          gold: 0,
+          silver: 0,
+          bronze: 0,
+        };
+        // psnine 上所有已获得奖杯数据
+        const psnineGottedTrophies: PsnineTrophy[] = [];
+        const psnineGottedTrophyIds: number[] = [];
+        for (const groupItem of trophyGroup) {
+          for (const trophyItem of groupItem.trophies) {
+            if (trophyItem.completeTime) {
+              psnineGottedTrophyIds.push(trophyItem.id);
+              psnineGottedTrophies.push(trophyItem);
             }
           }
-          // 3.3.2 获取本地数据库中相关奖杯数据
-          const psnineTrophyIds: number[] = psnineTrophies.map((item) => item.id);
-          const existedTrophies = await this.psnTrophyRepository.find({
-            relations: { link: true },
-            where: {
-              link: {
-                psnineTrophyId: In(psnineTrophyIds),
-              },
+        }
+        // 获取数据库中，相关的奖杯数据
+        const existedTrophies = await this.psnTrophyRepository.find({
+          relations: { link: true },
+          where: {
+            link: {
+              psnineTrophyId: In(psnineGottedTrophyIds),
             },
-          });
-          // 3.3.3 创建本地数据库中相关奖杯数据
-          const map: Record<number, PsnTrophy> = {};
-          existedTrophies.forEach((item) => {
-            map[item.link.psnineTrophyId] = item;
-          });
-          const psnProfileGameTrophies: PsnProfileGameTrophy[] = [];
-          for (const trophyItem of psnineTrophies) {
-            const trophy = map[trophyItem.id];
-            if (map[trophyItem.id]) {
-              numMap[trophy.type]++;
+          },
+        });
+        const map: Record<number, PsnTrophy> = {};
+        existedTrophies.forEach((item) => {
+          map[item.link.psnineTrophyId] = item;
+        });
+        // 获取数据库中，用户已经同步的奖杯数据
+        const profileGameTrophies = await this.psnProfileGameTrophyRepository.find({
+          relations: {
+            trophy: {
+              link: true,
+            },
+          },
+          where: {
+            profileGame: {
+              id: profileGame.id,
+            },
+          },
+        });
+        const profileGameTrophyPsnineIds = profileGameTrophies.map(
+          (item) => item.trophy.link.psnineTrophyId,
+        );
+        // 遍历 psnine 上已经获取的奖杯信息
+        const psnProfileGameTrophies: PsnProfileGameTrophy[] = [];
+        for (const trophyItem of psnineGottedTrophies) {
+          const trophy = map[trophyItem.id];
+          // 存在数据库中未同步的DLC的情况，这些奖杯先进行忽略处理
+          if (map[trophyItem.id]) {
+            numMap[trophy.type]++;
+            // 判断该奖杯是否已同步
+            const index = profileGameTrophyPsnineIds.indexOf(trophyItem.id);
+            if (index > -1) {
+              // 该奖杯已经同步，更新完成时间
+              const profileGameTrophy = profileGameTrophies[index];
+              psnProfileGameTrophies.push(
+                this.psnProfileGameTrophyRepository.create({
+                  ...profileGameTrophy,
+                  completeTime: new Date(trophyItem.completeTime),
+                }),
+              );
+            } else {
+              // 奖杯未同步，创建奖杯数据
               psnProfileGameTrophies.push(
                 this.psnProfileGameTrophyRepository.create({
                   completeTime: new Date(trophyItem.completeTime),
@@ -277,14 +304,15 @@ export class PsnService {
               );
             }
           }
-          await queryRunner.manager.save(psnProfileGameTrophies);
-          // 3.3.4 更新已获得的奖杯数量
-          profileGame.platinumGot = numMap['platinum'];
-          profileGame.goldGot = numMap['gold'];
-          profileGame.silverGot = numMap['silver'];
-          profileGame.bronzeGot = numMap['bronze'];
-          await queryRunner.manager.save(profileGame);
         }
+        // 保存/更新奖杯信息
+        await queryRunner.manager.save(psnProfileGameTrophies);
+        // 更新已获得的奖杯数量
+        profileGame.platinumGot = numMap['platinum'];
+        profileGame.goldGot = numMap['gold'];
+        profileGame.silverGot = numMap['silver'];
+        profileGame.bronzeGot = numMap['bronze'];
+        await queryRunner.manager.save(profileGame);
       }
       // 提交事务
       await queryRunner.commitTransaction();
