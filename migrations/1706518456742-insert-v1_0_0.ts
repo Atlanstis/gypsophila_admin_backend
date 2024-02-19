@@ -1,10 +1,10 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class InsertData1702457932985 implements MigrationInterface {
+export class InsertV1021706518456742 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     /** 用户数据 */
     await queryRunner.query(
-      `INSERT INTO \`gypsophila\`.\`user\` (\`id\`, \`username\`, \`nickname\`, \`password\`, \`avatar\`) VALUES ('1d20f3f5-51f0-43ab-8147-804c772664a3', 'admin', '超级管理员', '$argon2id$v=19$m=65536,t=3,p=4$WHAZuS6PwsUF9eEnPHGOpw$8WFMz+XuOLgOhVRtBG2rRh8Z9z9bgKXFrhP9B+xuiLc', '');`,
+      `INSERT INTO \`gypsophila\`.\`user\` (\`id\`, \`username\`, \`nickname\`, \`password\`, \`avatar\`) VALUES ('1d20f3f5-51f0-43ab-8147-804c772664a3', 'admin', '超级管理员', '$argon2id$v=19$m=65536,t=3,p=4$awhYFu9KmWwOFptjmb+1sQ$tizKwN8BIstcdsxP8VNkMSUvKvc9ZU+SPYc0oCyWSFc', '');`,
     );
     /** 角色数据 */
     await queryRunner.query(
@@ -18,13 +18,13 @@ export class InsertData1702457932985 implements MigrationInterface {
       `INSERT INTO \`gypsophila\`.\`menu\` (\`id\`, \`key\`, \`name\`, \`parent_id\`) VALUES (2, 'PlayStation', 'PlayStation', 0);`,
     );
     await queryRunner.query(
-      `INSERT INTO \`gypsophila\`.\`menu\` (\`id\`, \`key\`, \`name\`, \`parent_id\`) VALUES (3, 'PlayStation_Game', '游戏', 2);`,
+      `INSERT INTO \`gypsophila\`.\`menu\` (\`id\`, \`key\`, \`name\`, \`parent_id\`) VALUES (3, 'PlayStation_Profile', 'PSN 概览', 2);`,
     );
     await queryRunner.query(
-      `INSERT INTO \`gypsophila\`.\`menu\` (\`id\`, \`key\`, \`name\`, \`parent_id\`) VALUES (4, 'PlayStation_Trophy', '奖杯', 2);`,
+      `INSERT INTO \`gypsophila\`.\`menu\` (\`id\`, \`key\`, \`name\`, \`parent_id\`) VALUES (4, 'PlayStation_Game', 'PSN 游戏', 2);`,
     );
     await queryRunner.query(
-      `INSERT INTO \`gypsophila\`.\`menu\` (\`id\`, \`key\`, \`name\`, \`parent_id\`) VALUES (5, 'PlayStation_Search', '搜索', 2);`,
+      `INSERT INTO \`gypsophila\`.\`menu\` (\`id\`, \`key\`, \`name\`, \`parent_id\`) VALUES (5, 'PlayStation_Search', '游戏查找', 2);`,
     );
     await queryRunner.query(
       `INSERT INTO \`gypsophila\`.\`menu\` (\`id\`, \`key\`, \`name\`, \`parent_id\`) VALUES (6, 'Management', '系统管理', 0);`,

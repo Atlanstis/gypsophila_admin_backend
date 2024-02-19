@@ -25,6 +25,9 @@ export class Permission extends TimeNotSelectBase {
   @JoinColumn({
     name: 'menu_id',
   })
-  @ManyToOne(() => Menu, (menu) => menu.permissions)
+  @ManyToOne(() => Menu, (menu) => menu.permissions, {
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  })
   menu: Menu;
 }

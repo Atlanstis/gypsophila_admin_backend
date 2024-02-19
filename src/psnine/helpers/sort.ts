@@ -1,5 +1,5 @@
 import * as cheerio from 'cheerio';
-import { PsnineGame, type PerfectDifficulty, PsTrophyGroup, PsnineTrophy } from '../class';
+import { PsnineGame, type PerfectDifficulty, PsnineTrophyGroup, PsnineTrophy } from '../class';
 import { getIdFromUrl, getPlatformsFromEl, getTrophyNumFromEl, getVersionFromEl } from './field';
 
 /** 获取详情基本信息 */
@@ -20,7 +20,7 @@ export function getDetailBaseInfo(id: number, url: string, $: cheerio.CheerioAPI
   let $next = $img.next();
   game.platforms = getPlatformsFromEl($next, $);
   /** 版本 */
-  game.version = getVersionFromEl($next);
+  game.version = getVersionFromEl($next.find('em'));
   /** 游戏名称 */
   $next.find('span').remove();
   $next.find('em').remove();
@@ -49,7 +49,7 @@ export function getDetailTrophyGroups($: cheerio.CheerioAPI) {
   const $trophyGroup = $('table.list');
   const trophyGroup = $trophyGroup
     .map((i, el) => sortDetailTrophyGroup($(el), i, $))
-    .toArray<PsTrophyGroup>();
+    .toArray<PsnineTrophyGroup>();
   return trophyGroup;
 }
 
@@ -59,7 +59,7 @@ function sortDetailTrophyGroup(
   i: number,
   $: cheerio.CheerioAPI,
 ) {
-  const trophyGroup = new PsTrophyGroup();
+  const trophyGroup = new PsnineTrophyGroup();
   /** 是否 DLC */
   trophyGroup.isDLC = i !== 0;
   const $title = $el.find('tr').first();
@@ -81,43 +81,84 @@ function sortDetailTrophyGroup(
 function sortDetailTrophy($el: cheerio.Cheerio<cheerio.Element>, $: cheerio.CheerioAPI) {
   const trophy = new PsnineTrophy();
   const $children = $el.children();
+  // 根据不同的长度执行不同的处理函数
+  let arr: (($: cheerio.CheerioAPI, trophy: PsnineTrophy, childEl: cheerio.Element) => void)[] = [];
+  if ($children.length === 3) {
+    arr = [trophyDetailTd0Sort, trophyDetailTd1Sort, trophyDetailTd3Sort];
+  } else if ($children.length === 4) {
+    arr = [trophyDetailTd0Sort, trophyDetailTd1Sort, trophyDetailTd2Sort, trophyDetailTd3Sort];
+  }
   $children.each(function (ci, childEl) {
-    if (ci === 0) {
-      /** 奖杯类型 */
-      const className = $(childEl).attr('class');
-      const map = {
-        t1: 'platinum',
-        t2: 'gold',
-        t3: 'silver',
-        t4: 'bronze',
-      };
-      trophy.trophyType = map[className];
-      /** 奖杯缩略图 */
-      trophy.thumbnail = $(childEl).find('img').attr('src');
-      /** psnine 奖杯 Id */
-      trophy.id = getIdFromUrl($(childEl).find('a').attr('href'));
-      /** 详情地址 */
-      trophy.url = $(childEl).find('a').attr('href');
-    } else if (ci === 1) {
-      /** 奖杯描述 */
-      trophy.description = $(childEl).children('em').text();
-      /** 奖杯顺序 */
-      trophy.order = Number($(childEl).find('.h-p').text().substring(1));
-      /** 奖杯名称 */
-      trophy.name = $(childEl).find('a').text();
-      /** 提示数量 */
-      const $tipNum = $(childEl).find('.alert-success');
-      if ($tipNum.length > 0) {
-        const text = $(childEl).find('.alert-success').text().replace(' Tips', '');
-        trophy.tipNums = Number(text);
-      } else {
-        trophy.tipNums = 0;
-      }
-    } else if (ci === 2) {
-      /** 奖杯完成率 */
-      $(childEl).find('em').remove('em');
-      trophy.complateRate = Number($(childEl).text().replace('%', ''));
-    }
+    arr[ci]($, trophy, childEl);
   });
   return trophy;
 }
+
+const trophyDetailTd0Sort = (
+  $: cheerio.CheerioAPI,
+  trophy: PsnineTrophy,
+  childEl: cheerio.Element,
+) => {
+  /** 奖杯类型 */
+  const className = $(childEl).attr('class');
+  const map = {
+    t1: 'platinum',
+    t2: 'gold',
+    t3: 'silver',
+    t4: 'bronze',
+  };
+  trophy.trophyType = map[className];
+  /** 奖杯缩略图 */
+  trophy.thumbnail = $(childEl).find('img').attr('src');
+  /** psnine 奖杯 Id */
+  trophy.id = getIdFromUrl($(childEl).find('a').attr('href'));
+  /** 详情地址 */
+  trophy.url = $(childEl).find('a').attr('href');
+};
+
+const trophyDetailTd1Sort = (
+  $: cheerio.CheerioAPI,
+  trophy: PsnineTrophy,
+  childEl: cheerio.Element,
+) => {
+  /** 奖杯描述 */
+  trophy.description = $(childEl).children('em').text();
+  /** 奖杯顺序 */
+  trophy.order = Number($(childEl).find('.h-p').text().substring(1));
+  /** 奖杯名称 */
+  trophy.name = $(childEl).find('a').text();
+  /** 提示数量 */
+  const $tipNum = $(childEl).find('.alert-success');
+  if ($tipNum.length > 0) {
+    const text = $(childEl).find('.alert-success').text().replace(' Tips', '');
+    trophy.tipNums = Number(text);
+  } else {
+    trophy.tipNums = 0;
+  }
+};
+
+const trophyDetailTd2Sort = (
+  $: cheerio.CheerioAPI,
+  trophy: PsnineTrophy,
+  childEl: cheerio.Element,
+) => {
+  /** 完成时间 */
+  const $time = $(childEl).find('em');
+  if ($time.length) {
+    const year = $time.attr('tips').slice(0, 4);
+    const timeText = $time.text().trim();
+    const day = timeText.slice(0, 5);
+    const time = timeText.slice(5);
+    trophy.completeTime = `${year}-${day} ${time}`;
+  }
+};
+
+const trophyDetailTd3Sort = (
+  $: cheerio.CheerioAPI,
+  trophy: PsnineTrophy,
+  childEl: cheerio.Element,
+) => {
+  /** 奖杯完成率 */
+  $(childEl).find('em').remove('em');
+  trophy.completeRate = Number($(childEl).text().replace('%', ''));
+};

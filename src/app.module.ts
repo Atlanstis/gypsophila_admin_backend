@@ -13,6 +13,7 @@ import { RoleModule } from './role/role.module';
 import { MenuModule } from './menu/menu.module';
 import { SettingModule } from './setting/setting.module';
 import { ormConfig } from 'ormconfig';
+import { PsnModule } from './psn/psn.module';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { ormConfig } from 'ormconfig';
     RoleModule,
     MenuModule,
     SettingModule,
+    PsnModule,
   ],
   controllers: [],
   providers: [],

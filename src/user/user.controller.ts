@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UserAddDto, UserEditDto } from './dto';
-import { JwtGuard, PageDto, PermissionGuard, RequirePermission } from 'src/core';
+import { JwtGuard, CommonPageDto, PermissionGuard, RequirePermission } from 'src/core';
 
 @Controller('user')
 @UseGuards(JwtGuard)
@@ -12,7 +12,7 @@ export class UserController {
   @Post('/list')
   @UseGuards(PermissionGuard)
   @RequirePermission('UserList')
-  async list(@Body() dto: PageDto) {
+  async list(@Body() dto: CommonPageDto) {
     return this.userService.list(dto.page, dto.size);
   }
 

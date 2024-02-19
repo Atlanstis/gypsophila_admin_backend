@@ -1,6 +1,6 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class InsertData1703144582107 implements MigrationInterface {
+export class InsertV1021706518566070 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     /** 新增菜单 PlayStation_Analysis */
     await queryRunner.query(
@@ -26,9 +26,30 @@ export class InsertData1703144582107 implements MigrationInterface {
     await queryRunner.query(
       `INSERT INTO \`gypsophila\`.\`role_menu\` (\`roleId\`, \`menuId\`) VALUES (1, 12);`,
     );
+    await queryRunner.query(
+      `INSERT INTO \`gypsophila\`.\`permission\` (\`id\`, \`key\`, \`name\`, \`type\`, \`menu_id\`) VALUES (15, 'WebsiteSetting', '网站设置', '0', 12);`,
+    );
+    await queryRunner.query(
+      `INSERT INTO \`gypsophila\`.\`role_menu_permission\` (\`role_id\`, \`menu_id\`, \`permission_id\`) VALUES (1, 12, 15);`,
+    );
+    /** 增加系统配置字段 */
+    await queryRunner.query(
+      `INSERT INTO \`gypsophila\`.\`system_setting\` (\`id\`, \`key\`, \`value\`, \`description\`) VALUES (1, 'WEBSITE_NAME', 'G中文站', '网站名称');`,
+    );
+    await queryRunner.query(
+      `INSERT INTO \`gypsophila\`.\`system_setting\` (\`id\`, \`key\`, \`value\`, \`description\`) VALUES (2, 'WEBSITE_RECORD_NUMBER', '', '备案号');`,
+    );
+    await queryRunner.query(
+      `INSERT INTO \`gypsophila\`.\`system_setting\` (\`id\`, \`key\`, \`value\`, \`description\`) VALUES (3, 'WEBSITE_SHOW_RECORD_NUMBER', 'true', '是否显示备案号');`,
+    );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
+    /** 删除系统配置 */
+    await queryRunner.query(`DELETE FROM \`gypsophila\`.\`system_setting\` WHERE \`id\` = 1`);
+    await queryRunner.query(`DELETE FROM \`gypsophila\`.\`system_setting\` WHERE \`id\` = 2`);
+    await queryRunner.query(`DELETE FROM \`gypsophila\`.\`system_setting\` WHERE \`id\` = 3`);
+    /** 删除菜单 */
     await queryRunner.query(`DELETE FROM \`gypsophila\`.\`menu\` WHERE \`id\` = 10`);
     await queryRunner.query(`DELETE FROM \`gypsophila\`.\`menu\` WHERE \`id\` = 11`);
     await queryRunner.query(`DELETE FROM \`gypsophila\`.\`menu\` WHERE \`id\` = 12`);

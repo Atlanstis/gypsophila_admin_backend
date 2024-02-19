@@ -48,7 +48,6 @@ export function getPlatformsFromEl($el: cheerio.Cheerio<cheerio.Element>, $) {
 /** 获取版本信息 */
 export function getVersionFromEl($el: cheerio.Cheerio<cheerio.Element>) {
   return $el
-    .find('em')
     .text()
     .split('\n')
     .filter((v) => v)

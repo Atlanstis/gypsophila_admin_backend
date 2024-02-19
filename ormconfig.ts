@@ -1,6 +1,22 @@
 import { DataSource, DataSourceOptions } from 'typeorm';
 import config from './src/utils/config';
-import { Menu, Role, User, Permission, RoleMenuPermission, SystemSetting } from './src/entities';
+import {
+  Menu,
+  Role,
+  User,
+  Permission,
+  RoleMenuPermission,
+  SystemSetting,
+  PsnProfile,
+  PsnGame,
+  PsnGameLink,
+  PsnTrophyGroup,
+  PsnTrophy,
+  PsnTrophyLink,
+  PsnProfileGame,
+  PsnProfileGameTrophy,
+  PsnProfileGameGuide,
+} from './src/entities';
 
 const mysqlConfing = config().mysql as {
   host: string;
@@ -13,7 +29,23 @@ const mysqlConfing = config().mysql as {
 
 export const ormConfig: DataSourceOptions = {
   type: 'mysql',
-  entities: [Menu, Role, User, Permission, RoleMenuPermission, SystemSetting],
+  entities: [
+    Menu,
+    Role,
+    User,
+    Permission,
+    RoleMenuPermission,
+    SystemSetting,
+    PsnProfile,
+    PsnGame,
+    PsnGameLink,
+    PsnTrophyGroup,
+    PsnTrophy,
+    PsnTrophyLink,
+    PsnProfileGame,
+    PsnProfileGameTrophy,
+    PsnProfileGameGuide,
+  ],
   ...mysqlConfing,
   dateStrings: true,
   poolSize: 10,
