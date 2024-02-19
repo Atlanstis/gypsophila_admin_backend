@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { PsnService } from './psn.service';
+import { PsnProfileGameGuideService } from './psn-profile-game-guide.service';
 import { PsnController } from './psn.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import {
@@ -31,6 +32,6 @@ import { PsnineModule } from 'src/psnine/psnine.module';
     PsnineModule,
   ],
   controllers: [PsnController],
-  providers: [PsnService],
+  providers: [PsnService, PsnProfileGameGuideService],
 })
 export class PsnModule {}
