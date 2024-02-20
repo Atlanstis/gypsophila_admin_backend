@@ -364,7 +364,7 @@ export class PsnService {
       take: size,
       where: { profile: { id: profile.id } },
       order: {
-        syncTime: 'ASC',
+        syncTime: 'DESC',
       },
     });
     return { list, total };
