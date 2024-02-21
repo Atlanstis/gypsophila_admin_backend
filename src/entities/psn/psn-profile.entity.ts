@@ -1,7 +1,7 @@
 import { Column, Entity, JoinColumn, OneToMany, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { TimeNotSelectBase } from './base';
-import { User } from './user.entity';
-import { PSN_PROFILE_LENGTH } from '../constants';
+import { TimeNotSelectBase } from '../base';
+import { User } from '../user.entity';
+import { PSN_PROFILE_LENGTH } from '../../constants';
 import { PsnProfileGame } from './psn-profile-game.entity';
 
 @Entity({

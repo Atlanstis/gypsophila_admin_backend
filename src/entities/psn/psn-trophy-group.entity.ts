@@ -1,5 +1,5 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { TimeNotSelectBase } from './base';
+import { TimeNotSelectBase } from '../base';
 import { PsnGame } from './psn-game.entity';
 import { PsnTrophy } from './psn-trophy.entity';
 

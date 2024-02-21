@@ -7,7 +7,7 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { TimeNotSelectBase } from './base';
+import { TimeNotSelectBase } from '../base';
 import { PsnTrophyGroup } from './psn-trophy-group.entity';
 import { PsnTrophyLink } from './psn-trophy-link.entity';
 import { PsnProfileGameTrophy } from './psn-profile-game-trophy.entity';

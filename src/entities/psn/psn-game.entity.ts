@@ -1,5 +1,5 @@
 import { Column, Entity, OneToMany, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { TimeBase } from './base';
+import { TimeBase } from '../base';
 import { PsnGameLink } from './psn-game-link.entity';
 import { PsnTrophyGroup } from './psn-trophy-group.entity';
 import { PsnProfileGame } from './psn-profile-game.entity';
