@@ -13,3 +13,4 @@ export * from './psn-trophy-link.entity';
 export * from './psn-profile-game.entity';
 export * from './psn-profile-game-trophy.entity';
 export * from './psn-profile-game-guide.entity';
+export * from './mhxy';
