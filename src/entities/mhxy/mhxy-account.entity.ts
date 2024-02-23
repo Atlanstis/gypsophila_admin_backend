@@ -1,8 +1,7 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
 import { TimeNotSelectBase } from '../base';
 import { MHXY_ACCOUNT_LENGTH } from '../../constants';
-import { MhxyAccountRole } from './mhxy-accoout-role.entity';
-import { MhxyAccountSect } from './mhxy-account-sect.entity';
+import { User } from '../../entities';
 
 /** 梦幻账号表 */
 @Entity({ name: 'mhxy_account' })
@@ -16,17 +15,19 @@ export class MhxyAccount extends TimeNotSelectBase {
   @Column({ name: 'is_primary', comment: '是否是主号', default: false })
   isPrimary: boolean;
 
-  @ManyToOne(() => MhxyAccountRole, (role) => role.accounts, {
-    onDelete: 'SET NULL',
-    onUpdate: 'CASCADE',
-  })
-  @JoinColumn({ name: 'role_id' })
-  role: MhxyAccountRole;
+  @Column({ name: 'role', comment: '角色' })
+  role: string;
 
-  @ManyToOne(() => MhxyAccountSect, (sect) => sect.accounts, {
-    onDelete: 'SET NULL',
+  @Column({ name: 'sect', comment: '门派' })
+  sect: string;
+
+  @Column({ name: 'gold', comment: '金币数量', default: 0 })
+  gold: number;
+
+  @ManyToOne(() => User, (user) => user.mhxyAccounts, {
+    onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn({ name: 'sect_id' })
-  sect: MhxyAccountSect;
+  @JoinColumn({ name: 'user_id' })
+  user: User;
 }

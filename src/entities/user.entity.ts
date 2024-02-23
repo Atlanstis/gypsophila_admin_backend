@@ -1,7 +1,7 @@
-import { Column, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { Role } from './role.entity';
+import { Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { TimeBase } from './base';
 import { USER_LENGTH } from '../constants';
+import { MhxyAccount, Role } from '../entities';
 
 @Entity()
 export class User extends TimeBase {
@@ -29,4 +29,7 @@ export class User extends TimeBase {
     name: 'user_role',
   })
   roles: Role[];
+
+  @OneToMany(() => MhxyAccount, (account) => account.user)
+  mhxyAccounts: MhxyAccount[];
 }
