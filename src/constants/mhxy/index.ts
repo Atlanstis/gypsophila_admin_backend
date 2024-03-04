@@ -1,11 +1,23 @@
 type MhxyAccountKey = 'ID_MAX' | 'NAME_MAX';
 type MhxyAccountRole = { label: string; value: string; type: '人' | '魔' | '仙' };
 type MhxyAccountSEct = { label: string; value: string };
+type MhxyGoldTradeCategoryKey = 'NAME_MAX';
+type MhxyAccountGoldRecordKey = 'REMARK_MAX';
 
 export const MHXY_ACCOUNT_LENGTH: Record<MhxyAccountKey, number> = {
   /** id 最大长度 */
   ID_MAX: 10,
   /** 角色名最大长度 */
+  NAME_MAX: 16,
+};
+
+export const MHXY_ACCOUNT_GOLD_RECORD_LENGTH: Record<MhxyAccountGoldRecordKey, number> = {
+  /** 备注最大长度 */
+  REMARK_MAX: 256,
+};
+
+export const MHXY_GOLD_TRADE_CATEGORY_LENGTH: Record<MhxyGoldTradeCategoryKey, number> = {
+  /** 名称最大长度 */
   NAME_MAX: 16,
 };
 
@@ -33,6 +45,7 @@ export const MHXY_ACCOUNT_ROLE_OPTS: MhxyAccountRole[] = [
   { label: '喵千岁', value: 'mqs', type: '魔' },
 ];
 
+/** 门派列表 */
 export const MHXY_ACCOUNT_SECT_OPTS: MhxyAccountSEct[] = [
   { label: '大唐官府', value: 'dtgf' },
   { label: '方寸山', value: 'fcs' },

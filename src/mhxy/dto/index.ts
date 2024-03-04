@@ -1,5 +1,5 @@
-import { IsInt, IsNotEmpty, Length, Min, Validate } from 'class-validator';
-import { MHXY_ACCOUNT_LENGTH } from 'src/constants';
+import { Allow, IsInt, IsNotEmpty, Length, Min, Validate } from 'class-validator';
+import { MHXY_ACCOUNT_GOLD_RECORD_LENGTH, MHXY_ACCOUNT_LENGTH } from 'src/constants';
 import { MhxyRoleValidator, MhxySectValidator } from './custom-validation';
 
 export class MhxyAccountIdDto {
@@ -46,4 +46,23 @@ export class MhxyAccountDto extends MhxyAccountEditDto {
   @Min(0, { message: 'gold 必须为大于 0 的数字' })
   /**  金币数量 */
   gold: number;
+}
+
+/** 金币收支记录 */
+export class MhxyAccountGoldRecordDto {
+  @IsNotEmpty({ message: 'gold 不能为空' })
+  @IsInt({ message: 'gold 必须为整数' })
+  nowGold: number;
+
+  @IsNotEmpty({ message: 'accountId 不能为空' })
+  accountId: string;
+
+  @IsNotEmpty({ message: 'categoryId 不能为空' })
+  categoryId: number;
+
+  @Allow()
+  @Length(0, MHXY_ACCOUNT_GOLD_RECORD_LENGTH.REMARK_MAX, {
+    message: `remark 最大长度为 ${MHXY_ACCOUNT_GOLD_RECORD_LENGTH.REMARK_MAX}`,
+  })
+  remark: string;
 }

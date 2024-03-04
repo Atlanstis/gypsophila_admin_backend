@@ -30,6 +30,17 @@ export class MhxyService {
     return { list, total };
   }
 
+  /** 获取当前用户下所有梦幻账号数据 */
+  async accountAll(userId: string) {
+    return this.mhxyAccountRepository.find({
+      where: {
+        user: {
+          id: userId,
+        },
+      },
+    });
+  }
+
   /** 新增账号数据 */
   async accountAdd(dto: MhxyAccountDto, userId: string) {
     const user = await this.userService.findOneByUser({ id: userId });
