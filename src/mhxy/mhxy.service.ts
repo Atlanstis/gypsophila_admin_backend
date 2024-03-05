@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { MHXY_ACCOUNT_ROLE_OPTS, MHXY_ACCOUNT_SECT_OPTS } from 'src/constants';
 import { BusinessException, CommonPageDto } from 'src/core';
 import { MhxyAccount } from 'src/entities';
-import { Repository } from 'typeorm';
+import { FindOptionsWhere, Repository } from 'typeorm';
 import { MhxyAccountDto, MhxyAccountEditDto, MhxyAccountIdDto } from './dto';
 import { UserService } from '../user/user.service';
 
@@ -57,9 +57,7 @@ export class MhxyService {
     if (!user) {
       throw new BusinessException('当前用户不存在');
     }
-    const mhxyAccount = await this.mhxyAccountRepository.findOne({
-      where: { id: dto.id, user: { id: userId } },
-    });
+    const mhxyAccount = await this.findAccount({ id: dto.id, user: { id: userId } });
     if (!mhxyAccount) {
       throw new BusinessException('当前账号不存在');
     }
@@ -69,9 +67,7 @@ export class MhxyService {
 
   /** 删除账号数据 */
   async accountDelete(id: MhxyAccountIdDto['id'], userId: string) {
-    const mhxyAccount = await this.mhxyAccountRepository.findOne({
-      where: { id: id, user: { id: userId } },
-    });
+    const mhxyAccount = await this.findAccount({ id: id, user: { id: userId } });
     if (!mhxyAccount) {
       throw new BusinessException('当前账号不存在');
     }
@@ -86,5 +82,10 @@ export class MhxyService {
   /** 获取门派数据 */
   async accountSect() {
     return MHXY_ACCOUNT_SECT_OPTS;
+  }
+
+  /** 查找账号 */
+  async findAccount(where: FindOptionsWhere<MhxyAccount>) {
+    return await this.mhxyAccountRepository.findOne({ where });
   }
 }

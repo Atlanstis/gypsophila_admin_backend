@@ -66,3 +66,28 @@ export class MhxyAccountGoldRecordDto {
   })
   remark: string;
 }
+
+/** 贸易种类查询 */
+export class MhxyGoldTradeCategorySearchDto {
+  /** 是否是转金项 */
+  @Allow()
+  isTransfer?: boolean;
+}
+
+/** 转金 */
+export class MhxyAccountGoldTransferDto {
+  @IsNotEmpty({ message: 'toAccountId 不能为空' })
+  toAccountId: string;
+
+  @IsNotEmpty({ message: 'fromAccountId 不能为空' })
+  fromAccountId: string;
+
+  @IsNotEmpty({ message: 'categoryId 不能为空' })
+  categoryId: number;
+
+  @Allow()
+  fromNowGold: number;
+
+  @Allow()
+  toNowGold: number;
+}

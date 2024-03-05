@@ -3,6 +3,7 @@ import { MhxyGoldTradeCategory } from './mhxy-gold-trade-category.entity';
 import { MHXY_ACCOUNT_GOLD_RECORD_LENGTH } from '../../constants';
 import { User } from '../user.entity';
 import { MhxyAccount } from './mhxy-account.entity';
+import { MhxyAccountGoldTransfer } from './mhxy-account-gold-transfer.entity';
 
 /** 梦幻账号金币收支记录表 */
 @Entity({ name: 'mhxy_account_gold_record', orderBy: { createTime: 'DESC' } })
@@ -11,13 +12,13 @@ export class MhxyAccountGoldRecord {
   id: number;
 
   @Column({ comment: '数额', default: 0 })
-  num: number;
+  amount: number;
 
-  @Column({ comment: '操作前金币数量', default: 0 })
-  beforeNum: number;
+  @Column({ comment: '操作前金币数量', name: 'before_gold', default: 0 })
+  beforeGold: number;
 
-  @Column({ comment: '操作后金币数量', default: 0 })
-  afterNum: number;
+  @Column({ comment: '操作后金币数量', name: 'after_gold', default: 0 })
+  afterGold: number;
 
   @Column({
     type: 'enum',
@@ -33,12 +34,18 @@ export class MhxyAccountGoldRecord {
   category: MhxyGoldTradeCategory;
 
   /** 归属梦幻账户 */
-  @ManyToOne(() => MhxyAccount)
+  @ManyToOne(() => MhxyAccount, {
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  })
   @JoinColumn({ name: 'account_id' })
   account: MhxyAccount;
 
+  @Column({ comment: '是否是转金', name: 'is_transfer', default: false })
+  isTransfer: boolean;
+
   /** 归属系统用户 */
-  @ManyToOne(() => User, (user) => user.mhxyAccounts, {
+  @ManyToOne(() => User, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
@@ -55,4 +62,11 @@ export class MhxyAccountGoldRecord {
     default: () => 'CURRENT_TIMESTAMP',
   })
   createTime: Date;
+
+  @ManyToOne(() => MhxyAccountGoldTransfer, (transfer) => transfer.records, {
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  })
+  @JoinColumn({ name: 'transfer_id' })
+  transfer: MhxyAccountGoldTransfer;
 }

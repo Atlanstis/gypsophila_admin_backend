@@ -13,11 +13,11 @@ export class MhxyGoldTradeCategory {
   @Column({ comment: '状态:1生效,0失效', type: 'enum', enum: [0, 1], default: 1 })
   status: 1 | 0;
 
-  @Column({ comment: '是否是转金项', name: 'is_transfter', default: false })
-  isTransfter: boolean;
+  @Column({ comment: '是否是转金项', name: 'is_transfer', default: false })
+  isTransfer: boolean;
 
-  @Column({ comment: '是否是周期性', name: 'is_cycle', default: false })
-  isCycle: boolean;
+  @Column({ comment: '是否是珍品', name: 'is_gem', default: false })
+  isGem: boolean;
 
   @Column({ comment: '转金额度', name: 'transter_quota', nullable: true })
   transterQuota: number;

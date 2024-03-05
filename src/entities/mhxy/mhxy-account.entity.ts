@@ -25,7 +25,7 @@ export class MhxyAccount extends TimeNotSelectBase {
   gold: number;
 
   /** 归属系统用户 */
-  @ManyToOne(() => User, (user) => user.mhxyAccounts, {
+  @ManyToOne(() => User, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })

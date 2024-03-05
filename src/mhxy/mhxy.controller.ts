@@ -6,10 +6,13 @@ import {
   MhxyAccountDto,
   MhxyAccountEditDto,
   MhxyAccountGoldRecordDto,
+  MhxyAccountGoldTransferDto,
   MhxyAccountIdDto,
+  MhxyGoldTradeCategorySearchDto,
 } from './dto';
 import { MhxyGoldTradeCategoryService } from './mhxy-gold-trade-category.service';
 import { MhxyAccountGoldRecordService } from './mhxy-account-gold-record.service';
+import { MhxyAccountGoldTransferService } from './mhxy-account-gold-transfer.service';
 
 @Controller('mhxy')
 @UseGuards(JwtGuard)
@@ -18,6 +21,7 @@ export class MhxyController {
     private readonly mhxyService: MhxyService,
     private readonly mhxyCategoryService: MhxyGoldTradeCategoryService,
     private readonly mhxyAccountGoldRecordService: MhxyAccountGoldRecordService,
+    private readonly mhxyAccountGoldTransferService: MhxyAccountGoldTransferService,
   ) {}
 
   /** 获取梦幻账号数据 */
@@ -63,9 +67,9 @@ export class MhxyController {
   }
 
   /** 获取贸易种类 */
-  @Get('/gold-trade-category/list')
-  async goldTradeCategoryList() {
-    return await this.mhxyCategoryService.goldTradeCategoryList();
+  @Post('/gold-trade-category/list')
+  async goldTradeCategoryList(@Body() dto: MhxyGoldTradeCategorySearchDto) {
+    return await this.mhxyCategoryService.goldTradeCategoryList(dto);
   }
 
   /** 获取金币收支记录 */
@@ -78,5 +82,17 @@ export class MhxyController {
   @Post('/account/gold-record/add')
   async goldRecordAdd(@Body() dto: MhxyAccountGoldRecordDto, @Req() req: Request) {
     return await this.mhxyAccountGoldRecordService.goldRecordAdd(dto, req.user.id);
+  }
+
+  /** 获取转金记录 */
+  @Post('/account/gold-transfer/list')
+  async goldTransferList(@Body() dto: CommonPageDto, @Req() req: Request) {
+    return await this.mhxyAccountGoldTransferService.goldTransferList(dto, req.user.id);
+  }
+
+  /** 新增转金 */
+  @Post('/account/gold-transfer/add')
+  async goldTransferAdd(@Body() dto: MhxyAccountGoldTransferDto, @Req() req: Request) {
+    return await this.mhxyAccountGoldTransferService.goldTransferAdd(dto, req.user.id);
   }
 }
