@@ -11,6 +11,9 @@ import {
   MhxyAccountIdDto,
   GoldTradeCategorySearchDto,
   GoldTransferFinishDto,
+  GoldTradeCategoryAddDto,
+  GoldTradeCategoryEditDto,
+  GoldTradeCategoryDeleteDto,
 } from './dto';
 import { MhxyGoldTradeCategoryService } from './mhxy-gold-trade-category.service';
 import { MhxyAccountGoldRecordService } from './mhxy-account-gold-record.service';
@@ -69,9 +72,33 @@ export class MhxyController {
   }
 
   /** 获取贸易种类 */
+  @Post('/gold-trade-category/all')
+  async goldTradeCategoryAll(@Body() dto: GoldTradeCategorySearchDto) {
+    return await this.mhxyCategoryService.goldTradeCategoryAll(dto);
+  }
+
+  /** 获取贸易种类-分页 */
   @Post('/gold-trade-category/list')
-  async goldTradeCategoryList(@Body() dto: GoldTradeCategorySearchDto) {
+  async goldTradeCategoryList(@Body() dto: CommonPageDto) {
     return await this.mhxyCategoryService.goldTradeCategoryList(dto);
+  }
+
+  /** 贸易种类-新增 */
+  @Post('/gold-trade-category/add')
+  async goldTradeCategoryAdd(@Body() dto: GoldTradeCategoryAddDto) {
+    return await this.mhxyCategoryService.goldTradeCategoryAdd(dto);
+  }
+
+  /** 贸易种类-编辑 */
+  @Post('/gold-trade-category/edit')
+  async goldTradeCategoryEdit(@Body() dto: GoldTradeCategoryEditDto) {
+    return await this.mhxyCategoryService.goldTradeCategoryEdit(dto);
+  }
+
+  /** 贸易种类-删除 */
+  @Post('/gold-trade-category/delete')
+  async goldTradeCategoryDelete(@Body() dto: GoldTradeCategoryDeleteDto) {
+    return await this.mhxyCategoryService.goldTradeCategoryDelete(dto);
   }
 
   /** 获取金币收支记录 */

@@ -1,5 +1,9 @@
-import { Allow, IsIn, IsInt, IsNotEmpty, Length, Min, Validate } from 'class-validator';
-import { MHXY_ACCOUNT_GOLD_RECORD_LENGTH, MHXY_ACCOUNT_LENGTH } from 'src/constants';
+import { Allow, IsBoolean, IsIn, IsInt, IsNotEmpty, Length, Min, Validate } from 'class-validator';
+import {
+  MHXY_ACCOUNT_GOLD_RECORD_LENGTH,
+  MHXY_ACCOUNT_LENGTH,
+  MHXY_GOLD_TRADE_CATEGORY_LENGTH,
+} from 'src/constants';
 import { MhxyRoleValidator, MhxySectValidator } from './custom-validation';
 import { GoldTransferFinishStatus } from '../constants';
 
@@ -71,6 +75,34 @@ export class GoldTradeCategorySearchDto {
   /** 是否是转金项 */
   @Allow()
   isTransfer?: boolean;
+}
+
+/** 贸易种类新增 */
+export class GoldTradeCategoryAddDto {
+  @IsNotEmpty({ message: 'name 不能为空' })
+  @Length(1, MHXY_GOLD_TRADE_CATEGORY_LENGTH.NAME_MAX, {
+    message: `name 长度为 1 - ${MHXY_GOLD_TRADE_CATEGORY_LENGTH.NAME_MAX} 个字符`,
+  })
+  /** 种类名称 */
+  name: string;
+  @IsBoolean({ message: 'isTransfer 类型错误' })
+  /** 是否是转金项 */
+  isTransfer: boolean;
+  @IsBoolean({ message: 'isGem 类型错误' })
+  /** 是否是珍品 */
+  isGem: boolean;
+}
+
+/** 贸易种类编辑 */
+export class GoldTradeCategoryEditDto extends GoldTradeCategoryAddDto {
+  @IsNotEmpty({ message: 'id 不能为空' })
+  id: number;
+}
+
+/** 贸易种类删除 */
+export class GoldTradeCategoryDeleteDto {
+  @IsNotEmpty({ message: 'id 不能为空' })
+  id: number;
 }
 
 /** 转金 */
