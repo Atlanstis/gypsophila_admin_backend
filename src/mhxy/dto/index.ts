@@ -75,19 +75,19 @@ export class GoldTradeCategorySearchDto {
 /** 转金 */
 export class GoldTransferDto {
   @IsNotEmpty({ message: 'toAccountId 不能为空' })
-  /** 接受方 id */
+  /** 转入账号 id */
   toAccountId: string;
   @IsNotEmpty({ message: 'fromAccountId 不能为空' })
-  /** 发起方 id */
+  /** 转出账号 id */
   fromAccountId: string;
   @IsNotEmpty({ message: 'categoryId 不能为空' })
   /** 贸易种类 id */
   categoryId: number;
   @Allow()
-  /** 发起方金币数 */
+  /** 转出账号金币数 */
   fromNowGold: number;
   @Allow()
-  /** 接受方金币数 */
+  /** 转入账号金币数 */
   toNowGold: number;
   @Allow()
   /** 珍品交易金额 */

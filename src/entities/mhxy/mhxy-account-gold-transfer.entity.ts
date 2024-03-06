@@ -3,13 +3,14 @@ import { MhxyAccount } from './mhxy-account.entity';
 import { MhxyGoldTradeCategory } from './mhxy-gold-trade-category.entity';
 import { User } from '../user.entity';
 import { MhxyAccountGoldRecord } from './mhxy-account-gold-record.entity';
+import { AccountGoldTransferStatus } from '../../constants';
 
 @Entity({ name: 'mhxy_account_gold_transfer', orderBy: { createTime: 'DESC' } })
 export class MhxyAccountGoldTransfer {
   @PrimaryGeneratedColumn()
   id: number;
 
-  /** 发起账号 */
+  /** 转出账号 */
   @ManyToOne(() => MhxyAccount, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
@@ -30,16 +31,16 @@ export class MhxyAccountGoldTransfer {
   @JoinColumn({ name: 'user_id' })
   user: User;
 
-  @Column({ comment: '发起账号转金前金币数量', name: 'from_before_gold', default: 0 })
+  @Column({ comment: '转出账号转金前金币数量', name: 'from_before_gold', default: 0 })
   fromBeforeGold: number;
 
-  @Column({ comment: '发起账号转金前后金币数量', name: 'from_after_gold', default: 0 })
+  @Column({ comment: '转出账号转金前后金币数量', name: 'from_after_gold', default: 0 })
   fromAfterGold: number;
 
-  @Column({ comment: '接受账号转金前金币数量', name: 'to_before_gold', default: 0 })
+  @Column({ comment: '转入账号转金前金币数量', name: 'to_before_gold', default: 0 })
   toBeforeGold: number;
 
-  @Column({ comment: '接受账号转金后金币数量', name: 'to_after_gold', default: 0 })
+  @Column({ comment: '转入账号转金后金币数量', name: 'to_after_gold', default: 0 })
   toAfterGold: number;
 
   /** 贸易种类 */
@@ -62,12 +63,12 @@ export class MhxyAccountGoldTransfer {
   auditEndTime: Date;
 
   @Column({
-    comment: '状态:0-进行中;1-已完成;-1:审核失败',
+    comment: '状态',
     type: 'enum',
-    enum: ['0', '1', '-1'],
-    default: '0',
+    enum: AccountGoldTransferStatus,
+    default: AccountGoldTransferStatus.progress,
   })
-  status: '0' | '1' | '-1';
+  status: AccountGoldTransferStatus;
 
   @Column({
     comment: '转金时间',

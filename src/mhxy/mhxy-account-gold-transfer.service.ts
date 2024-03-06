@@ -10,6 +10,7 @@ import { MhxyAccountGoldRecordService } from './mhxy-account-gold-record.service
 import * as dayjs from 'dayjs';
 import { isInt } from 'class-validator';
 import { DefaultTradeCategory, GoldTransferFinishStatus } from './constants';
+import { AccountGoldTransferStatus } from 'src/constants';
 
 @Injectable()
 /** 转金相关服务 */
@@ -35,7 +36,7 @@ export class MhxyAccountGoldTransferService {
       },
     });
     if (!fromAccount) {
-      throw new BusinessException('发起账号不存在，请重新选择');
+      throw new BusinessException('转出账号不存在，请重新选择');
     }
     const toAccount = await this.mhxyService.findAccount({
       id: dto.toAccountId,
@@ -44,7 +45,7 @@ export class MhxyAccountGoldTransferService {
       },
     });
     if (!toAccount) {
-      throw new BusinessException('接受账号不存在，请重新选择');
+      throw new BusinessException('转入账号不存在，请重新选择');
     }
     const category = await this.mhxyGoldTradeCategoryRepository.findOne({
       where: {
@@ -75,7 +76,7 @@ export class MhxyAccountGoldTransferService {
           toAfterGold: dto.toNowGold,
           category,
           isGem: category.isGem,
-          status: '1',
+          status: AccountGoldTransferStatus.success,
         });
         await queryRunner.manager.save(goldTransfer);
         // 同步新建金币收支记录，并更新账号金币数量
@@ -117,7 +118,7 @@ export class MhxyAccountGoldTransferService {
           fromBeforeGold: fromAccount.gold,
           fromAfterGold: fromAccount.gold - dto.goldAmount,
           auditEndTime: dayjs().add(dto.auditEndHours, 'hour').toDate(),
-          status: '0',
+          status: AccountGoldTransferStatus.progress,
         });
         await queryRunner.manager.save(goldTransfer);
         // 转出方金币直接扣除
@@ -202,7 +203,7 @@ export class MhxyAccountGoldTransferService {
     if (!goldTransfer) {
       throw new BusinessException('当前记录不存在，或者无查看的权限');
     }
-    if (goldTransfer.status !== '0') {
+    if (goldTransfer.status !== AccountGoldTransferStatus.progress) {
       throw new BusinessException('当前记录已处理');
     }
     // 使用事务，发生错误时，回滚操作
@@ -212,7 +213,7 @@ export class MhxyAccountGoldTransferService {
       await queryRunner.startTransaction();
       if (dto.status === GoldTransferFinishStatus.SUCCESS) {
         // 转金成功
-        // 接受账号，增加金币
+        // 转入账号，增加金币
         await this.mhxyAccountGoldRecordService.createGoldRecord(
           queryRunner.manager,
           goldTransfer.toAccount.gold + dto.amount,
@@ -223,11 +224,12 @@ export class MhxyAccountGoldTransferService {
           true,
           goldTransfer,
         );
-        // 更新转金记录接受账号前后金额
+        // 更新转金记录转入账号前后金额
         goldTransfer.toBeforeGold = goldTransfer.toAccount.gold;
         goldTransfer.toAfterGold = goldTransfer.toAccount.gold + dto.amount;
+        goldTransfer.status = AccountGoldTransferStatus.success;
       } else if (dto.status === GoldTransferFinishStatus.FAIL_FROM_LOCK) {
-        // 转金失败，发起账号金币被锁
+        // 转金失败，转出账号金币被锁
         const record = await this.mhxyAccountGoldRecordService.findGoldRecord({
           transfer: { id: goldTransfer.id },
         });
@@ -250,12 +252,12 @@ export class MhxyAccountGoldTransferService {
         const account = goldTransfer.fromAccount;
         account.lockGold += Math.abs(record.amount);
         await queryRunner.manager.save(account);
-        // 记录转金记录接受账号前后金额
+        // 记录转金记录转入账号前后金额
         goldTransfer.toBeforeGold = goldTransfer.toAccount.gold;
         goldTransfer.toAfterGold = goldTransfer.toAccount.gold;
+        goldTransfer.status = AccountGoldTransferStatus.failFromLock;
       }
       // 更改转金状态
-      goldTransfer.status = '1';
       await queryRunner.manager.save(goldTransfer);
       // 提交事务
       await queryRunner.commitTransaction();
