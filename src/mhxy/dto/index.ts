@@ -1,6 +1,7 @@
-import { Allow, IsInt, IsNotEmpty, Length, Min, Validate } from 'class-validator';
+import { Allow, IsIn, IsInt, IsNotEmpty, Length, Min, Validate } from 'class-validator';
 import { MHXY_ACCOUNT_GOLD_RECORD_LENGTH, MHXY_ACCOUNT_LENGTH } from 'src/constants';
 import { MhxyRoleValidator, MhxySectValidator } from './custom-validation';
+import { GoldTransferFinishStatus } from '../constants';
 
 export class MhxyAccountIdDto {
   @IsNotEmpty({ message: 'id 不能为空' })
@@ -49,17 +50,14 @@ export class MhxyAccountDto extends MhxyAccountEditDto {
 }
 
 /** 金币收支记录 */
-export class MhxyAccountGoldRecordDto {
+export class GoldRecordDto {
   @IsNotEmpty({ message: 'gold 不能为空' })
   @IsInt({ message: 'gold 必须为整数' })
   nowGold: number;
-
   @IsNotEmpty({ message: 'accountId 不能为空' })
   accountId: string;
-
   @IsNotEmpty({ message: 'categoryId 不能为空' })
   categoryId: number;
-
   @Allow()
   @Length(0, MHXY_ACCOUNT_GOLD_RECORD_LENGTH.REMARK_MAX, {
     message: `remark 最大长度为 ${MHXY_ACCOUNT_GOLD_RECORD_LENGTH.REMARK_MAX}`,
@@ -68,26 +66,52 @@ export class MhxyAccountGoldRecordDto {
 }
 
 /** 贸易种类查询 */
-export class MhxyGoldTradeCategorySearchDto {
+export class GoldTradeCategorySearchDto {
   /** 是否是转金项 */
   @Allow()
   isTransfer?: boolean;
 }
 
 /** 转金 */
-export class MhxyAccountGoldTransferDto {
+export class GoldTransferDto {
   @IsNotEmpty({ message: 'toAccountId 不能为空' })
+  /** 接受方 id */
   toAccountId: string;
-
   @IsNotEmpty({ message: 'fromAccountId 不能为空' })
+  /** 发起方 id */
   fromAccountId: string;
-
   @IsNotEmpty({ message: 'categoryId 不能为空' })
+  /** 贸易种类 id */
   categoryId: number;
-
   @Allow()
+  /** 发起方金币数 */
   fromNowGold: number;
-
   @Allow()
+  /** 接受方金币数 */
   toNowGold: number;
+  @Allow()
+  /** 珍品交易金额 */
+  goldAmount: number;
+  @Allow()
+  /** 审核所需时间 */
+  auditEndHours: number;
+}
+
+/** 查询单个转金信息 */
+export class GoldTransferInfoDto {
+  @IsNotEmpty({ message: 'id 不能为空' })
+  id: number;
+}
+
+export class GoldTransferFinishDto {
+  @IsNotEmpty({ message: 'id 不能为空' })
+  id: number;
+  @IsNotEmpty({ message: 'amount 不能为空' })
+  @IsInt({ message: 'amount 必须为整数类型' })
+  amount: number;
+  @IsNotEmpty({ message: 'status 不能为空' })
+  @IsIn([GoldTransferFinishStatus.SUCCESS, GoldTransferFinishStatus.FAIL_FROM_LOCK], {
+    message: 'status 错误',
+  })
+  status: GoldTransferFinishStatus;
 }

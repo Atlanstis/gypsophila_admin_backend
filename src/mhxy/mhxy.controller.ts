@@ -5,10 +5,12 @@ import { CommonPageDto, JwtGuard } from 'src/core';
 import {
   MhxyAccountDto,
   MhxyAccountEditDto,
-  MhxyAccountGoldRecordDto,
-  MhxyAccountGoldTransferDto,
+  GoldRecordDto,
+  GoldTransferDto,
+  GoldTransferInfoDto,
   MhxyAccountIdDto,
-  MhxyGoldTradeCategorySearchDto,
+  GoldTradeCategorySearchDto,
+  GoldTransferFinishDto,
 } from './dto';
 import { MhxyGoldTradeCategoryService } from './mhxy-gold-trade-category.service';
 import { MhxyAccountGoldRecordService } from './mhxy-account-gold-record.service';
@@ -68,7 +70,7 @@ export class MhxyController {
 
   /** 获取贸易种类 */
   @Post('/gold-trade-category/list')
-  async goldTradeCategoryList(@Body() dto: MhxyGoldTradeCategorySearchDto) {
+  async goldTradeCategoryList(@Body() dto: GoldTradeCategorySearchDto) {
     return await this.mhxyCategoryService.goldTradeCategoryList(dto);
   }
 
@@ -80,7 +82,7 @@ export class MhxyController {
 
   /** 新增金币收支记录 */
   @Post('/account/gold-record/add')
-  async goldRecordAdd(@Body() dto: MhxyAccountGoldRecordDto, @Req() req: Request) {
+  async goldRecordAdd(@Body() dto: GoldRecordDto, @Req() req: Request) {
     return await this.mhxyAccountGoldRecordService.goldRecordAdd(dto, req.user.id);
   }
 
@@ -90,9 +92,21 @@ export class MhxyController {
     return await this.mhxyAccountGoldTransferService.goldTransferList(dto, req.user.id);
   }
 
+  /** 获取转金记录 */
+  @Post('/account/gold-transfer/info')
+  async goldTransferInfo(@Body() dto: GoldTransferInfoDto, @Req() req: Request) {
+    return await this.mhxyAccountGoldTransferService.goldTransferInfo(dto, req.user.id);
+  }
+
   /** 新增转金 */
   @Post('/account/gold-transfer/add')
-  async goldTransferAdd(@Body() dto: MhxyAccountGoldTransferDto, @Req() req: Request) {
+  async goldTransferAdd(@Body() dto: GoldTransferDto, @Req() req: Request) {
     return await this.mhxyAccountGoldTransferService.goldTransferAdd(dto, req.user.id);
+  }
+
+  /** 珍品转金完成 */
+  @Post('/account/gold-transfer/finish')
+  async goldTransferFinish(@Body() dto: GoldTransferFinishDto, @Req() req: Request) {
+    return await this.mhxyAccountGoldTransferService.goldTransferFinish(dto, req.user.id);
   }
 }

@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MhxyGoldTradeCategory } from 'src/entities';
 import { FindManyOptions, Repository } from 'typeorm';
-import { MhxyGoldTradeCategorySearchDto } from './dto';
+import { GoldTradeCategorySearchDto } from './dto';
 
 @Injectable()
 /** 贸易种类相关服务 */
@@ -13,10 +13,14 @@ export class MhxyGoldTradeCategoryService {
   ) {}
 
   /** 获取贸易种类 */
-  async goldTradeCategoryList(dto: MhxyGoldTradeCategorySearchDto) {
-    const options: FindManyOptions<MhxyGoldTradeCategory> = {};
+  async goldTradeCategoryList(dto: GoldTradeCategorySearchDto) {
+    const options: FindManyOptions<MhxyGoldTradeCategory> = {
+      where: {
+        status: '1',
+      },
+    };
     if (Object.prototype.hasOwnProperty.call(dto, 'isTransfer')) {
-      options.where = { isTransfer: dto.isTransfer };
+      options.where = { isTransfer: dto.isTransfer, status: '1' };
     }
     return this.mhxyGoldTradeCategoryRepository.find(options);
   }

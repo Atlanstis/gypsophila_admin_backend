@@ -9,7 +9,7 @@ import {
   User,
 } from 'src/entities';
 import { DataSource, EntityManager, Repository } from 'typeorm';
-import { MhxyAccountGoldRecordDto } from './dto';
+import { GoldRecordDto } from './dto';
 import { UserService } from 'src/user/user.service';
 import { MhxyService } from './mhxy.service';
 
@@ -46,7 +46,7 @@ export class MhxyAccountGoldRecordService {
   }
 
   /** 新增收支记录 */
-  async goldRecordAdd(dto: MhxyAccountGoldRecordDto, userId: string) {
+  async goldRecordAdd(dto: GoldRecordDto, userId: string) {
     const user = await this.userService.findOneByUser({ id: userId });
     const account = await this.mhxyService.findAccount({
       id: dto.accountId,
@@ -92,13 +92,13 @@ export class MhxyAccountGoldRecordService {
   /**
    * 创建收支记录
    * @param manager 事务对象
-   * @param nowGold 当前金币数
+   * @param nowGold 账号当前金币数
    * @param user 归属系统用户
    * @param account 归属梦幻账户
    * @param category 贸易种类
    * @param remark 备注
    * @param isTransfer 是否是转金
-   * @param
+   * @param transfer 转金记录
    */
   async createGoldRecord(
     manager: EntityManager,

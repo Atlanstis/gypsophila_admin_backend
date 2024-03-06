@@ -61,8 +61,13 @@ export class MhxyAccountGoldTransfer {
   })
   auditEndTime: Date;
 
-  @Column({ comment: '是否已完成', name: 'is_finish', default: true })
-  isFinish: boolean;
+  @Column({
+    comment: '状态:0-进行中;1-已完成;-1:审核失败',
+    type: 'enum',
+    enum: ['0', '1', '-1'],
+    default: '0',
+  })
+  status: '0' | '1' | '-1';
 
   @Column({
     comment: '转金时间',

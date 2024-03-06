@@ -2,11 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MhxyAccountGoldTransfer, MhxyGoldTradeCategory } from 'src/entities';
 import { DataSource, Repository } from 'typeorm';
-import { MhxyAccountGoldTransferDto } from './dto';
+import { GoldTransferDto, GoldTransferFinishDto, GoldTransferInfoDto } from './dto';
 import { UserService } from 'src/user/user.service';
 import { MhxyService } from './mhxy.service';
 import { BusinessException, CommonPageDto } from 'src/core';
 import { MhxyAccountGoldRecordService } from './mhxy-account-gold-record.service';
+import * as dayjs from 'dayjs';
+import { isInt } from 'class-validator';
+import { GoldTransferFinishStatus } from './constants';
 
 @Injectable()
 /** 转金相关服务 */
@@ -22,7 +25,8 @@ export class MhxyAccountGoldTransferService {
     private dataSource: DataSource,
   ) {}
 
-  async goldTransferAdd(dto: MhxyAccountGoldTransferDto, userId: string) {
+  /** 新增转金 */
+  async goldTransferAdd(dto: GoldTransferDto, userId: string) {
     const user = await this.userService.findOneByUser({ id: userId });
     const fromAccount = await this.mhxyService.findAccount({
       id: dto.fromAccountId,
@@ -70,8 +74,8 @@ export class MhxyAccountGoldTransferService {
           toBeforeGold: toAccount.gold,
           toAfterGold: dto.toNowGold,
           category,
-          isGem: false,
-          isFinish: true,
+          isGem: category.isGem,
+          status: '1',
         });
         await queryRunner.manager.save(goldTransfer);
         // 同步新建金币收支记录，并更新账号金币数量
@@ -90,6 +94,36 @@ export class MhxyAccountGoldTransferService {
           dto.toNowGold,
           user,
           toAccount,
+          category,
+          `转金-${category.name}`,
+          true,
+          goldTransfer,
+        );
+      } else {
+        // 珍品转金，需要等待审核
+        if (!isInt(dto.goldAmount)) {
+          throw new BusinessException('goldAmount 类型错误');
+        }
+        if (!isInt(dto.auditEndHours)) {
+          throw new BusinessException('auditEndHours 类型错误');
+        }
+        const goldTransfer = this.mhxyAccountGoldTransferRepository.create({
+          fromAccount,
+          toAccount,
+          user,
+          category,
+          isGem: category.isGem,
+          goldAmount: dto.goldAmount,
+          auditEndTime: dayjs().add(dto.auditEndHours, 'hour').toDate(),
+          status: '0',
+        });
+        await queryRunner.manager.save(goldTransfer);
+        // 转出方金币直接扣除
+        await this.mhxyAccountGoldRecordService.createGoldRecord(
+          queryRunner.manager,
+          fromAccount.gold - dto.goldAmount,
+          user,
+          fromAccount,
           category,
           `转金-${category.name}`,
           true,
@@ -124,5 +158,77 @@ export class MhxyAccountGoldTransferService {
       },
     });
     return { list, total };
+  }
+
+  /** 单个转金记录 */
+  async goldTransferInfo(dto: GoldTransferInfoDto, userId: string) {
+    const goldTransfer = await this.mhxyAccountGoldTransferRepository.findOne({
+      where: {
+        id: dto.id,
+        user: {
+          id: userId,
+        },
+      },
+      relations: {
+        fromAccount: true,
+        toAccount: true,
+        category: true,
+      },
+    });
+    if (!goldTransfer) {
+      throw new BusinessException('当前记录不存在，或者无查看的权限');
+    }
+    return goldTransfer;
+  }
+
+  /** 珍品转金完成 */
+  async goldTransferFinish(dto: GoldTransferFinishDto, userId: string) {
+    const user = await this.userService.findOneByUser({ id: userId });
+    const goldTransfer = await this.mhxyAccountGoldTransferRepository.findOne({
+      where: {
+        id: dto.id,
+        user: {
+          id: userId,
+        },
+      },
+      relations: {
+        fromAccount: true,
+        toAccount: true,
+        category: true,
+      },
+    });
+    if (!goldTransfer) {
+      throw new BusinessException('当前记录不存在，或者无查看的权限');
+    }
+    // 使用事务，发生错误时，回滚操作
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    try {
+      await queryRunner.startTransaction();
+      // 转金成功
+      if (dto.status === GoldTransferFinishStatus.SUCCESS) {
+        // 更改转金状态
+        goldTransfer.status = '1';
+        await queryRunner.manager.save(goldTransfer);
+        // 接受账号，增加金币
+        await this.mhxyAccountGoldRecordService.createGoldRecord(
+          queryRunner.manager,
+          goldTransfer.toAccount.gold + dto.amount,
+          user,
+          goldTransfer.toAccount,
+          goldTransfer.category,
+          `转金-${goldTransfer.category.name}`,
+          true,
+          goldTransfer,
+        );
+      }
+      // 提交事务
+      await queryRunner.commitTransaction();
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      throw err;
+    } finally {
+      await queryRunner.release();
+    }
   }
 }

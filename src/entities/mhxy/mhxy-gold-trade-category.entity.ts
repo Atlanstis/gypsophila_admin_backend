@@ -10,8 +10,8 @@ export class MhxyGoldTradeCategory {
   @Column({ comment: '名称', length: MHXY_GOLD_TRADE_CATEGORY_LENGTH.NAME_MAX })
   name: string;
 
-  @Column({ comment: '状态:1生效,0失效', type: 'enum', enum: [0, 1], default: 1 })
-  status: 1 | 0;
+  @Column({ comment: '状态:1生效,0失效', type: 'enum', enum: ['0', '1'], default: '1' })
+  status: '1' | '0';
 
   @Column({ comment: '是否是转金项', name: 'is_transfer', default: false })
   isTransfer: boolean;
