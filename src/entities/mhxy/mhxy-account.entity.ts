@@ -24,6 +24,9 @@ export class MhxyAccount extends TimeNotSelectBase {
   @Column({ name: 'gold', comment: '金币数量', default: 0 })
   gold: number;
 
+  @Column({ name: 'lock_gold', comment: '被锁金币数量', default: 0 })
+  lockGold: number;
+
   /** 归属系统用户 */
   @ManyToOne(() => User, {
     onDelete: 'CASCADE',

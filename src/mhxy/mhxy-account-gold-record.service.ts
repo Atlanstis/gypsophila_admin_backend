@@ -8,7 +8,7 @@ import {
   MhxyGoldTradeCategory,
   User,
 } from 'src/entities';
-import { DataSource, EntityManager, Repository } from 'typeorm';
+import { DataSource, EntityManager, FindOptionsWhere, Repository } from 'typeorm';
 import { GoldRecordDto } from './dto';
 import { UserService } from 'src/user/user.service';
 import { MhxyService } from './mhxy.service';
@@ -128,5 +128,9 @@ export class MhxyAccountGoldRecordService {
     // 更新用户金币数量
     account.gold = nowGold;
     await manager.save(account);
+  }
+
+  async findGoldRecord(where: FindOptionsWhere<MhxyAccountGoldRecord>) {
+    return await this.accountGoldRecordRepository.findOne({ where });
   }
 }

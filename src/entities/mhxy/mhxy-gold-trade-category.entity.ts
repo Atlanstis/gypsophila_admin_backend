@@ -10,6 +10,9 @@ export class MhxyGoldTradeCategory {
   @Column({ comment: '名称', length: MHXY_GOLD_TRADE_CATEGORY_LENGTH.NAME_MAX })
   name: string;
 
+  @Column({ comment: '是否内置', name: 'is_default', default: false })
+  isDefault: boolean;
+
   @Column({ comment: '状态:1生效,0失效', type: 'enum', enum: ['0', '1'], default: '1' })
   status: '1' | '0';
 

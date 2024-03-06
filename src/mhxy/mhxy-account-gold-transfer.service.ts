@@ -9,7 +9,7 @@ import { BusinessException, CommonPageDto } from 'src/core';
 import { MhxyAccountGoldRecordService } from './mhxy-account-gold-record.service';
 import * as dayjs from 'dayjs';
 import { isInt } from 'class-validator';
-import { GoldTransferFinishStatus } from './constants';
+import { DefaultTradeCategory, GoldTransferFinishStatus } from './constants';
 
 @Injectable()
 /** 转金相关服务 */
@@ -114,6 +114,8 @@ export class MhxyAccountGoldTransferService {
           category,
           isGem: category.isGem,
           goldAmount: dto.goldAmount,
+          fromBeforeGold: fromAccount.gold,
+          fromAfterGold: fromAccount.gold - dto.goldAmount,
           auditEndTime: dayjs().add(dto.auditEndHours, 'hour').toDate(),
           status: '0',
         });
@@ -200,16 +202,16 @@ export class MhxyAccountGoldTransferService {
     if (!goldTransfer) {
       throw new BusinessException('当前记录不存在，或者无查看的权限');
     }
+    if (goldTransfer.status !== '0') {
+      throw new BusinessException('当前记录已处理');
+    }
     // 使用事务，发生错误时，回滚操作
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     try {
       await queryRunner.startTransaction();
-      // 转金成功
       if (dto.status === GoldTransferFinishStatus.SUCCESS) {
-        // 更改转金状态
-        goldTransfer.status = '1';
-        await queryRunner.manager.save(goldTransfer);
+        // 转金成功
         // 接受账号，增加金币
         await this.mhxyAccountGoldRecordService.createGoldRecord(
           queryRunner.manager,
@@ -221,7 +223,40 @@ export class MhxyAccountGoldTransferService {
           true,
           goldTransfer,
         );
+        // 更新转金记录接受账号前后金额
+        goldTransfer.toBeforeGold = goldTransfer.toAccount.gold;
+        goldTransfer.toAfterGold = goldTransfer.toAccount.gold + dto.amount;
+      } else if (dto.status === GoldTransferFinishStatus.FAIL_FROM_LOCK) {
+        // 转金失败，发起账号金币被锁
+        const record = await this.mhxyAccountGoldRecordService.findGoldRecord({
+          transfer: { id: goldTransfer.id },
+        });
+        // 关联收支记录，需为支出项
+        if (record.type !== 'expenditure') {
+          return new BusinessException('关联收支记录错误');
+        }
+        // 更改收支记录关联贸易种类
+        const category = await this.mhxyGoldTradeCategoryRepository.findOne({
+          where: {
+            id: DefaultTradeCategory.GOLD_LOCK,
+          },
+        });
+        if (!category) {
+          throw new BusinessException('默认种类（金币被扣）项缺失，请检查数据库');
+        }
+        record.category = category;
+        await queryRunner.manager.save(record);
+        // 更改账号被锁金币数
+        const account = goldTransfer.fromAccount;
+        account.lockGold += Math.abs(record.amount);
+        await queryRunner.manager.save(account);
+        // 记录转金记录接受账号前后金额
+        goldTransfer.toBeforeGold = goldTransfer.toAccount.gold;
+        goldTransfer.toAfterGold = goldTransfer.toAccount.gold;
       }
+      // 更改转金状态
+      goldTransfer.status = '1';
+      await queryRunner.manager.save(goldTransfer);
       // 提交事务
       await queryRunner.commitTransaction();
     } catch (err) {
