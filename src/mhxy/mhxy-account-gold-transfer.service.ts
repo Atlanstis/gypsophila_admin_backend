@@ -240,7 +240,7 @@ export class MhxyAccountGoldTransferService {
         // 更改收支记录关联贸易种类
         const category = await this.mhxyGoldTradeCategoryRepository.findOne({
           where: {
-            id: DefaultTradeCategory.GOLD_LOCK,
+            key: DefaultTradeCategory.GOLD_LOCK,
           },
         });
         if (!category) {

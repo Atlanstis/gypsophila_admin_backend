@@ -7,9 +7,9 @@ export enum GoldTransferFinishStatus {
 /** 默认贸易种类 */
 export enum DefaultTradeCategory {
   /** 日常 */
-  DAILY = 10001,
+  DAILY = 'DAILY',
   /** 金币被锁 */
-  GOLD_LOCK = 10002,
+  GOLD_LOCK = 'GOLD_LOCK',
   /** 金币解锁 */
-  GOLD_UNLOCK = 10003,
+  GOLD_UNLOCK = 'GOLD_UNLOCK',
 }

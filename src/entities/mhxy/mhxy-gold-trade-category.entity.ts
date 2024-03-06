@@ -7,6 +7,9 @@ export class MhxyGoldTradeCategory {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Column({ comment: '特殊键，用于业务标识', nullable: true })
+  key: string;
+
   @Column({ comment: '名称', length: MHXY_GOLD_TRADE_CATEGORY_LENGTH.NAME_MAX })
   name: string;
 
