@@ -41,12 +41,13 @@ export class MhxyAccountDto extends MhxyAccountEditDto {
   @IsNotEmpty({ message: 'isPrimary 不能为空' })
   /** 是否是主号 */
   isPrimary: boolean;
-
-  @IsNotEmpty({ message: 'gold 不能为空' })
   @IsInt({ message: 'gold 必须为整数' })
   @Min(0, { message: 'gold 必须为大于 0 的数字' })
   /**  金币数量 */
   gold: number;
+  @IsInt({ message: 'lockGold 必须为整数' })
+  /**  金币数量 */
+  lockGold: number;
 }
 
 /** 金币收支记录 */
