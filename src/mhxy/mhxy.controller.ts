@@ -1,139 +1,88 @@
 import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { Request } from 'express';
-import { MhxyService } from './mhxy.service';
+import { MhxyAccountService } from './mhxy-account.service';
 import { CommonPageDto, JwtGuard } from 'src/core';
 import {
   MhxyAccountDto,
   MhxyAccountEditDto,
-  GoldRecordDto,
-  GoldTransferDto,
-  GoldTransferInfoDto,
   MhxyAccountIdDto,
-  GoldTradeCategorySearchDto,
-  GoldTransferFinishDto,
-  GoldTradeCategoryAddDto,
-  GoldTradeCategoryEditDto,
-  GoldTradeCategoryDeleteDto,
+  PropCategoryAddDto,
+  PropCategoryDeleteDto,
+  PropCategoryEditDto,
 } from './dto';
-import { MhxyGoldTradeCategoryService } from './mhxy-gold-trade-category.service';
-import { MhxyAccountGoldRecordService } from './mhxy-account-gold-record.service';
-import { MhxyAccountGoldTransferService } from './mhxy-account-gold-transfer.service';
+import { MhxyPropCategoryService } from './mhxy-prop-category.service';
 
 @Controller('mhxy')
 @UseGuards(JwtGuard)
 export class MhxyController {
   constructor(
-    private readonly mhxyService: MhxyService,
-    private readonly mhxyCategoryService: MhxyGoldTradeCategoryService,
-    private readonly mhxyAccountGoldRecordService: MhxyAccountGoldRecordService,
-    private readonly mhxyAccountGoldTransferService: MhxyAccountGoldTransferService,
+    private readonly accountService: MhxyAccountService,
+    private readonly propCategoryService: MhxyPropCategoryService,
   ) {}
 
   /** 获取梦幻账号数据 */
   @Post('/account/list')
   async accountList(@Body() dto: CommonPageDto, @Req() req: Request) {
-    return await this.mhxyService.accountList(dto, req.user.id);
+    return await this.accountService.accountList(dto, req.user.id);
   }
 
   /** 获取当前用户下所有梦幻账号数据 */
   @Post('/account/all')
   async accountAll(@Req() req: Request) {
-    return await this.mhxyService.accountAll(req.user.id);
+    return await this.accountService.accountAll(req.user.id);
   }
 
   /** 新增账号数据 */
   @Post('/account/add')
   async accountAdd(@Body() dto: MhxyAccountDto, @Req() req: Request) {
-    return await this.mhxyService.accountAdd(dto, req.user.id);
+    return await this.accountService.accountAdd(dto, req.user.id);
   }
 
   /** 编辑账号数据 */
   @Post('/account/edit')
   async accountEdit(@Body() dto: MhxyAccountEditDto, @Req() req: Request) {
-    return await this.mhxyService.accountEdit(dto, req.user.id);
+    return await this.accountService.accountEdit(dto, req.user.id);
   }
 
   /** 删除账号数据 */
   @Post('/account/delete')
   async asscountDelete(@Body() dto: MhxyAccountIdDto, @Req() req: Request) {
-    return await this.mhxyService.accountDelete(dto.id, req.user.id);
+    return await this.accountService.accountDelete(dto.id, req.user.id);
   }
 
   /** 获取角色数据 */
   @Get('/account/role')
   async accountRole() {
-    return await this.mhxyService.accountRole();
+    return await this.accountService.accountRole();
   }
 
   /** 获取门派数据 */
   @Get('/account/sect')
   async accountSect() {
-    return await this.mhxyService.accountSect();
+    return await this.accountService.accountSect();
   }
 
-  /** 获取贸易种类 */
-  @Post('/gold-trade-category/all')
-  async goldTradeCategoryAll(@Body() dto: GoldTradeCategorySearchDto) {
-    return await this.mhxyCategoryService.goldTradeCategoryAll(dto);
+  /** 道具种类-新增 */
+  @Post('/prop-category/add')
+  async propCategoryAdd(@Body() dto: PropCategoryAddDto) {
+    return await this.propCategoryService.propCategoryAdd(dto);
   }
 
-  /** 获取贸易种类-分页 */
-  @Post('/gold-trade-category/list')
-  async goldTradeCategoryList(@Body() dto: CommonPageDto) {
-    return await this.mhxyCategoryService.goldTradeCategoryList(dto);
+  /** 道具种类-编辑 */
+  @Post('/prop-category/edit')
+  async propCategoryEdit(@Body() dto: PropCategoryEditDto) {
+    return await this.propCategoryService.propCategoryEdit(dto);
   }
 
-  /** 贸易种类-新增 */
-  @Post('/gold-trade-category/add')
-  async goldTradeCategoryAdd(@Body() dto: GoldTradeCategoryAddDto) {
-    return await this.mhxyCategoryService.goldTradeCategoryAdd(dto);
+  /** 道具种类-删除 */
+  @Post('/prop-category/delete')
+  async propCategoryDelete(@Body() dto: PropCategoryDeleteDto) {
+    return await this.propCategoryService.propCategoryDelete(dto);
   }
 
-  /** 贸易种类-编辑 */
-  @Post('/gold-trade-category/edit')
-  async goldTradeCategoryEdit(@Body() dto: GoldTradeCategoryEditDto) {
-    return await this.mhxyCategoryService.goldTradeCategoryEdit(dto);
-  }
-
-  /** 贸易种类-删除 */
-  @Post('/gold-trade-category/delete')
-  async goldTradeCategoryDelete(@Body() dto: GoldTradeCategoryDeleteDto) {
-    return await this.mhxyCategoryService.goldTradeCategoryDelete(dto);
-  }
-
-  /** 获取金币收支记录 */
-  @Post('/account/gold-record/list')
-  async goldRecordList(@Body() dto: CommonPageDto, @Req() req: Request) {
-    return await this.mhxyAccountGoldRecordService.goldRecordList(dto, req.user.id);
-  }
-
-  /** 新增金币收支记录 */
-  @Post('/account/gold-record/add')
-  async goldRecordAdd(@Body() dto: GoldRecordDto, @Req() req: Request) {
-    return await this.mhxyAccountGoldRecordService.goldRecordAdd(dto, req.user.id);
-  }
-
-  /** 获取转金记录 */
-  @Post('/account/gold-transfer/list')
-  async goldTransferList(@Body() dto: CommonPageDto, @Req() req: Request) {
-    return await this.mhxyAccountGoldTransferService.goldTransferList(dto, req.user.id);
-  }
-
-  /** 获取转金记录 */
-  @Post('/account/gold-transfer/info')
-  async goldTransferInfo(@Body() dto: GoldTransferInfoDto, @Req() req: Request) {
-    return await this.mhxyAccountGoldTransferService.goldTransferInfo(dto, req.user.id);
-  }
-
-  /** 新增转金 */
-  @Post('/account/gold-transfer/add')
-  async goldTransferAdd(@Body() dto: GoldTransferDto, @Req() req: Request) {
-    return await this.mhxyAccountGoldTransferService.goldTransferAdd(dto, req.user.id);
-  }
-
-  /** 珍品转金完成 */
-  @Post('/account/gold-transfer/finish')
-  async goldTransferFinish(@Body() dto: GoldTransferFinishDto, @Req() req: Request) {
-    return await this.mhxyAccountGoldTransferService.goldTransferFinish(dto, req.user.id);
+  /** 道具种类-列表 */
+  @Post('/prop-category/list')
+  async propCategoryList() {
+    return await this.propCategoryService.propCategoryList();
   }
 }

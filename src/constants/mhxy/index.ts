@@ -16,10 +16,14 @@ export const MHXY_ACCOUNT_GOLD_RECORD_LENGTH: Record<MhxyAccountGoldRecordKey, n
   REMARK_MAX: 256,
 };
 
-export const MHXY_GOLD_TRADE_CATEGORY_LENGTH: Record<MhxyGoldTradeCategoryKey, number> = {
+/** 梦幻道具种类字段长度 */
+export const MHXY_PROP_CATEGORY_LENGTH: Record<MhxyGoldTradeCategoryKey, number> = {
   /** 名称最大长度 */
   NAME_MAX: 16,
 };
+
+/** 梦幻道具种类顶级标识 */
+export const MHXY_PROP_CATEGORY_TOP_FLAG = 0;
 
 /** 角色列表 */
 export const MHXY_ACCOUNT_ROLE_OPTS: MhxyAccountRole[] = [

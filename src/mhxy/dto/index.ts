@@ -2,10 +2,11 @@ import { Allow, IsBoolean, IsIn, IsInt, IsNotEmpty, Length, Min, Validate } from
 import {
   MHXY_ACCOUNT_GOLD_RECORD_LENGTH,
   MHXY_ACCOUNT_LENGTH,
-  MHXY_GOLD_TRADE_CATEGORY_LENGTH,
+  MHXY_PROP_CATEGORY_LENGTH,
 } from 'src/constants';
 import { MhxyRoleValidator, MhxySectValidator } from './custom-validation';
 import { GoldTransferFinishStatus } from '../constants';
+import { MhxyPropCategory } from 'src/entities';
 
 export class MhxyAccountIdDto {
   @IsNotEmpty({ message: 'id 不能为空' })
@@ -80,8 +81,8 @@ export class GoldTradeCategorySearchDto {
 /** 贸易种类新增 */
 export class GoldTradeCategoryAddDto {
   @IsNotEmpty({ message: 'name 不能为空' })
-  @Length(1, MHXY_GOLD_TRADE_CATEGORY_LENGTH.NAME_MAX, {
-    message: `name 长度为 1 - ${MHXY_GOLD_TRADE_CATEGORY_LENGTH.NAME_MAX} 个字符`,
+  @Length(1, MHXY_PROP_CATEGORY_LENGTH.NAME_MAX, {
+    message: `name 长度为 1 - ${MHXY_PROP_CATEGORY_LENGTH.NAME_MAX} 个字符`,
   })
   /** 种类名称 */
   name: string;
@@ -147,4 +148,33 @@ export class GoldTransferFinishDto {
     message: 'status 错误',
   })
   status: GoldTransferFinishStatus;
+}
+
+/** 道具种类 */
+export class PropCategoryBaseDto {
+  @IsNotEmpty({ message: 'name 不能为空' })
+  @Length(1, MHXY_PROP_CATEGORY_LENGTH.NAME_MAX, {
+    message: `name 长度为 1 - ${MHXY_PROP_CATEGORY_LENGTH.NAME_MAX} 个字符`,
+  })
+  name: MhxyPropCategory['name'];
+  @Allow()
+  isGem: boolean;
+}
+
+/** 道具种类-新增 */
+export class PropCategoryAddDto extends PropCategoryBaseDto {
+  @Allow()
+  parentId?: MhxyPropCategory['id'];
+}
+
+/** 道具种类-编辑 */
+export class PropCategoryEditDto extends PropCategoryBaseDto {
+  @IsNotEmpty({ message: 'id 不能为空' })
+  id: MhxyPropCategory['id'];
+}
+
+/** 道具种类-删除 */
+export class PropCategoryDeleteDto {
+  @IsNotEmpty({ message: 'id 不能为空' })
+  id: MhxyPropCategory['id'];
 }

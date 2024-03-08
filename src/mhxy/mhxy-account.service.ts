@@ -8,7 +8,8 @@ import { MhxyAccountDto, MhxyAccountEditDto, MhxyAccountIdDto } from './dto';
 import { UserService } from '../user/user.service';
 
 @Injectable()
-export class MhxyService {
+/** 梦幻账号相关服务 */
+export class MhxyAccountService {
   constructor(
     @InjectRepository(MhxyAccount)
     private readonly mhxyAccountRepository: Repository<MhxyAccount>,
