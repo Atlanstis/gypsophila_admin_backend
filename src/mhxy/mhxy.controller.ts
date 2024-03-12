@@ -1,8 +1,10 @@
 import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { Request } from 'express';
-import { MhxyAccountService } from './mhxy-account.service';
 import { CommonPageDto, JwtGuard } from 'src/core';
 import {
+  ChannelAddDto,
+  ChannelDeleteDto,
+  ChannelEditDto,
   MhxyAccountDto,
   MhxyAccountEditDto,
   MhxyAccountIdDto,
@@ -10,7 +12,9 @@ import {
   PropCategoryDeleteDto,
   PropCategoryEditDto,
 } from './dto';
+import { MhxyAccountService } from './mhxy-account.service';
 import { MhxyPropCategoryService } from './mhxy-prop-category.service';
+import { MhxyChannelService } from './mhxy-channel.service';
 
 @Controller('mhxy')
 @UseGuards(JwtGuard)
@@ -18,6 +22,7 @@ export class MhxyController {
   constructor(
     private readonly accountService: MhxyAccountService,
     private readonly propCategoryService: MhxyPropCategoryService,
+    private readonly channelService: MhxyChannelService,
   ) {}
 
   /** 获取梦幻账号数据 */
@@ -84,5 +89,29 @@ export class MhxyController {
   @Post('/prop-category/list')
   async propCategoryList() {
     return await this.propCategoryService.propCategoryList();
+  }
+
+  /** 途径-列表 */
+  @Post('/channel/list')
+  async channelList() {
+    return await this.channelService.channelList();
+  }
+
+  /** 途径-新增 */
+  @Post('/channel/add')
+  async channelAdd(@Body() dto: ChannelAddDto) {
+    return await this.channelService.channelAdd(dto);
+  }
+
+  /** 途径-编辑 */
+  @Post('/channel/edit')
+  async channelEdit(@Body() dto: ChannelEditDto) {
+    return await this.channelService.channelEdit(dto);
+  }
+
+  /** 途径-删除 */
+  @Post('/channel/delete')
+  async channelDelete(@Body() dto: ChannelDeleteDto) {
+    return await this.channelService.channelDelete(dto);
   }
 }

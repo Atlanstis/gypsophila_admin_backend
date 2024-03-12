@@ -1,7 +1,8 @@
 type MhxyAccountKey = 'ID_MAX' | 'NAME_MAX';
 type MhxyAccountRole = { label: string; value: string; type: '人' | '魔' | '仙' };
 type MhxyAccountSEct = { label: string; value: string };
-type MhxyGoldTradeCategoryKey = 'NAME_MAX';
+type MhxyPropCategoryKey = 'NAME_MAX';
+type MhxyChannelKey = 'NAME_MAX' | 'KEY_MAX';
 type MhxyAccountGoldRecordKey = 'REMARK_MAX';
 
 export const MHXY_ACCOUNT_LENGTH: Record<MhxyAccountKey, number> = {
@@ -17,13 +18,23 @@ export const MHXY_ACCOUNT_GOLD_RECORD_LENGTH: Record<MhxyAccountGoldRecordKey, n
 };
 
 /** 梦幻道具种类字段长度 */
-export const MHXY_PROP_CATEGORY_LENGTH: Record<MhxyGoldTradeCategoryKey, number> = {
+export const MHXY_PROP_CATEGORY_LENGTH: Record<MhxyPropCategoryKey, number> = {
   /** 名称最大长度 */
   NAME_MAX: 16,
 };
 
 /** 梦幻道具种类顶级标识 */
 export const MHXY_PROP_CATEGORY_TOP_FLAG = 0;
+
+/** 梦幻途径字段长度 */
+export const MHXY_CHANNEL_LENGTH: Record<MhxyChannelKey, number> = {
+  /** 名称最大长度 */
+  NAME_MAX: 16,
+  /** key 最大长度 */
+  KEY_MAX: 16,
+};
+/** 梦幻途径顶级标识 */
+export const MHXY_CHANNEL_TOP_FLAG = 0;
 
 /** 角色列表 */
 export const MHXY_ACCOUNT_ROLE_OPTS: MhxyAccountRole[] = [

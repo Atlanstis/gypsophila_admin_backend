@@ -7,6 +7,7 @@ import {
 import { MhxyRoleValidator, MhxySectValidator } from './custom-validation';
 import { GoldTransferFinishStatus } from '../constants';
 import { MhxyPropCategory } from 'src/entities';
+export * from './channel';
 
 export class MhxyAccountIdDto {
   @IsNotEmpty({ message: 'id 不能为空' })
