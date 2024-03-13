@@ -1,13 +1,11 @@
+export * from './channel.dto';
+export * from './gold-record.dto';
+
 import { Allow, IsBoolean, IsIn, IsInt, IsNotEmpty, Length, Min, Validate } from 'class-validator';
-import {
-  MHXY_ACCOUNT_GOLD_RECORD_LENGTH,
-  MHXY_ACCOUNT_LENGTH,
-  MHXY_PROP_CATEGORY_LENGTH,
-} from 'src/constants';
+import { MHXY_ACCOUNT_LENGTH, MHXY_PROP_CATEGORY_LENGTH } from 'src/constants';
 import { MhxyRoleValidator, MhxySectValidator } from './custom-validation';
 import { GoldTransferFinishStatus } from '../constants';
 import { MhxyPropCategory } from 'src/entities';
-export * from './channel';
 
 export class MhxyAccountIdDto {
   @IsNotEmpty({ message: 'id 不能为空' })
@@ -54,22 +52,6 @@ export class MhxyAccountDto extends MhxyAccountEditDto {
   @IsInt({ message: 'lockGold 必须为整数' })
   /**  金币数量 */
   lockGold: number;
-}
-
-/** 金币收支记录 */
-export class GoldRecordDto {
-  @IsNotEmpty({ message: 'gold 不能为空' })
-  @IsInt({ message: 'gold 必须为整数' })
-  nowGold: number;
-  @IsNotEmpty({ message: 'accountId 不能为空' })
-  accountId: string;
-  @IsNotEmpty({ message: 'categoryId 不能为空' })
-  categoryId: number;
-  @Allow()
-  @Length(0, MHXY_ACCOUNT_GOLD_RECORD_LENGTH.REMARK_MAX, {
-    message: `remark 最大长度为 ${MHXY_ACCOUNT_GOLD_RECORD_LENGTH.REMARK_MAX}`,
-  })
-  remark: string;
 }
 
 /** 贸易种类查询 */

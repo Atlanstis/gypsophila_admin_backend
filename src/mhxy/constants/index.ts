@@ -1,3 +1,6 @@
+export * from './gold-record';
+export * from './channel';
+
 /** 珍品转金完成状态 */
 export enum GoldTransferFinishStatus {
   SUCCESS = 'success',

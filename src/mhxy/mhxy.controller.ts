@@ -5,6 +5,9 @@ import {
   ChannelAddDto,
   ChannelDeleteDto,
   ChannelEditDto,
+  GoldRecordAddDto,
+  GoldRecordCompleteDto,
+  GoldRecordIdDto,
   MhxyAccountDto,
   MhxyAccountEditDto,
   MhxyAccountIdDto,
@@ -15,6 +18,7 @@ import {
 import { MhxyAccountService } from './mhxy-account.service';
 import { MhxyPropCategoryService } from './mhxy-prop-category.service';
 import { MhxyChannelService } from './mhxy-channel.service';
+import { MhxyAccountGoldRecordService } from './mhxy-account-gold-record.service';
 
 @Controller('mhxy')
 @UseGuards(JwtGuard)
@@ -23,6 +27,7 @@ export class MhxyController {
     private readonly accountService: MhxyAccountService,
     private readonly propCategoryService: MhxyPropCategoryService,
     private readonly channelService: MhxyChannelService,
+    private readonly accountGoldRecordService: MhxyAccountGoldRecordService,
   ) {}
 
   /** 获取梦幻账号数据 */
@@ -113,5 +118,29 @@ export class MhxyController {
   @Post('/channel/delete')
   async channelDelete(@Body() dto: ChannelDeleteDto) {
     return await this.channelService.channelDelete(dto);
+  }
+
+  /** 金币收支记录-分页 */
+  @Post('account/gold-record/list')
+  async goldRecordList(@Body() dto: CommonPageDto, @Req() req: Request) {
+    return this.accountGoldRecordService.goldRecordList(dto, req.user.id);
+  }
+
+  /** 金币收支记录-新增 */
+  @Post('account/gold-record/add')
+  async goldRecordAdd(@Body() dto: GoldRecordAddDto, @Req() req: Request) {
+    return this.accountGoldRecordService.goldRecordAdd(dto, req.user.id);
+  }
+
+  /** 金币收支记录-分页 */
+  @Post('account/gold-record/info')
+  async goldRecordInfo(@Body() dto: GoldRecordIdDto, @Req() req: Request) {
+    return this.accountGoldRecordService.goldRecordInfo(dto, req.user.id);
+  }
+
+  /** 金币收支记录-完成 */
+  @Post('account/gold-record/complete')
+  async goldRecordComplete(@Body() dto: GoldRecordCompleteDto, @Req() req: Request) {
+    return this.accountGoldRecordService.goldRecordComplete(dto, req.user.id);
   }
 }

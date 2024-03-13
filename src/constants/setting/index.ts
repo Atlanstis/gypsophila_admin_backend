@@ -14,3 +14,5 @@ export const WEBSITE_NAME = 'WEBSITE_NAME';
 export const WEBSITE_RECORD_NUMBER = 'WEBSITE_RECORD_NUMBER';
 /** 是否显示备案号 */
 export const WEBSITE_SHOW_RECORD_NUMBER = 'WEBSITE_SHOW_RECORD_NUMBER';
+/** 梦幻西游交易税率(%) */
+export const MHXY_TRADE_TAX = 'MHXY_TRADE_TAX';
