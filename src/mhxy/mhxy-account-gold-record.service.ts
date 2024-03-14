@@ -255,8 +255,20 @@ export class MhxyAccountGoldRecordService {
     await manager.save(record);
     // 更新用户金币数量
     if (status === MHXY_GOLD_RECORD_STATUS.COMPLETE) {
+      let lockGold = account.lockGold;
+      if (channel.key === MHXY_CHANNEL_DEFAULT_KEY.GOLD_LOCK) {
+        // 金币被锁
+        lockGold += amount;
+      } else if (channel.key === MHXY_CHANNEL_DEFAULT_KEY.GOLD_UNLOCK) {
+        // 金币解锁
+        lockGold -= amount;
+        if (lockGold < 0) {
+          throw new BusinessException('输入金额大于被锁的金币数，请检查后操作');
+        }
+      }
       await manager.update(MhxyAccount, account.id, {
         gold: accountNowGold,
+        lockGold,
       });
     }
   }
