@@ -4,6 +4,7 @@ import {
   MHXY_GOLD_RECORD_AMOUNT_TYPE,
   MHXY_GOLD_RECORD_COMPLETE_STATUS,
   MHXY_GOLD_RECORD_STATUS,
+  MHXY_GOLD_RECORD_TYPE,
 } from '../constants';
 
 /** 金币收支记录 */
@@ -27,7 +28,7 @@ export class GoldRecordAddDto {
 
   /** 收支类型: expenditure-支出,revenue-收入 */
   @Allow()
-  type: 'expenditure' | 'revenue';
+  type: MHXY_GOLD_RECORD_TYPE;
 
   /** 涉及金额 */
   @Allow()

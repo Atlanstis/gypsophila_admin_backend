@@ -76,13 +76,3 @@ export const MHXY_ACCOUNT_SECT_OPTS: MhxyAccountSEct[] = [
   { label: '花果山', value: 'hgs' },
   { label: '须弥海', value: 'xmh' },
 ];
-
-/** 转金状态 */
-export enum AccountGoldTransferStatus {
-  /** 进行中 */
-  progress = 'progress',
-  /** 转金成功 */
-  success = 'success',
-  /** 转金失败，转出账号金币被锁 */
-  failFromLock = 'failFromLock',
-}

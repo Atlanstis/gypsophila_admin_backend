@@ -1,5 +1,6 @@
 export * from './gold-record';
 export * from './channel';
+export * from './gold-transfer';
 
 /** 珍品转金完成状态 */
 export enum GoldTransferFinishStatus {

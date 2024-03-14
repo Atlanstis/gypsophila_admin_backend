@@ -5,14 +5,16 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import {
   MhxyAccount,
   MhxyAccountGoldRecord,
+  MhxyAccountGoldTransfer,
   MhxyChannel,
   MhxyPropCategory,
-  SystemSetting,
 } from 'src/entities';
 import { UserModule } from 'src/user/user.module';
+import { SettingModule } from 'src/setting/setting.module';
 import { MhxyPropCategoryService } from './mhxy-prop-category.service';
 import { MhxyChannelService } from './mhxy-channel.service';
 import { MhxyAccountGoldRecordService } from './mhxy-account-gold-record.service';
+import { MhxyAccountGoldTransferService } from './mhxy-account-gold-transfer.service';
 
 @Module({
   imports: [
@@ -21,9 +23,10 @@ import { MhxyAccountGoldRecordService } from './mhxy-account-gold-record.service
       MhxyPropCategory,
       MhxyChannel,
       MhxyAccountGoldRecord,
-      SystemSetting,
+      MhxyAccountGoldTransfer,
     ]),
     UserModule,
+    SettingModule,
   ],
   controllers: [MhxyController],
   providers: [
@@ -31,6 +34,7 @@ import { MhxyAccountGoldRecordService } from './mhxy-account-gold-record.service
     MhxyPropCategoryService,
     MhxyChannelService,
     MhxyAccountGoldRecordService,
+    MhxyAccountGoldTransferService,
   ],
 })
 export class MhxyModule {}

@@ -4,6 +4,7 @@ import { User } from '../user.entity';
 import { MhxyAccount } from './mhxy-account.entity';
 import { MhxyChannel } from './mhxy-channel.entity';
 import { MhxyPropCategory } from './mhxy-prop-category.entity';
+import { MhxyAccountGoldTransfer } from './mhxy-account-gold-transfer.entity';
 
 /** 梦幻账号金币收支记录表 */
 @Entity({ name: 'mhxy_account_gold_record', orderBy: { createTime: 'DESC' } })
@@ -61,13 +62,10 @@ export class MhxyAccountGoldRecord {
     default: () => 'CURRENT_TIMESTAMP',
   })
   createTime: Date;
-
-  /** 处理单条记录时，计算实际金额 */
-  realAmount?: number;
-  // @ManyToOne(() => MhxyAccountGoldTransfer, (transfer) => transfer.records, {
-  //   onDelete: 'CASCADE',
-  //   onUpdate: 'CASCADE',
-  // })
-  // @JoinColumn({ name: 'transfer_id' })
-  // transfer: MhxyAccountGoldTransfer;
+  @ManyToOne(() => MhxyAccountGoldTransfer, (transfer) => transfer.records, {
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  })
+  @JoinColumn({ name: 'transfer_id' })
+  transfer: MhxyAccountGoldTransfer;
 }

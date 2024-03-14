@@ -2,8 +2,15 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import BigNumber from 'bignumber.js';
 import { BusinessException, CommonPageDto } from 'src/core';
-import { MhxyAccount, MhxyAccountGoldRecord, MhxyChannel, SystemSetting } from 'src/entities';
-import { DataSource, FindOptionsWhere, Repository } from 'typeorm';
+import {
+  MhxyAccount,
+  MhxyAccountGoldRecord,
+  MhxyAccountGoldTransfer,
+  MhxyChannel,
+  MhxyPropCategory,
+  User,
+} from 'src/entities';
+import { DataSource, EntityManager, FindOptionsWhere, Repository } from 'typeorm';
 import { UserService } from 'src/user/user.service';
 import { MhxyAccountService } from './mhxy-account.service';
 import { GoldRecordAddDto, GoldRecordCompleteDto, GoldRecordIdDto } from './dto';
@@ -15,6 +22,7 @@ import {
   MHXY_GOLD_RECORD_TYPE,
 } from './constants';
 import { MHXY_TRADE_TAX } from 'src/constants';
+import { SettingService } from 'src/setting/setting.service';
 
 @Injectable()
 /** 金币收支记录相关服务 */
@@ -24,8 +32,7 @@ export class MhxyAccountGoldRecordService {
     private readonly goldRecordRepository: Repository<MhxyAccountGoldRecord>,
     @InjectRepository(MhxyChannel)
     private readonly channelRepository: Repository<MhxyChannel>,
-    @InjectRepository(SystemSetting)
-    private readonly systemSettingRepository: Repository<SystemSetting>,
+    private readonly settingService: SettingService,
     private readonly userService: UserService,
     private readonly mhxyAccountService: MhxyAccountService,
     private dataSource: DataSource,
@@ -76,46 +83,44 @@ export class MhxyAccountGoldRecordService {
     await queryRunner.connect();
     try {
       await queryRunner.startTransaction();
-      let accountNowGold = account.gold;
       if (dto.amountType === MHXY_GOLD_RECORD_AMOUNT_TYPE.BY_ACCOUNT_NOW_AMOUNT) {
         // 按账号当前金币数计算收支
         const diff = dto.nowAmount - account.gold;
         if (diff === 0) {
           throw new BusinessException('当前账号金币余额未发生变化');
         }
-        const record = this.goldRecordRepository.create({
+        const amount = Math.abs(diff);
+        const type = diff > 0 ? MHXY_GOLD_RECORD_TYPE.REVENUE : MHXY_GOLD_RECORD_TYPE.EXPENDITURE;
+        await this.createGoldRecord(
+          queryRunner.manager,
           account,
           user,
           channel,
-          amount: Math.abs(diff),
-          type: diff > 0 ? MHXY_GOLD_RECORD_TYPE.REVENUE : MHXY_GOLD_RECORD_TYPE.EXPENDITURE,
-          status: dto.status,
-          remark: dto.remark,
-        });
-        await queryRunner.manager.save(record);
-        accountNowGold = dto.nowAmount;
+          null,
+          amount,
+          type,
+          dto.status,
+          dto.nowAmount,
+          dto.remark,
+        );
       } else if (dto.amountType === MHXY_GOLD_RECORD_AMOUNT_TYPE.BY_AMOUNT) {
         // 按涉及金额计算收支
-        const record = this.goldRecordRepository.create({
-          account,
-          user,
-          channel,
-          amount: dto.amount,
-          type: dto.type,
-          status: dto.status,
-          remark: dto.remark,
-        });
-        await queryRunner.manager.save(record);
-        accountNowGold =
+        const accountNowGold =
           dto.type === MHXY_GOLD_RECORD_TYPE.REVENUE
             ? account.gold + dto.amount
             : account.gold - dto.amount;
-      }
-      if (dto.status === MHXY_GOLD_RECORD_STATUS.COMPLETE) {
-        // 更新账号金币余额
-        await queryRunner.manager.update(MhxyAccount, account.id, {
-          gold: accountNowGold,
-        });
+        await this.createGoldRecord(
+          queryRunner.manager,
+          account,
+          user,
+          channel,
+          null,
+          dto.amount,
+          dto.type,
+          dto.status,
+          accountNowGold,
+          dto.remark,
+        );
       }
       // 提交事务
       await queryRunner.commitTransaction();
@@ -145,24 +150,21 @@ export class MhxyAccountGoldRecordService {
     if (!record) {
       throw new BusinessException('当前记录不存在，或者无查看的权限');
     }
-    record.realAmount = record.amount;
+    let realAmount = record.amount;
     if (
       record.channel.key === MHXY_CHANNEL_DEFAULT_KEY.TRADE &&
       record.type === MHXY_GOLD_RECORD_TYPE.REVENUE
     ) {
       // 途径为交易的情况下，获得收入时会被收税
-      const tax = await this.systemSettingRepository.findOne({ where: { key: MHXY_TRADE_TAX } });
-      if (!tax) {
-        throw new BusinessException('请先设置 MHXY_TRADE_TAX');
-      }
-      if (isNaN(Number(tax.value))) {
-        throw new BusinessException('MHXY_TRADE_TAX 设置错误');
-      }
-      record.realAmount = Number(
+      const tax = await this.settingService.getSettingByKey(MHXY_TRADE_TAX, [
+        [(tax) => !tax, '请先设置 MHXY_TRADE_TAX'],
+        [(tax) => isNaN(Number(tax.value)), 'MHXY_TRADE_TAX 设置错误'],
+      ]);
+      realAmount = Number(
         new BigNumber(record.amount * (100 - Number(tax.value)) * 0.01).toFixed(0),
       );
     }
-    return record;
+    return { record, realAmount };
   }
 
   /** 处理未完成的收支记录 */
@@ -213,45 +215,51 @@ export class MhxyAccountGoldRecordService {
   }
 
   /**
-   * 创建收支记录
-   * @param manager 事务对象
-   * @param nowGold 账号当前金币数
-   * @param user 归属系统用户
-   * @param account 归属梦幻账户
-   * @param category 贸易种类
+   * 创建金币收支记录，并更新账号金币数
+   * @param manager EntityManager
+   * @param account 账号
+   * @param user 归属用户
+   * @param channel 途径
+   * @param propCategory 道具种类
+   * @param amount 金额
+   * @param type 收入/支出
+   * @param status 状态
+   * @param accountNowGold 用户金币数
    * @param remark 备注
-   * @param isTransfer 是否是转金
-   * @param transfer 转金记录
    */
-  // async createGoldRecord(
-  //   manager: EntityManager,
-  //   nowGold: number,
-  //   user: User,
-  //   account: MhxyAccount,
-  //   category: MhxyGoldTradeCategory,
-  //   remark: string,
-  //   isTransfer: boolean = false,
-  //   transfer: MhxyAccountGoldTransfer | null = null,
-  // ) {
-  //   // 创建收支记录
-  //   const amount = nowGold - account.gold;
-  //   const accountGoldRecord = this.accountGoldRecordRepository.create({
-  //     amount,
-  //     afterGold: nowGold,
-  //     beforeGold: account.gold,
-  //     type: amount > 0 ? 'revenue' : 'expenditure',
-  //     user,
-  //     account,
-  //     category,
-  //     remark,
-  //     isTransfer,
-  //     transfer,
-  //   });
-  //   await manager.save(accountGoldRecord);
-  //   // 更新用户金币数量
-  //   account.gold = nowGold;
-  //   await manager.save(account);
-  // }
+  async createGoldRecord(
+    manager: EntityManager,
+    account: MhxyAccount,
+    user: User,
+    channel: MhxyChannel,
+    propCategory: MhxyPropCategory | null,
+    amount: number,
+    type: MHXY_GOLD_RECORD_TYPE,
+    status: MHXY_GOLD_RECORD_STATUS,
+    accountNowGold: number,
+    remark: string,
+    transfer: MhxyAccountGoldTransfer = null,
+  ) {
+    // 创建收支记录
+    const record = this.goldRecordRepository.create({
+      account,
+      user,
+      channel,
+      propCategory,
+      amount,
+      type,
+      status,
+      remark,
+      transfer,
+    });
+    await manager.save(record);
+    // 更新用户金币数量
+    if (status === MHXY_GOLD_RECORD_STATUS.COMPLETE) {
+      await manager.update(MhxyAccount, account.id, {
+        gold: accountNowGold,
+      });
+    }
+  }
 
   async findGoldRecord(where: FindOptionsWhere<MhxyAccountGoldRecord>) {
     return await this.goldRecordRepository.findOne({ where });

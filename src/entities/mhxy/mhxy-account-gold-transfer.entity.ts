@@ -1,9 +1,9 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { MhxyAccount } from './mhxy-account.entity';
-import { MhxyGoldTradeCategory } from './mhxy-gold-trade-category.entity';
 import { User } from '../user.entity';
+import { MhxyPropCategory } from './mhxy-prop-category.entity';
+import { MHXY_GOLD_TRANSFER_STATUS } from '../../mhxy/constants';
 import { MhxyAccountGoldRecord } from './mhxy-account-gold-record.entity';
-import { AccountGoldTransferStatus } from '../../constants';
 
 @Entity({ name: 'mhxy_account_gold_transfer', orderBy: { createTime: 'DESC' } })
 export class MhxyAccountGoldTransfer {
@@ -14,6 +14,7 @@ export class MhxyAccountGoldTransfer {
   @ManyToOne(() => MhxyAccount, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
+    nullable: false,
   })
   @JoinColumn({ name: 'from_account_id' })
   fromAccount: MhxyAccount;
@@ -22,53 +23,35 @@ export class MhxyAccountGoldTransfer {
   @ManyToOne(() => MhxyAccount, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
+    nullable: false,
   })
   @JoinColumn({ name: 'to_account_id' })
   toAccount: MhxyAccount;
 
+  @ManyToOne(() => MhxyPropCategory, { nullable: false })
+  @JoinColumn({ name: 'prop_category_id' })
+  propCategory: MhxyPropCategory;
+
   /** 归属系统用户 */
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, {
+    nullable: false,
+  })
   @JoinColumn({ name: 'user_id' })
   user: User;
 
-  @Column({ comment: '转出账号转金前金币数量', name: 'from_before_gold', default: 0 })
-  fromBeforeGold: number;
+  @Column({ comment: '支出金额', name: 'expenditure_amount', default: 0 })
+  expenditureAmount: number;
 
-  @Column({ comment: '转出账号转金前后金币数量', name: 'from_after_gold', default: 0 })
-  fromAfterGold: number;
-
-  @Column({ comment: '转入账号转金前金币数量', name: 'to_before_gold', default: 0 })
-  toBeforeGold: number;
-
-  @Column({ comment: '转入账号转金后金币数量', name: 'to_after_gold', default: 0 })
-  toAfterGold: number;
-
-  /** 贸易种类 */
-  @ManyToOne(() => MhxyGoldTradeCategory)
-  @JoinColumn({ name: 'gold_trade_category_id' })
-  category: MhxyGoldTradeCategory;
-
-  @Column({ comment: '是否是珍品转金', name: 'is_gem', default: false })
-  isGem: boolean;
-
-  @Column({ comment: '珍品交易金额', name: 'gold_amount', default: 0 })
-  goldAmount: number;
-
-  @Column({
-    comment: '珍品交易审核结束时间',
-    name: 'audit_end_time',
-    type: 'timestamp',
-    nullable: true,
-  })
-  auditEndTime: Date;
+  @Column({ comment: '收入金额', name: 'revenue_amount', default: 0 })
+  revenueAmount: number;
 
   @Column({
     comment: '状态',
     type: 'enum',
-    enum: AccountGoldTransferStatus,
-    default: AccountGoldTransferStatus.progress,
+    enum: MHXY_GOLD_TRANSFER_STATUS,
+    default: MHXY_GOLD_TRANSFER_STATUS.PROGRESS,
   })
-  status: AccountGoldTransferStatus;
+  status: MHXY_GOLD_TRANSFER_STATUS;
 
   @Column({
     comment: '转金时间',

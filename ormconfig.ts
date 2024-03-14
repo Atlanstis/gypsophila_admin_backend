@@ -20,6 +20,7 @@ import {
   MhxyPropCategory,
   MhxyChannel,
   MhxyAccountGoldRecord,
+  MhxyAccountGoldTransfer,
 } from './src/entities';
 
 const mysqlConfing = config().mysql as {
@@ -53,6 +54,7 @@ export const ormConfig: DataSourceOptions = {
     MhxyPropCategory,
     MhxyChannel,
     MhxyAccountGoldRecord,
+    MhxyAccountGoldTransfer,
   ],
   ...mysqlConfing,
   dateStrings: true,

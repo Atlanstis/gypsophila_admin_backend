@@ -1,10 +1,10 @@
 export * from './channel.dto';
 export * from './gold-record.dto';
+export * from './gold-transfer.dto';
 
-import { Allow, IsBoolean, IsIn, IsInt, IsNotEmpty, Length, Min, Validate } from 'class-validator';
+import { Allow, IsBoolean, IsInt, IsNotEmpty, Length, Min, Validate } from 'class-validator';
 import { MHXY_ACCOUNT_LENGTH, MHXY_PROP_CATEGORY_LENGTH } from 'src/constants';
 import { MhxyRoleValidator, MhxySectValidator } from './custom-validation';
-import { GoldTransferFinishStatus } from '../constants';
 import { MhxyPropCategory } from 'src/entities';
 
 export class MhxyAccountIdDto {
@@ -87,50 +87,6 @@ export class GoldTradeCategoryEditDto extends GoldTradeCategoryAddDto {
 export class GoldTradeCategoryDeleteDto {
   @IsNotEmpty({ message: 'id 不能为空' })
   id: number;
-}
-
-/** 转金 */
-export class GoldTransferDto {
-  @IsNotEmpty({ message: 'toAccountId 不能为空' })
-  /** 转入账号 id */
-  toAccountId: string;
-  @IsNotEmpty({ message: 'fromAccountId 不能为空' })
-  /** 转出账号 id */
-  fromAccountId: string;
-  @IsNotEmpty({ message: 'categoryId 不能为空' })
-  /** 贸易种类 id */
-  categoryId: number;
-  @Allow()
-  /** 转出账号金币数 */
-  fromNowGold: number;
-  @Allow()
-  /** 转入账号金币数 */
-  toNowGold: number;
-  @Allow()
-  /** 珍品交易金额 */
-  goldAmount: number;
-  @Allow()
-  /** 审核所需时间 */
-  auditEndHours: number;
-}
-
-/** 查询单个转金信息 */
-export class GoldTransferInfoDto {
-  @IsNotEmpty({ message: 'id 不能为空' })
-  id: number;
-}
-
-export class GoldTransferFinishDto {
-  @IsNotEmpty({ message: 'id 不能为空' })
-  id: number;
-  @IsNotEmpty({ message: 'amount 不能为空' })
-  @IsInt({ message: 'amount 必须为整数类型' })
-  amount: number;
-  @IsNotEmpty({ message: 'status 不能为空' })
-  @IsIn([GoldTransferFinishStatus.SUCCESS, GoldTransferFinishStatus.FAIL_FROM_LOCK], {
-    message: 'status 错误',
-  })
-  status: GoldTransferFinishStatus;
 }
 
 /** 道具种类 */
