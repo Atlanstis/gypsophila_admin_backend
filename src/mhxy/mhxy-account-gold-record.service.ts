@@ -164,7 +164,7 @@ export class MhxyAccountGoldRecordService {
         new BigNumber(record.amount * (100 - Number(tax.value)) * 0.01).toFixed(0),
       );
     }
-    return { record, realAmount };
+    return { ...record, realAmount };
   }
 
   /** 处理未完成的收支记录 */
