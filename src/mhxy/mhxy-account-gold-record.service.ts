@@ -32,6 +32,8 @@ export class MhxyAccountGoldRecordService {
     private readonly goldRecordRepository: Repository<MhxyAccountGoldRecord>,
     @InjectRepository(MhxyChannel)
     private readonly channelRepository: Repository<MhxyChannel>,
+    @InjectRepository(MhxyPropCategory)
+    private readonly propCategoryRepository: Repository<MhxyPropCategory>,
     private readonly settingService: SettingService,
     private readonly userService: UserService,
     private readonly mhxyAccountService: MhxyAccountService,
@@ -78,6 +80,12 @@ export class MhxyAccountGoldRecordService {
     if (!channel) {
       throw new BusinessException('当前途径不存在，请重新选择');
     }
+    let propCategory: MhxyPropCategory;
+    if (dto.propCategoryId) {
+      propCategory = await this.propCategoryRepository.findOne({
+        where: { id: dto.propCategoryId },
+      });
+    }
     // 使用事务，发生错误时，回滚操作
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
@@ -96,7 +104,7 @@ export class MhxyAccountGoldRecordService {
           account,
           user,
           channel,
-          null,
+          propCategory,
           amount,
           type,
           dto.status,
@@ -114,7 +122,7 @@ export class MhxyAccountGoldRecordService {
           account,
           user,
           channel,
-          null,
+          propCategory,
           dto.amount,
           dto.type,
           dto.status,

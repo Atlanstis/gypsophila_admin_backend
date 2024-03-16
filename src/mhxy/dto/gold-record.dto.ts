@@ -9,11 +9,17 @@ import {
 
 /** 金币收支记录 */
 export class GoldRecordAddDto {
+  /** 账号 id */
   @IsNotEmpty({ message: 'accountId 不能为空' })
   accountId: string;
 
+  /** 途径 id */
   @IsNotEmpty({ message: 'channelId 不能为空' })
   channelId: number;
+
+  /** 道具种类 id */
+  @Allow()
+  propCategoryId?: number;
 
   /** 类型 0-按涉及金额、1-按账号现有金币数 */
   @IsEnum(
