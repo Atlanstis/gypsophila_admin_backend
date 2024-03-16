@@ -9,12 +9,12 @@ export class MhxyChannel {
 
   @Column({
     comment: '途径 key，唯一，用于业务判断',
-    length: MHXY_CHANNEL_LENGTH.NAME_MAX,
+    length: MHXY_CHANNEL_LENGTH.KEY_MAX,
     nullable: true,
   })
   key: string;
 
-  @Column({ comment: '名称', length: MHXY_CHANNEL_LENGTH.KEY_MAX })
+  @Column({ comment: '名称', length: MHXY_CHANNEL_LENGTH.NAME_MAX })
   name: string;
 
   @Column({ comment: '是否默认', name: 'is_default', default: false })

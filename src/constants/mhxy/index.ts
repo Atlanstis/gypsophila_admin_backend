@@ -31,7 +31,7 @@ export const MHXY_CHANNEL_LENGTH: Record<MhxyChannelKey, number> = {
   /** 名称最大长度 */
   NAME_MAX: 16,
   /** key 最大长度 */
-  KEY_MAX: 16,
+  KEY_MAX: 32,
 };
 /** 梦幻途径顶级标识 */
 export const MHXY_CHANNEL_TOP_FLAG = 0;

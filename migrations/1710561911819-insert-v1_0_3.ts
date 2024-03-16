@@ -1,6 +1,6 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class InsertV1031710397390517 implements MigrationInterface {
+export class InsertV1031710561911819 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     /** 新增梦幻西游菜单 */
     await queryRunner.query(
@@ -48,28 +48,31 @@ export class InsertV1031710397390517 implements MigrationInterface {
 
     /** 新增途径数据 */
     await queryRunner.query(
-      `INSERT INTO \`gypsophila\`.\`mhxy_channel\` (\`id\`, \`key\`, \`name\`, \`is_default\`, \`parent_id\`) VALUES (1, 'DAILY', '日常', 1, 0);`,
+      `INSERT INTO \`gypsophila\`.\`mhxy_channel\` (\`key\`, \`name\`, \`is_default\`, \`parent_id\`) VALUES ('DAILY', '日常', 1, 0);`,
     );
     await queryRunner.query(
-      `INSERT INTO \`gypsophila\`.\`mhxy_channel\` (\`id\`, \`key\`, \`name\`, \`is_default\`, \`parent_id\`) VALUES (2, 'GOLD_TRANSFER', '转金', 1, 0);`,
+      `INSERT INTO \`gypsophila\`.\`mhxy_channel\` (\`key\`, \`name\`, \`is_default\`, \`parent_id\`) VALUES ('GOLD_TRANSFER', '转金', 1, 0);`,
     );
     await queryRunner.query(
-      `INSERT INTO \`gypsophila\`.\`mhxy_channel\` (\`id\`, \`key\`, \`name\`, \`is_default\`, \`parent_id\`) VALUES (3, 'TRADE', '交易', 1, 0);`,
+      `INSERT INTO \`gypsophila\`.\`mhxy_channel\` (\`key\`, \`name\`, \`is_default\`, \`parent_id\`) VALUES ('TRADE', '交易', 1, 0);`,
     );
     await queryRunner.query(
-      `INSERT INTO \`gypsophila\`.\`mhxy_channel\` (\`id\`, \`key\`, \`name\`, \`is_default\`, \`parent_id\`) VALUES (4, 'ACTIVITY', '活动', 1, 0);`,
+      `INSERT INTO \`gypsophila\`.\`mhxy_channel\` (\`key\`, \`name\`, \`is_default\`, \`parent_id\`) VALUES ('ACTIVITY', '活动', 1, 0);`,
     );
     await queryRunner.query(
-      `INSERT INTO \`gypsophila\`.\`mhxy_channel\` (\`id\`, \`key\`, \`name\`, \`is_default\`, \`parent_id\`) VALUES (5, 'SYSTEM', '系统', 1, 0);`,
+      `INSERT INTO \`gypsophila\`.\`mhxy_channel\` ( \`key\`, \`name\`, \`is_default\`, \`parent_id\`) VALUES ('SYSTEM', '系统', 1, 0);`,
     );
     await queryRunner.query(
-      `INSERT INTO \`gypsophila\`.\`mhxy_channel\` (\`id\`, \`key\`, \`name\`, \`is_default\`, \`parent_id\`) VALUES (6, 'GOLD_LOCK', '金币被锁', 1, 5);`,
+      `INSERT INTO \`gypsophila\`.\`mhxy_channel\` (\`key\`, \`name\`, \`is_default\`, \`parent_id\`) VALUES ('GOLD_LOCK', '金币被锁', 1, 5);`,
     );
     await queryRunner.query(
-      `INSERT INTO \`gypsophila\`.\`mhxy_channel\` (\`id\`, \`key\`, \`name\`, \`is_default\`, \`parent_id\`) VALUES (7, 'GOLD_UNLOCK', '金币解锁', 1, 5);`,
+      `INSERT INTO \`gypsophila\`.\`mhxy_channel\` (\`key\`, \`name\`, \`is_default\`, \`parent_id\`) VALUES ('GOLD_UNLOCK', '金币解锁', 1, 5);`,
     );
     await queryRunner.query(
-      `INSERT INTO \`gypsophila\`.\`mhxy_channel\` (\`id\`, \`key\`, \`name\`, \`is_default\`, \`parent_id\`) VALUES (8, 'GOLD_DEDUCT', '金币被扣除', 1, 5);`,
+      `INSERT INTO \`gypsophila\`.\`mhxy_channel\` (\`key\`, \`name\`, \`is_default\`, \`parent_id\`) VALUES ('GOLD_DEDUCT', '金币被扣除', 1, 5);`,
+    );
+    await queryRunner.query(
+      `INSERT INTO \`gypsophila\`.\`mhxy_channel\` (\`key\`, \`name\`, \`is_default\`, \`parent_id\`) VALUES ('MANUAL_CALIBRATION', '人工校正', 1, 5);`,
     );
   }
 
