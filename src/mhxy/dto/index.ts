@@ -38,6 +38,9 @@ export class MhxyAccountEditDto extends MhxyAccountIdDto {
   })
   /** 门派 */
   sect: string;
+  @Allow()
+  /** 是否是主号 */
+  isPrimary: boolean;
 }
 
 /** 账号 */
