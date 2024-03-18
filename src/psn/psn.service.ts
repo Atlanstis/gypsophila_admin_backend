@@ -314,6 +314,9 @@ export class PsnService {
         profileGame.bronzeGot = numMap['bronze'];
         await queryRunner.manager.save(profileGame);
       }
+      // 更改游戏同步时间
+      profileGame.syncTime = new Date();
+      await queryRunner.manager.save(profileGame);
       // 提交事务
       await queryRunner.commitTransaction();
       // 更新用户获得的奖杯数量
@@ -364,7 +367,7 @@ export class PsnService {
       take: size,
       where: { profile: { id: profile.id } },
       order: {
-        syncTime: 'ASC',
+        syncTime: 'DESC',
       },
     });
     return { list, total };

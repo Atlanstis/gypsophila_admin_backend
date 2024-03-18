@@ -1,6 +1,6 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { TimeBase } from './base';
-import { PSN_PROFILE_GAME_GUIDE_LENGTH, PSN_PROFILE_GAME_GUIDE_TYPE_ENUM } from '../constants';
+import { TimeBase } from '../base';
+import { PSN_PROFILE_GAME_GUIDE_LENGTH, PSN_PROFILE_GAME_GUIDE_TYPE_ENUM } from '../../constants';
 import { PsnProfileGame } from './psn-profile-game.entity';
 
 @Entity({ name: 'psn_profile_game_guide', orderBy: { updateTime: 'DESC' } })

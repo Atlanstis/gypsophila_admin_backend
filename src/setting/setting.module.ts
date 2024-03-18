@@ -9,5 +9,6 @@ import { RoleModule } from 'src/role/role.module';
   imports: [TypeOrmModule.forFeature([SystemSetting]), RoleModule],
   controllers: [SettingController],
   providers: [SettingService],
+  exports: [SettingService],
 })
 export class SettingModule {}

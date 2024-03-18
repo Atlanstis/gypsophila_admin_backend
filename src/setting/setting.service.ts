@@ -5,6 +5,7 @@ import { SystemSetting } from 'src/entities';
 import { In, Repository } from 'typeorm';
 import { WebsiteDto } from './dto';
 import { RoleService } from 'src/role/role.service';
+import { BusinessException } from 'src/core';
 
 /** 网站设置-字段对应 */
 const transferMap = {
@@ -55,5 +56,26 @@ export class SettingService {
   async getSettingCommonTabs(roleIds: number[]) {
     const rmps = await this.roleService.getPermissionByRoleIds(roleIds);
     return rmps.filter((rmp) => rmp.menu.key === 'Setting_Common').map((rmp) => rmp.permission.key);
+  }
+
+  /**
+   * 根据 key 获取配置
+   * @param key key
+   * @Param actions 判断条件
+   */
+  async getSettingByKey(key: string, actions: [(setting: SystemSetting) => boolean, string][]) {
+    const setting = await this.settingRepository.findOne({
+      where: {
+        key,
+      },
+    });
+    actions.some((item) => {
+      const [flag, str] = item;
+      if (flag(setting)) {
+        throw new BusinessException(str);
+      }
+      return flag;
+    });
+    return setting;
   }
 }

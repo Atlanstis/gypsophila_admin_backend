@@ -14,6 +14,7 @@ import { MenuModule } from './menu/menu.module';
 import { SettingModule } from './setting/setting.module';
 import { ormConfig } from 'ormconfig';
 import { PsnModule } from './psn/psn.module';
+import { MhxyModule } from './mhxy/mhxy.module';
 
 @Module({
   imports: [
@@ -49,6 +50,7 @@ import { PsnModule } from './psn/psn.module';
     MenuModule,
     SettingModule,
     PsnModule,
+    MhxyModule,
   ],
   controllers: [],
   providers: [],
