@@ -149,6 +149,12 @@ export class MhxyController {
     return this.goldRecordService.goldRecordComplete(dto, req.user.id);
   }
 
+  /** 金币收支记录-撤销 */
+  @Post('account/gold-record/revert')
+  async goldRecordRevert(@Body() dto: GoldRecordIdDto, @Req() req: Request) {
+    return this.goldRecordService.goldRecordRevert(dto, req.user.id);
+  }
+
   /** 转金-分页 */
   @Post('account/gold-transfer/list')
   async goldTransferList(@Body() dto: CommonPageDto, @Req() req: Request) {

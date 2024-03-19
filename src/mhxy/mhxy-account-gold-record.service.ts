@@ -175,6 +175,57 @@ export class MhxyAccountGoldRecordService {
     return { ...record, realAmount };
   }
 
+  /** 撤销收支记录 */
+  async goldRecordRevert(dto: GoldRecordIdDto, userId: string) {
+    const record = await this.goldRecordRepository.findOne({
+      where: {
+        id: dto.id,
+        user: {
+          id: userId,
+        },
+      },
+      relations: {
+        account: true,
+        transfer: true,
+      },
+    });
+    if (!record) {
+      throw new BusinessException('当前记录不存在，或者无查看的权限');
+    }
+    // 使用事务，发生错误时，回滚操作
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    try {
+      await queryRunner.startTransaction();
+      if (record.transfer) {
+        // 通过转金途径生成的记录无法撤销
+        throw new BusinessException('当前记录无法撤销，请在转金中进行撤销');
+      }
+      if (record.status === MHXY_GOLD_RECORD_STATUS.COMPLETE) {
+        // 如果是已完成状态，根据收入或支出，修改金额
+        const acount = record.account;
+        let amount = acount.gold;
+        if (record.type === MHXY_GOLD_RECORD_TYPE.REVENUE) {
+          amount = acount.gold - record.amount;
+        } else if (record.type === MHXY_GOLD_RECORD_TYPE.EXPENDITURE) {
+          amount = acount.gold + record.amount;
+        }
+        await queryRunner.manager.update(MhxyAccount, acount.id, {
+          gold: amount,
+        });
+      }
+      // 删除记录
+      await queryRunner.manager.delete(MhxyAccountGoldRecord, record.id);
+      // 提交事务
+      await queryRunner.commitTransaction();
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      throw err;
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
   /** 处理未完成的收支记录 */
   async goldRecordComplete(dto: GoldRecordCompleteDto, userId: string) {
     const record = await this.goldRecordRepository.findOne({
