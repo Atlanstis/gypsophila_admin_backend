@@ -1,13 +1,19 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import BigNumber from 'bignumber.js';
-import { MhxyAccountGoldTransfer, MhxyChannel, MhxyPropCategory } from 'src/entities';
+import {
+  MhxyAccount,
+  MhxyAccountGoldRecord,
+  MhxyAccountGoldTransfer,
+  MhxyChannel,
+  MhxyPropCategory,
+} from 'src/entities';
 import { DataSource, Repository } from 'typeorm';
 import { UserService } from 'src/user/user.service';
 import { MhxyAccountService } from './mhxy-account.service';
 import { BusinessException, CommonPageDto } from 'src/core';
 import { MhxyAccountGoldRecordService } from './mhxy-account-gold-record.service';
-import { GoldTransferDto, GoldTransferFinishDto, GoldTransferInfoDto } from './dto';
+import { GoldTransferDto, GoldTransferFinishDto, GoldTransferIdDto } from './dto';
 import { SettingService } from 'src/setting/setting.service';
 import {
   MHXY_CHANNEL_DEFAULT_KEY,
@@ -187,7 +193,7 @@ export class MhxyAccountGoldTransferService {
   }
 
   /** 单个转金记录 */
-  async goldTransferInfo(dto: GoldTransferInfoDto, userId: string) {
+  async goldTransferInfo(dto: GoldTransferIdDto, userId: string) {
     const goldTransfer = await this.goldTransferRepository.findOne({
       where: {
         id: dto.id,
@@ -298,6 +304,68 @@ export class MhxyAccountGoldTransferService {
       }
       // 更改转金状态
       await queryRunner.manager.save(goldTransfer);
+      // 提交事务
+      await queryRunner.commitTransaction();
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      throw err;
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  /** 转金记录-撤销 */
+  async goldTransferRevert(dto: GoldTransferIdDto, userId: string) {
+    const goldTransfer = await this.goldTransferRepository.findOne({
+      where: {
+        id: dto.id,
+        user: {
+          id: userId,
+        },
+      },
+      relations: {
+        fromAccount: true,
+        toAccount: true,
+        records: true,
+      },
+    });
+    if (!goldTransfer) {
+      throw new BusinessException('当前记录不存在，或者无查看的权限');
+    }
+    // 使用事务，发生错误时，回滚操作
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    try {
+      await queryRunner.startTransaction();
+      let fromAccountAmount = goldTransfer.fromAccount.gold;
+      let toAccountAmount = goldTransfer.toAccount.gold;
+      if (goldTransfer.status === MHXY_GOLD_TRANSFER_STATUS.SUCCESS) {
+        // 已成功，修改转金双方金额
+        fromAccountAmount += goldTransfer.expenditureAmount;
+        toAccountAmount -= goldTransfer.expenditureAmount;
+      } else if (goldTransfer.status === MHXY_GOLD_TRANSFER_STATUS.PROGRESS) {
+        // 进行中，修改转出方金额
+        fromAccountAmount += goldTransfer.expenditureAmount;
+      } else if (goldTransfer.status === MHXY_GOLD_TRANSFER_STATUS.FAIL_FROM_LOCK) {
+        // 转出方锁定，无法撤销
+        throw new BusinessException('转金金币被锁，无法撤销');
+      }
+      // 删除对应收支记录
+      if (goldTransfer.records.length) {
+        await queryRunner.manager.delete(
+          MhxyAccountGoldRecord,
+          goldTransfer.records.map((record) => record.id),
+        );
+      }
+      // 删除转金记录
+      await queryRunner.manager.delete(MhxyAccountGoldTransfer, [goldTransfer.id]);
+      // 修改转金双方金币数量
+      await queryRunner.manager.update(MhxyAccount, goldTransfer.fromAccount.id, {
+        gold: fromAccountAmount,
+      });
+      await queryRunner.manager.update(MhxyAccount, goldTransfer.toAccount.id, {
+        gold: toAccountAmount,
+      });
       // 提交事务
       await queryRunner.commitTransaction();
     } catch (err) {

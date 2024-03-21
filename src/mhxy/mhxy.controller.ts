@@ -10,7 +10,7 @@ import {
   GoldRecordIdDto,
   GoldTransferDto,
   GoldTransferFinishDto,
-  GoldTransferInfoDto,
+  GoldTransferIdDto,
   MhxyAccountDto,
   MhxyAccountEditDto,
   MhxyAccountIdDto,
@@ -169,7 +169,7 @@ export class MhxyController {
 
   /** 转金-单条信息 */
   @Post('account/gold-transfer/info')
-  async goldTransferInfo(@Body() dto: GoldTransferInfoDto, @Req() req: Request) {
+  async goldTransferInfo(@Body() dto: GoldTransferIdDto, @Req() req: Request) {
     return this.goldTransferService.goldTransferInfo(dto, req.user.id);
   }
 
@@ -177,5 +177,11 @@ export class MhxyController {
   @Post('account/gold-transfer/finish')
   async goldTransferFinish(@Body() dto: GoldTransferFinishDto, @Req() req: Request) {
     return this.goldTransferService.goldTransferFinish(dto, req.user.id);
+  }
+
+  /** 转金-撤销 */
+  @Post('account/gold-transfer/revert')
+  async goldTransferRevert(@Body() dto: GoldTransferIdDto, @Req() req: Request) {
+    return this.goldTransferService.goldTransferRevert(dto, req.user.id);
   }
 }

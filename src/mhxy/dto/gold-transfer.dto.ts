@@ -24,12 +24,12 @@ export class GoldTransferDto {
 }
 
 /** 查询单个转金信息 */
-export class GoldTransferInfoDto {
+export class GoldTransferIdDto {
   @IsNotEmpty({ message: 'id 不能为空' })
   id: number;
 }
 
-export class GoldTransferFinishDto extends GoldTransferInfoDto {
+export class GoldTransferFinishDto extends GoldTransferIdDto {
   @IsNotEmpty({ message: 'amount 不能为空' })
   @IsInt({ message: 'amount 必须为整数类型' })
   amount: number;
