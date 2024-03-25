@@ -2,6 +2,10 @@ import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { Request } from 'express';
 import { CommonPageDto, JwtGuard } from 'src/core';
 import {
+  AccountGroupAddDto,
+  AccountGroupEditDto,
+  AccountGroupIdDto,
+  AccountGroupListDto,
   ChannelAddDto,
   ChannelDeleteDto,
   ChannelEditDto,
@@ -23,6 +27,7 @@ import { MhxyPropCategoryService } from './mhxy-prop-category.service';
 import { MhxyChannelService } from './mhxy-channel.service';
 import { MhxyAccountGoldRecordService } from './mhxy-account-gold-record.service';
 import { MhxyAccountGoldTransferService } from './mhxy-account-gold-transfer.service';
+import { MhxyAccountGroupService } from './mhxy-account-group.service';
 
 @Controller('mhxy')
 @UseGuards(JwtGuard)
@@ -33,6 +38,7 @@ export class MhxyController {
     private readonly channelService: MhxyChannelService,
     private readonly goldRecordService: MhxyAccountGoldRecordService,
     private readonly goldTransferService: MhxyAccountGoldTransferService,
+    private readonly groupService: MhxyAccountGroupService,
   ) {}
 
   /** 获取梦幻账号数据 */
@@ -122,66 +128,90 @@ export class MhxyController {
   /** 途径-删除 */
   @Post('/channel/delete')
   async channelDelete(@Body() dto: ChannelDeleteDto) {
-    return await this.channelService.channelDelete(dto);
+    return await await this.channelService.channelDelete(dto);
   }
 
   /** 金币收支记录-分页 */
   @Post('account/gold-record/list')
   async goldRecordList(@Body() dto: CommonPageDto, @Req() req: Request) {
-    return this.goldRecordService.goldRecordList(dto, req.user.id);
+    return await this.goldRecordService.goldRecordList(dto, req.user.id);
   }
 
   /** 金币收支记录-新增 */
   @Post('account/gold-record/add')
   async goldRecordAdd(@Body() dto: GoldRecordAddDto, @Req() req: Request) {
-    return this.goldRecordService.goldRecordAdd(dto, req.user.id);
+    return await this.goldRecordService.goldRecordAdd(dto, req.user.id);
   }
 
   /** 金币收支记录-分页 */
   @Post('account/gold-record/info')
   async goldRecordInfo(@Body() dto: GoldRecordIdDto, @Req() req: Request) {
-    return this.goldRecordService.goldRecordInfo(dto, req.user.id);
+    return await this.goldRecordService.goldRecordInfo(dto, req.user.id);
   }
 
   /** 金币收支记录-完成 */
   @Post('account/gold-record/complete')
   async goldRecordComplete(@Body() dto: GoldRecordCompleteDto, @Req() req: Request) {
-    return this.goldRecordService.goldRecordComplete(dto, req.user.id);
+    return await this.goldRecordService.goldRecordComplete(dto, req.user.id);
   }
 
   /** 金币收支记录-撤销 */
   @Post('account/gold-record/revert')
   async goldRecordRevert(@Body() dto: GoldRecordIdDto, @Req() req: Request) {
-    return this.goldRecordService.goldRecordRevert(dto, req.user.id);
+    return await this.goldRecordService.goldRecordRevert(dto, req.user.id);
   }
 
   /** 转金-分页 */
   @Post('account/gold-transfer/list')
   async goldTransferList(@Body() dto: CommonPageDto, @Req() req: Request) {
-    return this.goldTransferService.goldTransferList(dto, req.user.id);
+    return await this.goldTransferService.goldTransferList(dto, req.user.id);
   }
 
   /** 转金-新增 */
   @Post('account/gold-transfer/add')
   async goldTransferAdd(@Body() dto: GoldTransferDto, @Req() req: Request) {
-    return this.goldTransferService.goldTransferAdd(dto, req.user.id);
+    return await this.goldTransferService.goldTransferAdd(dto, req.user.id);
   }
 
   /** 转金-单条信息 */
   @Post('account/gold-transfer/info')
   async goldTransferInfo(@Body() dto: GoldTransferIdDto, @Req() req: Request) {
-    return this.goldTransferService.goldTransferInfo(dto, req.user.id);
+    return await this.goldTransferService.goldTransferInfo(dto, req.user.id);
   }
 
   /** 转金-完成 */
   @Post('account/gold-transfer/finish')
   async goldTransferFinish(@Body() dto: GoldTransferFinishDto, @Req() req: Request) {
-    return this.goldTransferService.goldTransferFinish(dto, req.user.id);
+    return await this.goldTransferService.goldTransferFinish(dto, req.user.id);
   }
 
   /** 转金-撤销 */
   @Post('account/gold-transfer/revert')
   async goldTransferRevert(@Body() dto: GoldTransferIdDto, @Req() req: Request) {
-    return this.goldTransferService.goldTransferRevert(dto, req.user.id);
+    return await this.goldTransferService.goldTransferRevert(dto, req.user.id);
+  }
+
+  /** 账号分组-列表 */
+  @Post('account/group/list')
+  async accountGroupList(@Body() dto: AccountGroupListDto, @Req() req: Request) {
+    return await this.groupService.accountGroupList(dto, req.user.id);
+  }
+
+  /** 账号分组-新增 */
+  @Post('account/group/add')
+  async accountGroupAdd(@Body() dto: AccountGroupAddDto, @Req() req: Request) {
+    return await this.groupService.accountGroupAdd(dto, req.user.id);
+  }
+
+  /** 账号分组-编辑 */
+  @Post('account/group/edit')
+  async accountGroupEdit(@Body() dto: AccountGroupEditDto, @Req() req: Request) {
+    return await this.groupService.accountGroupEdit(dto, req.user.id);
+  }
+
+  /** 账号分组-删除 */
+  @Post('account/group/delete')
+  async accountGroupDelete(@Body() dto: AccountGroupIdDto, @Req() req: Request) {
+    return await this.groupService.accountGroupDelete(dto, req.user.id);
   }
 }

@@ -1,6 +1,7 @@
 export * from './channel.dto';
 export * from './gold-record.dto';
 export * from './gold-transfer.dto';
+export * from './account-group.dto';
 
 import { Allow, IsBoolean, IsInt, IsNotEmpty, Length, Min, Validate } from 'class-validator';
 import { MHXY_ACCOUNT_LENGTH, MHXY_PROP_CATEGORY_LENGTH } from 'src/constants';
@@ -41,6 +42,12 @@ export class MhxyAccountEditDto extends MhxyAccountIdDto {
   @Allow()
   /** 是否是主号 */
   isPrimary: boolean;
+  @Allow()
+  /** 分组 id */
+  groupId: number;
+  @Allow()
+  /** 分组备注  */
+  groupRemark: string;
 }
 
 /** 账号 */

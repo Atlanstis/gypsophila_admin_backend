@@ -4,6 +4,8 @@ type MhxyAccountSEct = { label: string; value: string };
 type MhxyPropCategoryKey = 'NAME_MAX';
 type MhxyChannelKey = 'NAME_MAX' | 'KEY_MAX';
 type MhxyAccountGoldRecordKey = 'REMARK_MAX';
+type MhxyAccountGroupKey = 'NAME_MAX';
+type MhxyAccountGroupItemKey = 'REMARK_MAX';
 
 export const MHXY_ACCOUNT_LENGTH: Record<MhxyAccountKey, number> = {
   /** id 最大长度 */
@@ -35,6 +37,18 @@ export const MHXY_CHANNEL_LENGTH: Record<MhxyChannelKey, number> = {
 };
 /** 梦幻途径顶级标识 */
 export const MHXY_CHANNEL_TOP_FLAG = 0;
+
+/** 梦幻账号分组字段长度 */
+export const MHXY_ACCOUNT_GROUP_LENGTH: Record<MhxyAccountGroupKey, number> = {
+  /** 名称最大长度 */
+  NAME_MAX: 16,
+};
+
+/** 梦幻账号分组子项字段长度 */
+export const MHXY_ACCOUNT_GROUP_ITEM_LENGTH: Record<MhxyAccountGroupItemKey, number> = {
+  /** 备注最大长度 */
+  REMARK_MAX: 32,
+};
 
 /** 角色列表 */
 export const MHXY_ACCOUNT_ROLE_OPTS: MhxyAccountRole[] = [

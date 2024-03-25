@@ -1,7 +1,7 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryColumn } from 'typeorm';
 import { TimeNotSelectBase } from '../base';
 import { MHXY_ACCOUNT_LENGTH } from '../../constants';
-import { User } from '../../entities';
+import { MhxyAccountGroup, MhxyAccountGroupItem, User } from '../../entities';
 
 /** 梦幻账号表 */
 @Entity({ name: 'mhxy_account', orderBy: { isPrimary: 'DESC' } })
@@ -34,4 +34,10 @@ export class MhxyAccount extends TimeNotSelectBase {
   })
   @JoinColumn({ name: 'user_id' })
   user: User;
+
+  @OneToOne(() => MhxyAccountGroupItem, (item) => item.account)
+  groupItem: MhxyAccountGroupItem;
+
+  /** 仅查询使用 */
+  group?: MhxyAccountGroup;
 }

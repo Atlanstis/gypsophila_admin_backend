@@ -6,6 +6,8 @@ import {
   MhxyAccount,
   MhxyAccountGoldRecord,
   MhxyAccountGoldTransfer,
+  MhxyAccountGroup,
+  MhxyAccountGroupItem,
   MhxyChannel,
   MhxyPropCategory,
 } from 'src/entities';
@@ -15,6 +17,7 @@ import { MhxyPropCategoryService } from './mhxy-prop-category.service';
 import { MhxyChannelService } from './mhxy-channel.service';
 import { MhxyAccountGoldRecordService } from './mhxy-account-gold-record.service';
 import { MhxyAccountGoldTransferService } from './mhxy-account-gold-transfer.service';
+import { MhxyAccountGroupService } from './mhxy-account-group.service';
 
 @Module({
   imports: [
@@ -24,6 +27,8 @@ import { MhxyAccountGoldTransferService } from './mhxy-account-gold-transfer.ser
       MhxyChannel,
       MhxyAccountGoldRecord,
       MhxyAccountGoldTransfer,
+      MhxyAccountGroup,
+      MhxyAccountGroupItem,
     ]),
     UserModule,
     SettingModule,
@@ -35,6 +40,7 @@ import { MhxyAccountGoldTransferService } from './mhxy-account-gold-transfer.ser
     MhxyChannelService,
     MhxyAccountGoldRecordService,
     MhxyAccountGoldTransferService,
+    MhxyAccountGroupService,
   ],
 })
 export class MhxyModule {}

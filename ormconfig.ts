@@ -21,6 +21,8 @@ import {
   MhxyChannel,
   MhxyAccountGoldRecord,
   MhxyAccountGoldTransfer,
+  MhxyAccountGroup,
+  MhxyAccountGroupItem,
 } from './src/entities';
 
 const mysqlConfing = config().mysql as {
@@ -55,6 +57,8 @@ export const ormConfig: DataSourceOptions = {
     MhxyChannel,
     MhxyAccountGoldRecord,
     MhxyAccountGoldTransfer,
+    MhxyAccountGroup,
+    MhxyAccountGroupItem,
   ],
   ...mysqlConfing,
   dateStrings: true,
