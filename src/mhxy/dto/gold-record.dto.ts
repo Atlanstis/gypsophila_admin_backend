@@ -32,6 +32,10 @@ export class GoldRecordAddDto {
   @Allow()
   nowAmount: number;
 
+  /** 当前被锁金币数 */
+  @Allow()
+  nowLockAmount: number;
+
   /** 收支类型: expenditure-支出,revenue-收入 */
   @Allow()
   type: MHXY_GOLD_RECORD_TYPE;

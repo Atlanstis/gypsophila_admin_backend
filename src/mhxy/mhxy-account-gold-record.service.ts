@@ -95,7 +95,20 @@ export class MhxyAccountGoldRecordService {
       if (dto.amountType === MHXY_GOLD_RECORD_AMOUNT_TYPE.BY_ACCOUNT_NOW_AMOUNT) {
         // 按账号当前金币数计算收支
         const diff = dto.nowAmount - account.gold;
-        if (diff === 0) {
+        if (channel.key === MHXY_CHANNEL_DEFAULT_KEY.MANUAL_CALIBRATION) {
+          if (diff === 0 && dto.nowLockAmount === account.lockGold) {
+            throw new BusinessException('当前账号金币余额未发生变化');
+          } else if (diff === 0) {
+            // 金币未发生变化，直接更新被锁金币数，不插入金币记录
+            await queryRunner.manager.update(MhxyAccount, account.id, {
+              lockGold: dto.nowLockAmount,
+            });
+            await queryRunner.commitTransaction();
+            return;
+          } else {
+            account.lockGold = dto.nowLockAmount;
+          }
+        } else if (diff === 0) {
           throw new BusinessException('当前账号金币余额未发生变化');
         }
         const amount = Math.abs(diff);
