@@ -1,8 +1,12 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { MHXY_ACCOUNT_ROLE_OPTS, MHXY_ACCOUNT_SECT_OPTS } from 'src/constants';
+import {
+  MHXY_ACCOUNT_ROLE_OPTS,
+  MHXY_ACCOUNT_SECT_OPTS,
+  ENUM_MHXY_ACCOUNT_STATUS,
+} from 'src/constants';
 import { BusinessException, CommonPageDto } from 'src/core';
-import { MhxyAccount, MhxyAccountGroup, MhxyAccountGroupItem } from 'src/entities';
+import { MhxyAccount, MhxyAccountGroup, MhxyAccountGroupItem, MhxyChannel } from 'src/entities';
 import {
   DataSource,
   EntityManager,
@@ -13,6 +17,12 @@ import {
 import { MhxyAccountDto, MhxyAccountEditDto, MhxyAccountIdDto } from './dto';
 import { UserService } from '../user/user.service';
 import { useTransaction } from 'src/utils';
+import { MhxyAccountGoldRecordService } from './mhxy-account-gold-record.service';
+import {
+  MHXY_CHANNEL_DEFAULT_KEY,
+  MHXY_GOLD_RECORD_STATUS,
+  MHXY_GOLD_RECORD_TYPE,
+} from './constants';
 
 @Injectable()
 /** 梦幻账号相关服务 */
@@ -20,10 +30,10 @@ export class MhxyAccountService {
   constructor(
     @InjectRepository(MhxyAccount)
     private readonly mhxyAccountRepository: Repository<MhxyAccount>,
-    @InjectRepository(MhxyAccountGroup)
-    private readonly groupRepository: Repository<MhxyAccountGroup>,
     private readonly userService: UserService,
-    private dataSource: DataSource,
+    @Inject(forwardRef(() => MhxyAccountGoldRecordService))
+    private readonly goldRecordService: MhxyAccountGoldRecordService,
+    private readonly dataSource: DataSource,
   ) {}
 
   /** 查询账号列表 */
@@ -100,9 +110,14 @@ export class MhxyAccountService {
     if (!account) {
       throw new BusinessException('当前账号不存在');
     }
-
-    async function inTransaction(manager: EntityManager) {
-      if (dto.groupId) {
+    const inTransaction = async (manager: EntityManager) => {
+      if (dto.status === ENUM_MHXY_ACCOUNT_STATUS.BANNED || !dto.groupId) {
+        // 编辑后无分组，或者账号被封禁，去除所在分组
+        if (account.groupItem) {
+          // 编辑前有分组，删除分组信息
+          await manager.delete(MhxyAccountGroupItem, { id: account.groupItem.id });
+        }
+      } else if (dto.groupId) {
         // 编辑后有分组，新增或更新分组信息
         const group = await manager.findOne(MhxyAccountGroup, {
           where: { id: dto.groupId, user: { id: userId } },
@@ -119,19 +134,37 @@ export class MhxyAccountService {
         });
         await manager.save(groupItem);
         account.groupItem = groupItem;
-      } else {
-        // 编辑后无分组
-        if (account.groupItem) {
-          // 编辑前有分组，删除分组信息
-          await manager.delete(MhxyAccountGroupItem, { id: account.groupItem.id });
-        }
       }
       const newAccount = manager.create(MhxyAccount, {
         ...account,
         ...dto,
       });
       await manager.save(newAccount);
-    }
+      if (dto.status === ENUM_MHXY_ACCOUNT_STATUS.BANNED) {
+        const channel = await manager.findOne(MhxyChannel, {
+          where: {
+            key: MHXY_CHANNEL_DEFAULT_KEY.GOLD_DEDUCT,
+          },
+        });
+        if (!channel) {
+          throw new BusinessException('金币扣除途径不存在，请检查数据库');
+        }
+        // 创建金币记录，记录金币清零
+        await this.goldRecordService.createGoldRecord(
+          manager,
+          account,
+          user,
+          channel,
+          null,
+          account.gold,
+          MHXY_GOLD_RECORD_TYPE.EXPENDITURE,
+          MHXY_GOLD_RECORD_STATUS.COMPLETE,
+          0,
+          '',
+          null,
+        );
+      }
+    };
     await useTransaction(this.dataSource, inTransaction);
   }
 

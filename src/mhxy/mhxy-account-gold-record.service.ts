@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import BigNumber from 'bignumber.js';
 import { BusinessException, CommonPageDto } from 'src/core';
@@ -36,6 +36,7 @@ export class MhxyAccountGoldRecordService {
     private readonly propCategoryRepository: Repository<MhxyPropCategory>,
     private readonly settingService: SettingService,
     private readonly userService: UserService,
+    @Inject(forwardRef(() => MhxyAccountService))
     private readonly mhxyAccountService: MhxyAccountService,
     private dataSource: DataSource,
   ) {}

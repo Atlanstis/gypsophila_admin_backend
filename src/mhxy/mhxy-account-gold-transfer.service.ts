@@ -290,7 +290,7 @@ export class MhxyAccountGoldTransferService {
           },
         });
         if (!goldLockChannel) {
-          throw new BusinessException('金币被锁渠道不存在，请检查数据库');
+          throw new BusinessException('金币被锁途径不存在，请检查数据库');
         }
         record.channel = goldLockChannel;
         await queryRunner.manager.save(record);
