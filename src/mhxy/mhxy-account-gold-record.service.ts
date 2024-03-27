@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import BigNumber from 'bignumber.js';
 import { BusinessException, CommonPageDto } from 'src/core';
@@ -36,6 +36,7 @@ export class MhxyAccountGoldRecordService {
     private readonly propCategoryRepository: Repository<MhxyPropCategory>,
     private readonly settingService: SettingService,
     private readonly userService: UserService,
+    @Inject(forwardRef(() => MhxyAccountService))
     private readonly mhxyAccountService: MhxyAccountService,
     private dataSource: DataSource,
   ) {}
@@ -94,7 +95,20 @@ export class MhxyAccountGoldRecordService {
       if (dto.amountType === MHXY_GOLD_RECORD_AMOUNT_TYPE.BY_ACCOUNT_NOW_AMOUNT) {
         // 按账号当前金币数计算收支
         const diff = dto.nowAmount - account.gold;
-        if (diff === 0) {
+        if (channel.key === MHXY_CHANNEL_DEFAULT_KEY.MANUAL_CALIBRATION) {
+          if (diff === 0 && dto.nowLockAmount === account.lockGold) {
+            throw new BusinessException('当前账号金币余额未发生变化');
+          } else if (diff === 0) {
+            // 金币未发生变化，直接更新被锁金币数，不插入金币记录
+            await queryRunner.manager.update(MhxyAccount, account.id, {
+              lockGold: dto.nowLockAmount,
+            });
+            await queryRunner.commitTransaction();
+            return;
+          } else {
+            account.lockGold = dto.nowLockAmount;
+          }
+        } else if (diff === 0) {
           throw new BusinessException('当前账号金币余额未发生变化');
         }
         const amount = Math.abs(diff);
@@ -173,6 +187,57 @@ export class MhxyAccountGoldRecordService {
       );
     }
     return { ...record, realAmount };
+  }
+
+  /** 撤销收支记录 */
+  async goldRecordRevert(dto: GoldRecordIdDto, userId: string) {
+    const record = await this.goldRecordRepository.findOne({
+      where: {
+        id: dto.id,
+        user: {
+          id: userId,
+        },
+      },
+      relations: {
+        account: true,
+        transfer: true,
+      },
+    });
+    if (!record) {
+      throw new BusinessException('当前记录不存在，或者无查看的权限');
+    }
+    // 使用事务，发生错误时，回滚操作
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    try {
+      await queryRunner.startTransaction();
+      if (record.transfer) {
+        // 通过转金途径生成的记录无法撤销
+        throw new BusinessException('当前记录无法撤销，请在转金中进行撤销');
+      }
+      if (record.status === MHXY_GOLD_RECORD_STATUS.COMPLETE) {
+        // 如果是已完成状态，根据收入或支出，修改金额
+        const acount = record.account;
+        let amount = acount.gold;
+        if (record.type === MHXY_GOLD_RECORD_TYPE.REVENUE) {
+          amount = acount.gold - record.amount;
+        } else if (record.type === MHXY_GOLD_RECORD_TYPE.EXPENDITURE) {
+          amount = acount.gold + record.amount;
+        }
+        await queryRunner.manager.update(MhxyAccount, acount.id, {
+          gold: amount,
+        });
+      }
+      // 删除记录
+      await queryRunner.manager.delete(MhxyAccountGoldRecord, record.id);
+      // 提交事务
+      await queryRunner.commitTransaction();
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      throw err;
+    } finally {
+      await queryRunner.release();
+    }
   }
 
   /** 处理未完成的收支记录 */
