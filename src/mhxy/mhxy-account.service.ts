@@ -149,6 +149,8 @@ export class MhxyAccountService {
         if (!channel) {
           throw new BusinessException('金币扣除途径不存在，请检查数据库');
         }
+        // 去除被锁金币
+        account.lockGold = 0;
         // 创建金币记录，记录金币清零
         await this.goldRecordService.createGoldRecord(
           manager,
