@@ -2,6 +2,7 @@ import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColum
 import { MhxyAccountGroupItem } from './mhxy-account-group-item.entity';
 import { MHXY_ACCOUNT_GROUP_LENGTH } from '../../constants';
 import { User } from '../user.entity';
+import { MhxyAccount } from './mhxy-account.entity';
 
 @Entity({ name: 'mhxy_account_group' })
 export class MhxyAccountGroup {
@@ -22,4 +23,7 @@ export class MhxyAccountGroup {
   })
   @JoinColumn({ name: 'user_id' })
   user: User;
+
+  /** 关联账号，查询用 */
+  accounts: MhxyAccount[];
 }

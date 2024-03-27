@@ -12,7 +12,7 @@ import {
 } from 'typeorm';
 import { MhxyAccountDto, MhxyAccountEditDto, MhxyAccountIdDto } from './dto';
 import { UserService } from '../user/user.service';
-import { useTransaction } from 'src/utils/transaction';
+import { useTransaction } from 'src/utils';
 
 @Injectable()
 /** 梦幻账号相关服务 */
@@ -63,37 +63,28 @@ export class MhxyAccountService {
     if (!user) {
       throw new BusinessException('当前用户不存在');
     }
-    // 使用事务，发生错误时，回滚操作
-    const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    try {
-      await queryRunner.startTransaction();
+
+    async function inTransaction(manager: EntityManager) {
       const account = this.mhxyAccountRepository.create({ ...dto, user });
-      await queryRunner.manager.save(account);
+      await manager.save(account);
       // 处理分组信息
       if (dto.groupId) {
-        const group = await queryRunner.manager.findOne(MhxyAccountGroup, {
+        const group = await manager.findOne(MhxyAccountGroup, {
           where: { id: dto.groupId, user: { id: userId } },
         });
         if (!group) {
           throw new BusinessException('分组不存在');
         }
         // 新增分组项信息
-        const groupItem = queryRunner.manager.create(MhxyAccountGroupItem, {
+        const groupItem = manager.create(MhxyAccountGroupItem, {
           group,
           account,
           remark: dto.groupRemark,
         });
-        await queryRunner.manager.save(groupItem);
+        await manager.save(groupItem);
       }
-      // 提交事务
-      await queryRunner.commitTransaction();
-    } catch (err) {
-      await queryRunner.rollbackTransaction();
-      throw err;
-    } finally {
-      await queryRunner.release();
     }
+    await useTransaction(this.dataSource, inTransaction);
   }
 
   /** 编辑账号数据 */
@@ -110,7 +101,7 @@ export class MhxyAccountService {
       throw new BusinessException('当前账号不存在');
     }
 
-    async function inProcess(manager: EntityManager) {
+    async function inTransaction(manager: EntityManager) {
       if (dto.groupId) {
         // 编辑后有分组，新增或更新分组信息
         const group = await manager.findOne(MhxyAccountGroup, {
@@ -141,7 +132,7 @@ export class MhxyAccountService {
       });
       await manager.save(newAccount);
     }
-    await useTransaction(this.dataSource, inProcess);
+    await useTransaction(this.dataSource, inTransaction);
   }
 
   /** 删除账号数据 */
