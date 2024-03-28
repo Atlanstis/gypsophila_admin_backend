@@ -74,7 +74,7 @@ export class MhxyAccountService {
       throw new BusinessException('当前用户不存在');
     }
 
-    async function inTransaction(manager: EntityManager) {
+    const inTransaction = async (manager: EntityManager) => {
       const account = this.mhxyAccountRepository.create({ ...dto, user });
       await manager.save(account);
       // 处理分组信息
@@ -93,7 +93,7 @@ export class MhxyAccountService {
         });
         await manager.save(groupItem);
       }
-    }
+    };
     await useTransaction(this.dataSource, inTransaction);
   }
 
