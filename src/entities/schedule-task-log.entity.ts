@@ -2,7 +2,7 @@ import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 't
 import { ScheduleTask } from './schedule-task.entity';
 import { ENUM_SCHEDULE_TASK_LOG_STATUS } from '../constants';
 
-@Entity({ name: 'schedule_task_log' })
+@Entity({ name: 'schedule_task_log', orderBy: { executionTime: 'DESC' } })
 export class ScheduleTaskLog {
   @PrimaryGeneratedColumn()
   id: number;

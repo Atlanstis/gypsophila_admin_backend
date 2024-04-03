@@ -5,11 +5,11 @@ import { CronJob } from 'cron';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { BusinessException, CommonPageDto } from 'src/core';
-import { ScheduleTask } from 'src/entities';
+import { ScheduleTask, ScheduleTaskLog } from 'src/entities';
 import { ENUM_SCHEDULE_TASK_STATUS } from 'src/constants';
 import { TASKS_LIST } from './task';
 import { packExecuteTask, removeTaskJob } from './helpers';
-import { ScheduleTaskDto } from './dto';
+import { ScheduleTaskDto, ScheduleTaskIdDto } from './dto';
 import { Task } from './typings';
 
 @Injectable()
@@ -20,6 +20,8 @@ export class ScheduleTaskService {
     private schedulerRegistry: SchedulerRegistry,
     @InjectRepository(ScheduleTask)
     private readonly taskRepository: Repository<ScheduleTask>,
+    @InjectRepository(ScheduleTaskLog)
+    private readonly taskLogRepository: Repository<ScheduleTaskLog>,
     private dataSource: DataSource,
   ) {
     logger.log('Task Schedule Service Initialized');
@@ -89,6 +91,24 @@ export class ScheduleTaskService {
       this.schedulerRegistry,
     );
     await execute();
+  }
+
+  /** 定时任务-执行日志-列表 */
+  async logList(dto: ScheduleTaskIdDto) {
+    const { page, size, taskId } = dto;
+    const [list, total] = await this.taskLogRepository.findAndCount({
+      skip: (page - 1) * size,
+      take: size,
+      where: {
+        scheduleTask: {
+          id: taskId,
+        },
+      },
+    });
+    return {
+      list,
+      total,
+    };
   }
 
   /** 启动时，初始化任务 */

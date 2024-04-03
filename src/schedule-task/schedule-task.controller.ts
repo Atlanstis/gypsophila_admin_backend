@@ -1,7 +1,7 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { ScheduleTaskService } from './schedule-task.service';
 import { CommonPageDto } from 'src/core';
-import { ScheduleTaskDto } from './dto';
+import { ScheduleTaskDto, ScheduleTaskIdDto } from './dto';
 
 @Controller('schedule-task')
 export class ScheduleTaskController {
@@ -29,5 +29,11 @@ export class ScheduleTaskController {
   @Post('/open')
   async open(@Body() dto: ScheduleTaskDto) {
     return await this.scheduleTaskService.open(dto);
+  }
+
+  /** 定时任务-执行日志-列表 */
+  @Post('/log/list')
+  async logList(@Body() dto: ScheduleTaskIdDto) {
+    return await this.scheduleTaskService.logList(dto);
   }
 }
