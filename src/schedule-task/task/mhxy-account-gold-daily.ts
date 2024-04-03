@@ -27,7 +27,7 @@ export const MHXY_ACCOUNT_GOLD_DAILY: Task = {
       });
     });
     await manager.save(dailies);
-    const msg = `执行成功，已删除 ${dailies.length} 条数据，已统计 ${accounts.length} 数据`;
+    const msg = `执行成功，已删除 ${dailies.length} 条数据，已统计 ${accounts.length} 条数据`;
     logger.log(msg);
     return msg;
   },
