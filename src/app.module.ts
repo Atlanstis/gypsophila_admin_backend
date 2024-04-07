@@ -15,6 +15,7 @@ import { SettingModule } from './setting/setting.module';
 import { ormConfig } from 'ormconfig';
 import { PsnModule } from './psn/psn.module';
 import { MhxyModule } from './mhxy/mhxy.module';
+import { ScheduleTaskModule } from './schedule-task/schedule-task.module';
 
 @Module({
   imports: [
@@ -51,6 +52,7 @@ import { MhxyModule } from './mhxy/mhxy.module';
     SettingModule,
     PsnModule,
     MhxyModule,
+    ScheduleTaskModule,
   ],
   controllers: [],
   providers: [],
