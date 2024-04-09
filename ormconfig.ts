@@ -24,6 +24,8 @@ import {
   MhxyAccountGroup,
   MhxyAccountGroupItem,
   MhxyAccountGoldDaily,
+  MhxyGoldTransferPolicyApply,
+  MhxyGoldTransferPolicy,
   ScheduleTask,
   ScheduleTaskLog,
 } from './src/entities';
@@ -63,6 +65,8 @@ export const ormConfig: DataSourceOptions = {
     MhxyAccountGroup,
     MhxyAccountGroupItem,
     MhxyAccountGoldDaily,
+    MhxyGoldTransferPolicyApply,
+    MhxyGoldTransferPolicy,
     ScheduleTask,
     ScheduleTaskLog,
   ],

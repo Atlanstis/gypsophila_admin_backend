@@ -5,6 +5,7 @@ type MhxyAccountGroupKey = 'NAME_MAX';
 type MhxyAccountGroupItemKey = 'REMARK_MAX';
 
 export * from './account';
+export * from './gold-transfer';
 
 export const MHXY_ACCOUNT_GOLD_RECORD_LENGTH: Record<MhxyAccountGoldRecordKey, number> = {
   /** 备注最大长度 */
