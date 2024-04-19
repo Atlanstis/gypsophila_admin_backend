@@ -1,6 +1,11 @@
 import { IsNotEmpty, Allow, IsInt, IsIn, Length, Min } from 'class-validator';
 import { MHXY_GOLD_TRANSFER_STATUS } from '../constants';
-import { MHXY_GOLD_TRANSFER_POLICY_LENGTH } from 'src/constants';
+import {
+  ENUM_MHXY_GOLD_TRANSFER_POLICY_APPLY_STATUS,
+  MHXY_GOLD_TRANSFER_POLICY_LENGTH,
+} from 'src/constants';
+import { MhxyAccount, MhxyGoldTransferPolicy, MhxyGoldTransferPolicyApply } from 'src/entities';
+import { CommonPageDto } from 'src/core';
 
 /** 转金 */
 export class GoldTransferDto {
@@ -69,4 +74,40 @@ export class GoldTransferPolicyEditDto extends GoldTransferPolicyAddDto {
 export class GoldTransferPolicyIdDto {
   @IsNotEmpty({ message: 'id 不能为空' })
   id: number;
+}
+
+class GoldTransferPolicyApplyDto {
+  @IsNotEmpty({ message: 'nextApplyTime 不能为空' })
+  nextApplyTime: Date;
+  @IsNotEmpty({ message: 'status 不能为空' })
+  @IsIn(
+    [
+      ENUM_MHXY_GOLD_TRANSFER_POLICY_APPLY_STATUS.CLOSE,
+      ENUM_MHXY_GOLD_TRANSFER_POLICY_APPLY_STATUS.OPEN,
+    ],
+    { message: 'status 类型错误' },
+  )
+  status: ENUM_MHXY_GOLD_TRANSFER_POLICY_APPLY_STATUS;
+}
+
+export class GoldTransferPolicyApplyAddDto extends GoldTransferPolicyApplyDto {
+  @IsNotEmpty({ message: 'accountId 不能为空' })
+  accountId: MhxyAccount['id'];
+  @IsNotEmpty({ message: 'policyId 不能为空' })
+  policyId: MhxyGoldTransferPolicy['id'];
+}
+
+export class GoldTransferPolicyApplyEditDto extends GoldTransferPolicyApplyDto {
+  @IsNotEmpty({ message: 'id 不能为空' })
+  id: number;
+}
+
+export class GoldTransferPolicyApplyListDto extends CommonPageDto {
+  @IsNotEmpty({ message: 'policyId 不能为空' })
+  policyId: MhxyGoldTransferPolicy['id'];
+}
+
+export class GoldTransferPolicyApplyDeleteDto {
+  @IsNotEmpty({ message: 'id 不能为空' })
+  id: MhxyGoldTransferPolicyApply['id'];
 }

@@ -10,6 +10,7 @@ import {
   MhxyAccountGroupItem,
   MhxyChannel,
   MhxyGoldTransferPolicy,
+  MhxyGoldTransferPolicyApply,
   MhxyPropCategory,
 } from 'src/entities';
 import { UserModule } from 'src/user/user.module';
@@ -32,6 +33,7 @@ import { MhxyGoldTransferPolicyService } from './mhxy-gold-transfer-policy.servi
       MhxyAccountGroup,
       MhxyAccountGroupItem,
       MhxyGoldTransferPolicy,
+      MhxyGoldTransferPolicyApply,
     ]),
     UserModule,
     SettingModule,
