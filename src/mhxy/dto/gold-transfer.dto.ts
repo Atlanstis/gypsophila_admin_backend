@@ -77,8 +77,8 @@ export class GoldTransferPolicyIdDto {
 }
 
 class GoldTransferPolicyApplyDto {
-  @IsNotEmpty({ message: 'nextApplyTime 不能为空' })
-  nextApplyTime: Date;
+  @IsNotEmpty({ message: 'nextExecuteTime 不能为空' })
+  nextExecuteTime: Date;
   @IsNotEmpty({ message: 'status 不能为空' })
   @IsIn(
     [

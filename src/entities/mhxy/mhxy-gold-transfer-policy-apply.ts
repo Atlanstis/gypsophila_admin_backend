@@ -30,8 +30,11 @@ export class MhxyGoldTransferPolicyApply {
   })
   status: ENUM_MHXY_GOLD_TRANSFER_POLICY_APPLY_STATUS;
 
-  @Column({ comment: '下次执行时间', name: 'next_apply_time', type: 'date' })
-  nextApplyTime: Date;
+  @Column({ comment: '下次执行时间', name: 'next_execute_time', type: 'date', nullable: true })
+  nextExecuteTime: Date;
+
+  @Column({ comment: '上次执行时间', name: 'last_execute_time', type: 'date', nullable: true })
+  lastExecuteTime: Date;
 
   /** 归属系统用户 */
   @ManyToOne(() => User, {
