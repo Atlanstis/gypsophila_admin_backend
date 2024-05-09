@@ -6,6 +6,8 @@ import {
   MhxyAccountGoldRecord,
   MhxyAccountGoldTransfer,
   MhxyChannel,
+  MhxyGoldTransferPolicy,
+  MhxyGoldTransferPolicyApply,
   MhxyPropCategory,
 } from 'src/entities';
 import { DataSource, Repository } from 'typeorm';
@@ -22,7 +24,8 @@ import {
   MHXY_GOLD_TRANSFER_STATUS,
 } from './constants';
 import { isInt } from 'class-validator';
-import { MHXY_TRADE_TAX } from 'src/constants';
+import { ENUM_MHXY_GOLD_TRANSFER_POLICY_APPLY_STATUS, MHXY_TRADE_TAX } from 'src/constants';
+import * as dayjs from 'dayjs';
 
 @Injectable()
 /** 转金相关服务 */
@@ -34,6 +37,10 @@ export class MhxyAccountGoldTransferService {
     private readonly propCategoryRepository: Repository<MhxyPropCategory>,
     @InjectRepository(MhxyChannel)
     private readonly channelRepository: Repository<MhxyChannel>,
+    @InjectRepository(MhxyGoldTransferPolicyApply)
+    private readonly policyApplyRep: Repository<MhxyGoldTransferPolicyApply>,
+    @InjectRepository(MhxyGoldTransferPolicy)
+    private readonly policyRep: Repository<MhxyGoldTransferPolicy>,
     private readonly userService: UserService,
     private readonly settingService: SettingService,
     private readonly accountService: MhxyAccountService,
@@ -68,8 +75,31 @@ export class MhxyAccountGoldTransferService {
       },
     });
     if (!propCategory) {
-      throw new BusinessException('当前种类不存在，请重新选择');
+      throw new BusinessException('当前道具种类不存在，请重新选择');
     }
+
+    // 查找涉及该道具种类的转金策略
+    const policy = await this.policyRep.findOne({
+      where: {
+        propCategory: {
+          id: dto.propCategoryId,
+        },
+      },
+    });
+
+    // 判断转入账号应用的转金策略
+    const policyApply = await this.policyApplyRep.findOne({
+      where: {
+        account: {
+          id: toAccount.id,
+        },
+        status: ENUM_MHXY_GOLD_TRANSFER_POLICY_APPLY_STATUS.OPEN,
+        nextExecuteTime: dayjs().startOf('D').toDate(),
+        policy: {
+          id: policy.id,
+        },
+      },
+    });
 
     const channel = await this.channelRepository.findOne({
       where: {
@@ -162,6 +192,13 @@ export class MhxyAccountGoldTransferService {
           goldTransfer,
         );
       }
+      // 更新策略应用的相关信息
+      policyApply.lastExecuteTime = policyApply.nextExecuteTime;
+      policyApply.nextExecuteTime = dayjs(policyApply.nextExecuteTime)
+        .add(policy.cycleByDay, 'day')
+        .toDate();
+      await queryRunner.manager.save(policyApply);
+
       // 提交事务
       await queryRunner.commitTransaction();
     } catch (err) {
