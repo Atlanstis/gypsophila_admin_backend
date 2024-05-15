@@ -4,8 +4,8 @@ import { MhxyAccount } from './mhxy-account.entity';
 import { ENUM_MHXY_GOLD_TRANSFER_POLICY_APPLY_STATUS } from '../../constants';
 import { User } from '../user.entity';
 
-@Entity({ name: 'mhxy_gold_transfer_policy_apply' })
 /** MHXY 转金策略应用表 */
+@Entity({ name: 'mhxy_gold_transfer_policy_apply' })
 export class MhxyGoldTransferPolicyApply {
   @PrimaryGeneratedColumn()
   id: number;

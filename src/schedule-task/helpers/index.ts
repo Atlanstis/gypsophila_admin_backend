@@ -5,6 +5,7 @@ import { DataSource } from 'typeorm';
 import { ScheduleTask, ScheduleTaskLog } from 'src/entities';
 import { ENUM_SCHEDULE_TASK_LOG_STATUS, ENUM_SCHEDULE_TASK_STATUS } from 'src/constants';
 import { SchedulerRegistry } from '@nestjs/schedule';
+import { roundToDecimal } from 'src/utils';
 
 export function removeTaskJob(task: ScheduleTask, schedulerRegistry: SchedulerRegistry) {
   try {
@@ -33,6 +34,7 @@ export function packExecuteTask(
       scheduleTask,
       executionTime: new Date(),
     });
+    const lastStatus = scheduleTask.status;
     const startTime = dayjs();
     try {
       scheduleTask.status = ENUM_SCHEDULE_TASK_STATUS.IN_PROGRESS;
@@ -42,7 +44,7 @@ export function packExecuteTask(
       log.status = ENUM_SCHEDULE_TASK_LOG_STATUS.SUCCESS;
       log.result = result;
       scheduleTask.lastRunTime = new Date();
-      scheduleTask.status = ENUM_SCHEDULE_TASK_STATUS.OPEN;
+      scheduleTask.status = lastStatus;
     } catch (e) {
       log.status = ENUM_SCHEDULE_TASK_LOG_STATUS.FAIL;
       log.result = e.toString();
@@ -51,7 +53,7 @@ export function packExecuteTask(
       throw e;
     } finally {
       const endTime = dayjs();
-      const consumingTime = Math.round(endTime.diff(startTime) / 1000);
+      const consumingTime = roundToDecimal(endTime.diff(startTime) / 1000);
       logger.log(`${scheduleTask.key} task executed in ${consumingTime}s`);
       log.consumingTime = consumingTime;
       await queryRunner.manager.save(scheduleTask);

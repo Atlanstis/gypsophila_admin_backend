@@ -10,7 +10,7 @@ export class ScheduleTaskLog {
   @Column({ comment: '执行时间', name: 'execution_time', type: 'timestamp' })
   executionTime: Date;
 
-  @Column({ comment: '耗时(秒)', name: 'consuming_time', type: 'int' })
+  @Column({ comment: '耗时(秒)', name: 'consuming_time', type: 'float' })
   consumingTime: number;
 
   @Column({

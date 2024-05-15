@@ -5,6 +5,7 @@ export const MHXY_GOLD_TRANSFER_POLICY_LENGTH: Record<MhxyGoldTransferPolicyKey,
   NAME_MAX: 32,
 };
 
+/** 转金策略应用状态 */
 export enum ENUM_MHXY_GOLD_TRANSFER_POLICY_APPLY_STATUS {
   /** 开启 */
   OPEN = 'open',
