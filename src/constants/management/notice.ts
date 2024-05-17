@@ -10,13 +10,13 @@ export const NoticeLength: Record<NoticeKey, number> = {
   CategoryMax: 32,
 };
 
-export enum NoticeCategoryEnum {
+export enum EnumNoticeCategory {
   /** Mhxy 转金 */
   MhxyTransfer = 'MhxyTransfer',
 }
 
 /** 通知类型 */
-export enum NoticeTypeEnum {
+export enum EnumNoticeType {
   /** 待办 */
   Todo = 'Todo',
   /** 消息 */
@@ -24,7 +24,7 @@ export enum NoticeTypeEnum {
 }
 
 /** 通知状态 */
-export enum NoticeStatusEnum {
+export enum EnumNoticeStatus {
   /** 生效中 */
   Active = 'Active',
   /** 已处理 */

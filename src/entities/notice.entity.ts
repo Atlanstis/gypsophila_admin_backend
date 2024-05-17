@@ -1,4 +1,4 @@
-import { NoticeCategoryEnum, NoticeLength, NoticeStatusEnum, NoticeTypeEnum } from '../constants';
+import { EnumNoticeCategory, NoticeLength, EnumNoticeStatus, EnumNoticeType } from '../constants';
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { User } from './user.entity';
 
@@ -13,11 +13,11 @@ export class Notice {
   @Column({ comment: '描述', length: NoticeLength.DescriptionMax, nullable: true })
   description: string;
 
-  @Column({ comment: '类型', type: 'enum', enum: NoticeTypeEnum })
-  type: NoticeTypeEnum;
+  @Column({ comment: '类型', type: 'enum', enum: EnumNoticeType })
+  type: EnumNoticeType;
 
   @Column({ comment: '种类', type: 'varchar', length: NoticeLength.CategoryMax, nullable: true })
-  category: NoticeCategoryEnum;
+  category: EnumNoticeCategory;
 
   @Column({ comment: '关联信息', type: 'json', nullable: true })
   link: Record<string, any>;
@@ -25,10 +25,10 @@ export class Notice {
   @Column({
     comment: '状态',
     type: 'enum',
-    enum: NoticeStatusEnum,
-    default: NoticeStatusEnum.Active,
+    enum: EnumNoticeStatus,
+    default: EnumNoticeStatus.Active,
   })
-  status: NoticeStatusEnum;
+  status: EnumNoticeStatus;
 
   @Column({
     name: 'expire_time',

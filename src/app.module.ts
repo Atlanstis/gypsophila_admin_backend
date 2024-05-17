@@ -16,6 +16,7 @@ import { ormConfig } from 'ormconfig';
 import { PsnModule } from './psn/psn.module';
 import { MhxyModule } from './mhxy/mhxy.module';
 import { ScheduleTaskModule } from './schedule-task/schedule-task.module';
+import { NoticeModule } from './notice/notice.module';
 
 @Module({
   imports: [
@@ -53,6 +54,7 @@ import { ScheduleTaskModule } from './schedule-task/schedule-task.module';
     PsnModule,
     MhxyModule,
     ScheduleTaskModule,
+    NoticeModule,
   ],
   controllers: [],
   providers: [],

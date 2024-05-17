@@ -6,9 +6,9 @@ import { MhxyAccount, MhxyGoldTransferPolicyApply, Notice, User } from 'src/enti
 import {
   ENUM_MHXY_ACCOUNT_STATUS,
   ENUM_MHXY_GOLD_TRANSFER_POLICY_APPLY_STATUS,
-  NoticeCategoryEnum,
-  NoticeStatusEnum,
-  NoticeTypeEnum,
+  EnumNoticeCategory,
+  EnumNoticeStatus,
+  EnumNoticeType,
 } from 'src/constants';
 import { endOfNowDate, startOfNowDate } from 'src/utils';
 
@@ -19,8 +19,8 @@ export const MHXY_GOLD_TRANSFER_TODO_NOTIFY: Task = {
 
     // 删除已添加的待办，避免重复添加
     await manager.delete(Notice, {
-      category: NoticeCategoryEnum.MhxyTransfer,
-      type: NoticeTypeEnum.Todo,
+      category: EnumNoticeCategory.MhxyTransfer,
+      type: EnumNoticeType.Todo,
       createTime: Between(startOfNowDate(), endOfNowDate()),
     });
 
@@ -83,9 +83,9 @@ export const MHXY_GOLD_TRANSFER_TODO_NOTIFY: Task = {
           propCategory: apply.policy.propCategory,
           fromAccountId: fromAccount ? fromAccount.id : null,
         },
-        type: NoticeTypeEnum.Todo,
-        category: NoticeCategoryEnum.MhxyTransfer,
-        status: NoticeStatusEnum.Active,
+        type: EnumNoticeType.Todo,
+        category: EnumNoticeCategory.MhxyTransfer,
+        status: EnumNoticeStatus.Active,
         expireTime: endOfNowDate(),
         user: apply.user,
       });
