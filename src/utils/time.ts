@@ -19,3 +19,7 @@ export function startOfNowDate(pattrn: dayjs.OpUnitType = 'day') {
 export function endOfNowDate(pattrn: dayjs.OpUnitType = 'day') {
   return dayjs().endOf(pattrn).toDate();
 }
+
+export function nowDate() {
+  return dayjs().toDate();
+}
