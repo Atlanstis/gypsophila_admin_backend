@@ -292,7 +292,7 @@ export class InsertV1061716198335762 implements MigrationInterface {
     );
     /** 添加定时任务 */
     await queryRunner.query(
-      `INSERT INTO \`gypsophila\`.\`schedule_task\` (\`key\`, \`name\`, \`description\`, \`cycle\`, \`status\`, \`last_run_time\`) VALUES ('MHXY_ACCOUNT_GOLD_DAILY', '梦幻西游账号金币统计', '按天为单位统计每个账号当前的金币数', '0 55 23 * * *', 'open', NULL);`,
+      `INSERT INTO \`gypsophila\`.\`schedule_task\` (\`key\`, \`name\`, \`description\`, \`cycle\`, \`status\`, \`last_run_time\`) VALUES ('MHXY_ACCOUNT_GOLD_DAILY', '梦幻西游账号金币统计', '按天为单位统计每个账号当前的金币数', '0 55 23 * * *', 'close', NULL);`,
     );
     await queryRunner.query(
       `INSERT INTO \`gypsophila\`.\`schedule_task\` (\`key\`, \`name\`, \`description\`, \`cycle\`, \`status\`, \`last_run_time\`) VALUES ('MHXY_GOLD_TRANSFER_TODO_NOTIFY', '梦幻西游转金待办通知', '根据配置的转金策略生成待办通知', '5 0 0 * *', 'close', NULL);`,
