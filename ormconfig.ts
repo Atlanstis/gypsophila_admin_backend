@@ -24,8 +24,11 @@ import {
   MhxyAccountGroup,
   MhxyAccountGroupItem,
   MhxyAccountGoldDaily,
+  MhxyGoldTransferPolicyApply,
+  MhxyGoldTransferPolicy,
   ScheduleTask,
   ScheduleTaskLog,
+  Notice,
 } from './src/entities';
 
 const mysqlConfing = config().mysql as {
@@ -63,8 +66,11 @@ export const ormConfig: DataSourceOptions = {
     MhxyAccountGroup,
     MhxyAccountGroupItem,
     MhxyAccountGoldDaily,
+    MhxyGoldTransferPolicyApply,
+    MhxyGoldTransferPolicy,
     ScheduleTask,
     ScheduleTaskLog,
+    Notice,
   ],
   ...mysqlConfing,
   dateStrings: true,

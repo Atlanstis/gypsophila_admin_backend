@@ -1,6 +1,6 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class InsertV1021706518456742 implements MigrationInterface {
+export class InsertV1061716198335762 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     /** 用户数据 */
     await queryRunner.query(
@@ -156,10 +156,158 @@ export class InsertV1021706518456742 implements MigrationInterface {
     await queryRunner.query(
       `INSERT INTO \`gypsophila\`.\`role_menu_permission\` (\`role_id\`, \`menu_id\`, \`permission_id\`) VALUES (1, 9, 14);`,
     );
+    /** 新增菜单 PlayStation_Analysis */
+    await queryRunner.query(
+      `INSERT INTO \`gypsophila\`.\`menu\` (\`id\`, \`key\`, \`name\`, \`parent_id\`) VALUES (10, 'PlayStation_Analysis', '游戏分析', 2);`,
+    );
+    /** PlayStation_Analysis 给予 admin 访问权限  */
+    await queryRunner.query(
+      `INSERT INTO \`gypsophila\`.\`role_menu\` (\`roleId\`, \`menuId\`) VALUES (1, 10);`,
+    );
+    /** 新增菜单 系统设置 */
+    await queryRunner.query(
+      `INSERT INTO \`gypsophila\`.\`menu\` (\`id\`, \`key\`, \`name\`, \`parent_id\`) VALUES (11, 'Setting', '系统设置', 0);`,
+    );
+    /** 给予 admin 系统设置 访问权限  */
+    await queryRunner.query(
+      `INSERT INTO \`gypsophila\`.\`role_menu\` (\`roleId\`, \`menuId\`) VALUES (1, 11);`,
+    );
+    /** 新增菜单 通用设置 */
+    await queryRunner.query(
+      `INSERT INTO \`gypsophila\`.\`menu\` (\`id\`, \`key\`, \`name\`, \`parent_id\`) VALUES (12, 'Setting_Common', '通用设置', 11);`,
+    );
+    /** 给予 admin 通用设置 访问权限  */
+    await queryRunner.query(
+      `INSERT INTO \`gypsophila\`.\`role_menu\` (\`roleId\`, \`menuId\`) VALUES (1, 12);`,
+    );
+    await queryRunner.query(
+      `INSERT INTO \`gypsophila\`.\`permission\` (\`id\`, \`key\`, \`name\`, \`type\`, \`menu_id\`) VALUES (15, 'WebsiteSetting', '网站设置', '0', 12);`,
+    );
+    await queryRunner.query(
+      `INSERT INTO \`gypsophila\`.\`role_menu_permission\` (\`role_id\`, \`menu_id\`, \`permission_id\`) VALUES (1, 12, 15);`,
+    );
+    /** 增加系统配置字段 */
+    await queryRunner.query(
+      `INSERT INTO \`gypsophila\`.\`system_setting\` (\`id\`, \`key\`, \`value\`, \`description\`) VALUES (1, 'WEBSITE_NAME', 'G中文站', '网站名称');`,
+    );
+    await queryRunner.query(
+      `INSERT INTO \`gypsophila\`.\`system_setting\` (\`id\`, \`key\`, \`value\`, \`description\`) VALUES (2, 'WEBSITE_RECORD_NUMBER', '', '备案号');`,
+    );
+    await queryRunner.query(
+      `INSERT INTO \`gypsophila\`.\`system_setting\` (\`id\`, \`key\`, \`value\`, \`description\`) VALUES (3, 'WEBSITE_SHOW_RECORD_NUMBER', 'true', '是否显示备案号');`,
+    );
+    /** admin 账号增加 PSN 概览操作权限 */
+    await queryRunner.query(
+      `INSERT INTO \`gypsophila\`.\`permission\` (\`id\`, \`key\`, \`name\`, \`type\`, \`menu_id\`) VALUES (16, 'PsnProfileOperation', '概览操作', '0', 3);`,
+    );
+    await queryRunner.query(
+      `INSERT INTO \`gypsophila\`.\`role_menu_permission\` (\`role_id\`, \`menu_id\`, \`permission_id\`) VALUES (1, 3, 16);`,
+    );
+    /** 新增游戏概览菜单 */
+    await queryRunner.query(
+      `INSERT INTO \`gypsophila\`.\`menu\` (\`id\`, \`key\`, \`name\`, \`parent_id\`) VALUES (13, 'PlayStation_Profile_Game', '游戏概览', 2);`,
+    );
+    /** 给予管理员游戏概览菜单访问权限 */
+    await queryRunner.query(
+      `INSERT INTO \`gypsophila\`.\`role_menu\` (\`roleId\`, \`menuId\`) VALUES (1, 13);`,
+    );
+    /** 新增梦幻西游菜单 */
+    await queryRunner.query(
+      `INSERT INTO \`gypsophila\`.\`menu\` (\`id\`, \`key\`, \`name\`, \`parent_id\`) VALUES (14, 'Mhxy', '梦幻西游', 0);`,
+    );
+    await queryRunner.query(
+      `INSERT INTO \`gypsophila\`.\`menu\` (\`id\`, \`key\`, \`name\`, \`parent_id\`) VALUES (15, 'Mhxy_Account', '账号一览', 14);`,
+    );
+    await queryRunner.query(
+      `INSERT INTO \`gypsophila\`.\`menu\` (\`id\`, \`key\`, \`name\`, \`parent_id\`) VALUES (16, 'Mhxy_Gold_Record', '金币收支记录', 14);`,
+    );
+    await queryRunner.query(
+      `INSERT INTO \`gypsophila\`.\`menu\` (\`id\`, \`key\`, \`name\`, \`parent_id\`) VALUES (17, 'Mhxy_Gold_Transfer', '转金', 14);`,
+    );
+    await queryRunner.query(
+      `INSERT INTO \`gypsophila\`.\`menu\` (\`id\`, \`key\`, \`name\`, \`parent_id\`) VALUES (18, 'Mhxy_Prop_Category', '道具种类', 14);`,
+    );
+    await queryRunner.query(
+      `INSERT INTO \`gypsophila\`.\`menu\` (\`id\`, \`key\`, \`name\`, \`parent_id\`) VALUES (19, 'Mhxy_Channel', '途径管理', 14);`,
+    );
+    /** 配置 admin 权限 */
+    await queryRunner.query(
+      `INSERT INTO \`gypsophila\`.\`role_menu\` (\`roleId\`, \`menuId\`) VALUES (1, 14);`,
+    );
+    await queryRunner.query(
+      `INSERT INTO \`gypsophila\`.\`role_menu\` (\`roleId\`, \`menuId\`) VALUES (1, 15);`,
+    );
+    await queryRunner.query(
+      `INSERT INTO \`gypsophila\`.\`role_menu\` (\`roleId\`, \`menuId\`) VALUES (1, 16);`,
+    );
+    await queryRunner.query(
+      `INSERT INTO \`gypsophila\`.\`role_menu\` (\`roleId\`, \`menuId\`) VALUES (1, 17);`,
+    );
+    await queryRunner.query(
+      `INSERT INTO \`gypsophila\`.\`role_menu\` (\`roleId\`, \`menuId\`) VALUES (1, 18);`,
+    );
+    await queryRunner.query(
+      `INSERT INTO \`gypsophila\`.\`role_menu\` (\`roleId\`, \`menuId\`) VALUES (1, 19);`,
+    );
+
+    /** 添加配置 */
+    await queryRunner.query(
+      `INSERT INTO \`gypsophila\`.\`system_setting\` (\`id\`, \`key\`, \`value\`, \`description\`) VALUES (4, 'MHXY_TRADE_TAX', '9', '梦幻西游交易税率(%)');`,
+    );
+
+    /** 新增途径数据 */
+    await queryRunner.query(
+      `INSERT INTO \`gypsophila\`.\`mhxy_channel\` (\`key\`, \`name\`, \`is_default\`, \`parent_id\`) VALUES ('DAILY', '日常', 1, 0);`,
+    );
+    await queryRunner.query(
+      `INSERT INTO \`gypsophila\`.\`mhxy_channel\` (\`key\`, \`name\`, \`is_default\`, \`parent_id\`) VALUES ('GOLD_TRANSFER', '转金', 1, 0);`,
+    );
+    await queryRunner.query(
+      `INSERT INTO \`gypsophila\`.\`mhxy_channel\` (\`key\`, \`name\`, \`is_default\`, \`parent_id\`) VALUES ('TRADE', '交易', 1, 0);`,
+    );
+    await queryRunner.query(
+      `INSERT INTO \`gypsophila\`.\`mhxy_channel\` (\`key\`, \`name\`, \`is_default\`, \`parent_id\`) VALUES ('ACTIVITY', '活动', 1, 0);`,
+    );
+    await queryRunner.query(
+      `INSERT INTO \`gypsophila\`.\`mhxy_channel\` ( \`key\`, \`name\`, \`is_default\`, \`parent_id\`) VALUES ('SYSTEM', '系统', 1, 0);`,
+    );
+    await queryRunner.query(
+      `INSERT INTO \`gypsophila\`.\`mhxy_channel\` (\`key\`, \`name\`, \`is_default\`, \`parent_id\`) VALUES ('GOLD_LOCK', '金币被锁', 1, 5);`,
+    );
+    await queryRunner.query(
+      `INSERT INTO \`gypsophila\`.\`mhxy_channel\` (\`key\`, \`name\`, \`is_default\`, \`parent_id\`) VALUES ('GOLD_UNLOCK', '金币解锁', 1, 5);`,
+    );
+    await queryRunner.query(
+      `INSERT INTO \`gypsophila\`.\`mhxy_channel\` (\`key\`, \`name\`, \`is_default\`, \`parent_id\`) VALUES ('GOLD_DEDUCT', '金币被扣除', 1, 5);`,
+    );
+    await queryRunner.query(
+      `INSERT INTO \`gypsophila\`.\`mhxy_channel\` (\`key\`, \`name\`, \`is_default\`, \`parent_id\`) VALUES ('MANUAL_CALIBRATION', '人工校正', 1, 5);`,
+    );
+    /** 添加定时任务菜单 */
+    await queryRunner.query(
+      `INSERT INTO \`gypsophila\`.\`menu\` (\`id\`, \`key\`, \`name\`, \`parent_id\`) VALUES (20, 'Schedule_Task', '定时任务', 11);`,
+    );
+    await queryRunner.query(
+      `INSERT INTO \`gypsophila\`.\`role_menu\` (\`roleId\`, \`menuId\`) VALUES (1, 20);`,
+    );
+    /** 添加定时任务 */
+    await queryRunner.query(
+      `INSERT INTO \`gypsophila\`.\`schedule_task\` (\`key\`, \`name\`, \`description\`, \`cycle\`, \`status\`, \`last_run_time\`) VALUES ('MHXY_ACCOUNT_GOLD_DAILY', '梦幻西游账号金币统计', '按天为单位统计每个账号当前的金币数', '0 55 23 * * *', 'close', NULL);`,
+    );
+    await queryRunner.query(
+      `INSERT INTO \`gypsophila\`.\`schedule_task\` (\`key\`, \`name\`, \`description\`, \`cycle\`, \`status\`, \`last_run_time\`) VALUES ('MHXY_GOLD_TRANSFER_TODO_NOTIFY', '梦幻西游转金待办通知', '根据配置的转金策略生成待办通知', '5 0 0 * * *', 'close', NULL);`,
+    );
+    await queryRunner.query(
+      `INSERT INTO \`gypsophila\`.\`schedule_task\` (\`key\`, \`name\`, \`description\`, \`cycle\`, \`status\`, \`last_run_time\`) VALUES ('NOTICE_EXPIRE_CHECK', '通知过期检查', '检查通知是否过期', '5 0 0 * * *', 'close', NULL);`,
+    );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(`DELETE FROM \`gypsophila\`.\`schedule_task\``);
+    await queryRunner.query(`DELETE FROM \`gypsophila\`.\`mhxy_channel\``);
+    await queryRunner.query(`DELETE FROM \`gypsophila\`.\`system_setting\``);
     await queryRunner.query(`DELETE FROM \`gypsophila\`.\`role_menu_permission\``);
+    await queryRunner.query(`DELETE FROM \`gypsophila\`.\`permission\``);
     await queryRunner.query(`DELETE FROM \`gypsophila\`.\`role_menu\``);
     await queryRunner.query(`DELETE FROM \`gypsophila\`.\`user_role\``);
     await queryRunner.query(`DELETE FROM \`gypsophila\`.\`menu\``);

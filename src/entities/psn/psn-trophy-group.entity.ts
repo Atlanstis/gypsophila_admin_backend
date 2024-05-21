@@ -8,7 +8,7 @@ export class PsnTrophyGroup extends TimeNotSelectBase {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ comment: '名称', width: 128 })
+  @Column({ comment: '名称', length: 128 })
   name: string;
 
   @Column({

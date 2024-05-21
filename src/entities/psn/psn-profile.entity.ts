@@ -11,10 +11,15 @@ export class PsnProfile extends TimeNotSelectBase {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ name: 'psn_id', comment: 'Psn Id', width: PSN_PROFILE_LENGTH.PSN_ID_MAX, unique: true })
+  @Column({
+    name: 'psn_id',
+    comment: 'Psn Id',
+    length: PSN_PROFILE_LENGTH.PSN_ID_MAX,
+    unique: true,
+  })
   psnId: string;
 
-  @Column({ comment: '头像地址', width: PSN_PROFILE_LENGTH.AVATAR_MAX })
+  @Column({ comment: '头像地址', length: PSN_PROFILE_LENGTH.AVATAR_MAX })
   avatar: string;
 
   @Column({ comment: '白金奖杯数量', default: 0 })

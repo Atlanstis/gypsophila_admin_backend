@@ -15,6 +15,13 @@ import {
   GoldTransferDto,
   GoldTransferFinishDto,
   GoldTransferIdDto,
+  GoldTransferPolicyAddDto,
+  GoldTransferPolicyApplyAddDto,
+  GoldTransferPolicyApplyDeleteDto,
+  GoldTransferPolicyApplyEditDto,
+  GoldTransferPolicyApplyListDto,
+  GoldTransferPolicyEditDto,
+  GoldTransferPolicyIdDto,
   MhxyAccountDto,
   MhxyAccountEditDto,
   MhxyAccountIdDto,
@@ -28,6 +35,7 @@ import { MhxyChannelService } from './mhxy-channel.service';
 import { MhxyAccountGoldRecordService } from './mhxy-account-gold-record.service';
 import { MhxyAccountGoldTransferService } from './mhxy-account-gold-transfer.service';
 import { MhxyAccountGroupService } from './mhxy-account-group.service';
+import { MhxyGoldTransferPolicyService } from './mhxy-gold-transfer-policy.service';
 
 @Controller('mhxy')
 @UseGuards(JwtGuard)
@@ -39,6 +47,7 @@ export class MhxyController {
     private readonly goldRecordService: MhxyAccountGoldRecordService,
     private readonly goldTransferService: MhxyAccountGoldTransferService,
     private readonly groupService: MhxyAccountGroupService,
+    private readonly goldTransferPolicyService: MhxyGoldTransferPolicyService,
   ) {}
 
   /** 获取梦幻账号数据 */
@@ -213,5 +222,65 @@ export class MhxyController {
   @Post('account/group/delete')
   async accountGroupDelete(@Body() dto: AccountGroupIdDto, @Req() req: Request) {
     return await this.groupService.accountGroupDelete(dto, req.user.id);
+  }
+
+  /** 转金策略-新增 */
+  @Post('gold-transfer/policy/add')
+  async goldTransferPolicyAdd(@Body() dto: GoldTransferPolicyAddDto, @Req() req: Request) {
+    return await this.goldTransferPolicyService.goldTransferPolicyAdd(dto, req.user.id);
+  }
+
+  /** 转金策略-编辑 */
+  @Post('gold-transfer/policy/edit')
+  async goldTransferPolicyEdit(@Body() dto: GoldTransferPolicyEditDto, @Req() req: Request) {
+    return await this.goldTransferPolicyService.goldTransferPolicyEdit(dto, req.user.id);
+  }
+
+  /** 转金策略-删除 */
+  @Post('gold-transfer/policy/delete')
+  async goldTransferPolicyDelete(@Body() dto: GoldTransferPolicyIdDto, @Req() req: Request) {
+    return await this.goldTransferPolicyService.goldTransferPolicyDelete(dto.id, req.user.id);
+  }
+
+  /** 转金策略-分页 */
+  @Post('gold-transfer/policy/list')
+  async goldTransferPolicyList(@Body() dto: CommonPageDto, @Req() req: Request) {
+    return await this.goldTransferPolicyService.goldTransferPolicyList(dto, req.user.id);
+  }
+
+  /** 转金策略应用-新增 */
+  @Post('gold-transfer/policy/apply/add')
+  async goldTransferPolicyApplyAdd(
+    @Body() dto: GoldTransferPolicyApplyAddDto,
+    @Req() req: Request,
+  ) {
+    return await this.goldTransferPolicyService.goldTransferPolicyApplyAdd(dto, req.user.id);
+  }
+
+  /** 转金策略应用-编辑 */
+  @Post('gold-transfer/policy/apply/edit')
+  async goldTransferPolicyApplyEdit(
+    @Body() dto: GoldTransferPolicyApplyEditDto,
+    @Req() req: Request,
+  ) {
+    return await this.goldTransferPolicyService.goldTransferPolicyApplyEdit(dto, req.user.id);
+  }
+
+  /** 转金策略应用-新增 */
+  @Post('gold-transfer/policy/apply/list')
+  async goldTransferPolicyApplyList(
+    @Body() dto: GoldTransferPolicyApplyListDto,
+    @Req() req: Request,
+  ) {
+    return await this.goldTransferPolicyService.goldTransferPolicyApplyList(dto, req.user.id);
+  }
+
+  /** 转金策略应用-新增 */
+  @Post('gold-transfer/policy/apply/delete')
+  async goldTransferPolicyApplyDelete(
+    @Body() dto: GoldTransferPolicyApplyDeleteDto,
+    @Req() req: Request,
+  ) {
+    return await this.goldTransferPolicyService.goldTransferPolicyApplyDelete(dto, req.user.id);
   }
 }

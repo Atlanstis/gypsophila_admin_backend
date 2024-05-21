@@ -15,4 +15,7 @@ export class MhxyAccountGoldDaily {
 
   @Column({ comment: '金额', type: 'int', default: 0 })
   amount: number;
+
+  @Column({ comment: '与前一日金额差额', name: 'change_amount', type: 'int', default: 0 })
+  changeAmount: number;
 }

@@ -1,4 +1,4 @@
-import { ENUM_SCHEDULE_TASK_STATUS, SCHEDULE_TASK_KEY_LENGTH } from '../constants';
+import { ENUM_SCHEDULE_TASK_STATUS, SCHEDULE_TASK_KEY_LENGTH } from '../../constants';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { ScheduleTaskLog } from './schedule-task-log.entity';
 
