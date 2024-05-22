@@ -9,6 +9,7 @@ import {
   MhxyGoldTransferPolicy,
   MhxyGoldTransferPolicyApply,
   MhxyPropCategory,
+  Notice,
 } from 'src/entities';
 import { DataSource, Repository } from 'typeorm';
 import { UserService } from 'src/user/user.service';
@@ -24,7 +25,14 @@ import {
   MHXY_GOLD_TRANSFER_STATUS,
 } from './constants';
 import { isInt } from 'class-validator';
-import { ENUM_MHXY_GOLD_TRANSFER_POLICY_APPLY_STATUS, MHXY_TRADE_TAX } from 'src/constants';
+import {
+  ENUM_MHXY_GOLD_TRANSFER_POLICY_APPLY_STATUS,
+  EnumNoticeCategory,
+  EnumNoticeStatus,
+  EnumNoticeType,
+  MHXY_TRADE_TAX,
+  NoticeMhxyTransferLink,
+} from 'src/constants';
 import * as dayjs from 'dayjs';
 
 @Injectable()
@@ -87,7 +95,7 @@ export class MhxyAccountGoldTransferService {
       },
     });
 
-    // 判断转入账号应用的转金策略
+    // 查找转入账号是否应用转金策略
     const policyApply = await this.policyApplyRep.findOne({
       where: {
         account: {
@@ -202,6 +210,23 @@ export class MhxyAccountGoldTransferService {
         await queryRunner.manager.save(policyApply);
       }
 
+      // 查找相关的待办，并设置状态为已处理
+      const notices = await queryRunner.manager.find(Notice, {
+        where: {
+          type: EnumNoticeType.Todo,
+          status: EnumNoticeStatus.Active,
+          category: EnumNoticeCategory.MhxyTransfer,
+        },
+      });
+      const activeNotice = notices.find((notice) => {
+        const link = notice.link as NoticeMhxyTransferLink;
+        return link.account.id === toAccount.id && link.propCategory.id === propCategory.id;
+      });
+      if (activeNotice) {
+        activeNotice.status = EnumNoticeStatus.Handled;
+        await queryRunner.manager.save(activeNotice);
+      }
+
       // 提交事务
       await queryRunner.commitTransaction();
     } catch (err) {
@@ -297,7 +322,6 @@ export class MhxyAccountGoldTransferService {
     await queryRunner.connect();
     try {
       await queryRunner.startTransaction();
-      debugger;
       if (dto.status === MHXY_GOLD_TRANSFER_STATUS.SUCCESS) {
         // 转金成功
         // 转入账号，增加金币
