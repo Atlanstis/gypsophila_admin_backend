@@ -192,12 +192,15 @@ export class MhxyAccountGoldTransferService {
           goldTransfer,
         );
       }
+
       // 更新策略应用的相关信息
-      policyApply.lastExecuteTime = policyApply.nextExecuteTime;
-      policyApply.nextExecuteTime = dayjs(policyApply.nextExecuteTime)
-        .add(policy.cycleByDay, 'day')
-        .toDate();
-      await queryRunner.manager.save(policyApply);
+      if (policyApply) {
+        policyApply.lastExecuteTime = policyApply.nextExecuteTime;
+        policyApply.nextExecuteTime = dayjs(policyApply.nextExecuteTime)
+          .add(policy.cycleByDay, 'day')
+          .toDate();
+        await queryRunner.manager.save(policyApply);
+      }
 
       // 提交事务
       await queryRunner.commitTransaction();
