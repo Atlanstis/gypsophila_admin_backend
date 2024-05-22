@@ -93,7 +93,7 @@ export const MHXY_GOLD_TRANSFER_TODO_NOTIFY: Task = {
     await manager.save(notices);
 
     const count = notices.length;
-    const msg = `执行成功，已删除 ${count} 条待办，已为 ${count} 条转金策略添加待办。`;
+    const msg = `执行成功，已为 ${count} 条转金策略添加待办。`;
     return msg;
   },
 };
