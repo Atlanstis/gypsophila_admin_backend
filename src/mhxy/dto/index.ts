@@ -4,7 +4,7 @@ export * from './gold-transfer.dto';
 export * from './account-group.dto';
 export * from './account.dto';
 
-import { Allow, IsBoolean, IsNotEmpty, Length } from 'class-validator';
+import { Allow, IsBoolean, IsInt, IsNotEmpty, Length, Min } from 'class-validator';
 import { MHXY_PROP_CATEGORY_LENGTH } from 'src/constants';
 import { MhxyPropCategory } from 'src/entities';
 
@@ -63,4 +63,11 @@ export class PropCategoryEditDto extends PropCategoryBaseDto {
 export class PropCategoryDeleteDto {
   @IsNotEmpty({ message: 'id 不能为空' })
   id: MhxyPropCategory['id'];
+}
+
+export class AmountCalcDto {
+  @IsNotEmpty({ message: 'amount 不能为空' })
+  @IsInt({ message: 'amount 必须为整数类型' })
+  @Min(0, { message: 'amount 必须为非负整数' })
+  amount: number;
 }

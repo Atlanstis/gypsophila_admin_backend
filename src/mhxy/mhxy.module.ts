@@ -21,6 +21,7 @@ import { MhxyAccountGoldRecordService } from './mhxy-account-gold-record.service
 import { MhxyAccountGoldTransferService } from './mhxy-account-gold-transfer.service';
 import { MhxyAccountGroupService } from './mhxy-account-group.service';
 import { MhxyGoldTransferPolicyService } from './mhxy-gold-transfer-policy.service';
+import { MhxyCommonService } from './mhxy-common.service';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { MhxyGoldTransferPolicyService } from './mhxy-gold-transfer-policy.servi
     MhxyAccountGoldTransferService,
     MhxyAccountGroupService,
     MhxyGoldTransferPolicyService,
+    MhxyCommonService,
   ],
 })
 export class MhxyModule {}

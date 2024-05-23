@@ -6,6 +6,7 @@ import {
   AccountGroupEditDto,
   AccountGroupIdDto,
   AccountGroupListDto,
+  AmountCalcDto,
   ChannelAddDto,
   ChannelDeleteDto,
   ChannelEditDto,
@@ -36,6 +37,7 @@ import { MhxyAccountGoldRecordService } from './mhxy-account-gold-record.service
 import { MhxyAccountGoldTransferService } from './mhxy-account-gold-transfer.service';
 import { MhxyAccountGroupService } from './mhxy-account-group.service';
 import { MhxyGoldTransferPolicyService } from './mhxy-gold-transfer-policy.service';
+import { MhxyCommonService } from './mhxy-common.service';
 
 @Controller('mhxy')
 @UseGuards(JwtGuard)
@@ -48,6 +50,7 @@ export class MhxyController {
     private readonly goldTransferService: MhxyAccountGoldTransferService,
     private readonly groupService: MhxyAccountGroupService,
     private readonly goldTransferPolicyService: MhxyGoldTransferPolicyService,
+    private readonly commonService: MhxyCommonService,
   ) {}
 
   /** 获取梦幻账号数据 */
@@ -282,5 +285,11 @@ export class MhxyController {
     @Req() req: Request,
   ) {
     return await this.goldTransferPolicyService.goldTransferPolicyApplyDelete(dto, req.user.id);
+  }
+
+  /** 计算除去交易税后的价格 */
+  @Post('amount/calc')
+  async amountCalc(@Body() dto: AmountCalcDto) {
+    return await this.commonService.amountCalc(dto.amount);
   }
 }
