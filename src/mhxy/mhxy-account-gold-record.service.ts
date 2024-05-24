@@ -57,6 +57,9 @@ export class MhxyAccountGoldRecordService {
         propCategory: true,
         channel: true,
       },
+      order: {
+        status: 'ASC',
+      },
     });
     return { list, total };
   }
