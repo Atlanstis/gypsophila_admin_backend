@@ -59,6 +59,7 @@ export class MhxyAccountGoldRecordService {
       },
       order: {
         status: 'ASC',
+        createTime: 'DESC',
       },
     });
     return { list, total };
