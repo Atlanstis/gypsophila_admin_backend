@@ -14,7 +14,6 @@ import { MenuModule } from './menu/menu.module';
 import { SettingModule } from './setting/setting.module';
 import { ormConfig } from 'ormconfig';
 import { PsnModule } from './psn/psn.module';
-import { MhxyModule } from './mhxy/mhxy.module';
 import { ScheduleTaskModule } from './schedule-task/schedule-task.module';
 import { NoticeModule } from './notice/notice.module';
 
@@ -52,7 +51,6 @@ import { NoticeModule } from './notice/notice.module';
     MenuModule,
     SettingModule,
     PsnModule,
-    MhxyModule,
     ScheduleTaskModule,
     NoticeModule,
   ],

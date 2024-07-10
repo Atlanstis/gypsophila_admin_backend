@@ -1,5 +1,3 @@
-import { MhxyAccount, MhxyPropCategory } from 'src/entities';
-
 type NoticeKey = 'TitleMax' | 'DescriptionMax' | 'CategoryMax';
 
 /** 权限各键值长度枚举 */
@@ -12,10 +10,7 @@ export const NoticeLength: Record<NoticeKey, number> = {
   CategoryMax: 32,
 };
 
-export enum EnumNoticeCategory {
-  /** Mhxy 转金 */
-  MhxyTransfer = 'MhxyTransfer',
-}
+export enum EnumNoticeCategory {}
 
 /** 通知类型 */
 export enum EnumNoticeType {
@@ -33,11 +28,4 @@ export enum EnumNoticeStatus {
   Handled = 'Handled',
   /** 已过期 */
   Expire = 'Expire',
-}
-
-/** Mhxy 转金关联信息 */
-export interface NoticeMhxyTransferLink {
-  account: MhxyAccount;
-  propCategory: MhxyPropCategory;
-  fromAccountId?: MhxyAccount['id'];
 }

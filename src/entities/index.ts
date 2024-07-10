@@ -5,6 +5,5 @@ export * from './permission.entity';
 export * from './role-menu-permission.entity';
 export * from './system-setting.entnty';
 export * from './psn';
-export * from './mhxy';
 export * from './schedule-task';
 export * from './notice.entity';
