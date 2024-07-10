@@ -1,7 +1,7 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class CreateV1061716198320286 implements MigrationInterface {
-  name = 'CreateV1061716198320286';
+export class CreateV1101720595502096 implements MigrationInterface {
+  name = 'CreateV1101720595502096';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
@@ -48,36 +48,6 @@ export class CreateV1061716198320286 implements MigrationInterface {
     );
     await queryRunner.query(
       `CREATE TABLE \`psn_profile\` (\`create_time\` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP, \`update_time\` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP, \`id\` int NOT NULL AUTO_INCREMENT, \`psn_id\` varchar(32) NOT NULL COMMENT 'Psn Id', \`avatar\` varchar(128) NOT NULL COMMENT '头像地址', \`platinum\` int NOT NULL COMMENT '白金奖杯数量' DEFAULT '0', \`gold\` int NOT NULL COMMENT '金奖杯数量' DEFAULT '0', \`silver\` int NOT NULL COMMENT '银奖杯数量' DEFAULT '0', \`bronze\` int NOT NULL COMMENT '铜奖杯数量' DEFAULT '0', \`userId\` varchar(36) NULL, UNIQUE INDEX \`IDX_c8458bb0abcf3875cfbb03f1d9\` (\`psn_id\`), UNIQUE INDEX \`REL_aaaf66028d29a6ce8cd0fe91d0\` (\`userId\`), PRIMARY KEY (\`id\`)) ENGINE=InnoDB`,
-    );
-    await queryRunner.query(
-      `CREATE TABLE \`mhxy_account\` (\`create_time\` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP, \`update_time\` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP, \`id\` varchar(10) NOT NULL COMMENT '账号 Id （官方）', \`name\` varchar(16) NOT NULL COMMENT '账号名称', \`is_primary\` tinyint NOT NULL COMMENT '是否是主号' DEFAULT 0, \`role\` varchar(255) NOT NULL COMMENT '角色', \`sect\` varchar(255) NOT NULL COMMENT '门派', \`gold\` int NOT NULL COMMENT '金币数量' DEFAULT '0', \`lock_gold\` int NOT NULL COMMENT '被锁金币数量' DEFAULT '0', \`status\` enum ('active', 'banned') NOT NULL COMMENT '状态' DEFAULT 'active', \`user_id\` varchar(36) NULL, PRIMARY KEY (\`id\`)) ENGINE=InnoDB`,
-    );
-    await queryRunner.query(
-      `CREATE TABLE \`mhxy_prop_category\` (\`id\` int NOT NULL AUTO_INCREMENT, \`name\` varchar(16) NOT NULL COMMENT '名称', \`isGem\` tinyint NOT NULL COMMENT '是否为珍品' DEFAULT 0, \`parentId\` int NOT NULL COMMENT '父级 id' DEFAULT '0', PRIMARY KEY (\`id\`)) ENGINE=InnoDB`,
-    );
-    await queryRunner.query(
-      `CREATE TABLE \`mhxy_channel\` (\`id\` int NOT NULL AUTO_INCREMENT, \`key\` varchar(32) NULL COMMENT '途径 key，唯一，用于业务判断', \`name\` varchar(16) NOT NULL COMMENT '名称', \`is_default\` tinyint NOT NULL COMMENT '是否默认' DEFAULT 0, \`parent_id\` int NOT NULL COMMENT '父级 id' DEFAULT '0', PRIMARY KEY (\`id\`)) ENGINE=InnoDB`,
-    );
-    await queryRunner.query(
-      `CREATE TABLE \`mhxy_account_gold_transfer\` (\`id\` int NOT NULL AUTO_INCREMENT, \`expenditure_amount\` int NOT NULL COMMENT '支出金额' DEFAULT '0', \`revenue_amount\` int NOT NULL COMMENT '收入金额' DEFAULT '0', \`status\` enum ('progress', 'success', 'fail_from_lock') NOT NULL COMMENT '状态' DEFAULT 'progress', \`create_time\` timestamp NOT NULL COMMENT '转金时间' DEFAULT CURRENT_TIMESTAMP, \`from_account_id\` varchar(10) NOT NULL COMMENT '账号 Id （官方）', \`to_account_id\` varchar(10) NOT NULL COMMENT '账号 Id （官方）', \`prop_category_id\` int NOT NULL, \`user_id\` varchar(36) NOT NULL, PRIMARY KEY (\`id\`)) ENGINE=InnoDB`,
-    );
-    await queryRunner.query(
-      `CREATE TABLE \`mhxy_account_gold_record\` (\`id\` int NOT NULL AUTO_INCREMENT, \`amount\` int NOT NULL COMMENT '数额' DEFAULT '0', \`type\` enum ('expenditure', 'revenue') NOT NULL COMMENT '收支类型: expenditure-支出,revenue-收入' DEFAULT 'revenue', \`status\` int NOT NULL COMMENT '状态: 0-进行中,1-已完成' DEFAULT '1', \`remark\` varchar(256) NOT NULL COMMENT '备注' DEFAULT '', \`create_time\` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP, \`channel_id\` int NOT NULL, \`prop_category_id\` int NULL, \`account_id\` varchar(10) NOT NULL COMMENT '账号 Id （官方）', \`user_id\` varchar(36) NOT NULL, \`transfer_id\` int NULL, PRIMARY KEY (\`id\`)) ENGINE=InnoDB`,
-    );
-    await queryRunner.query(
-      `CREATE TABLE \`mhxy_account_group_item\` (\`id\` int NOT NULL AUTO_INCREMENT, \`remark\` text NULL COMMENT '备注', \`account_id\` varchar(10) NOT NULL COMMENT '账号 Id （官方）', \`account_group_id\` int NOT NULL, UNIQUE INDEX \`REL_e75d7b5a1a2e100dd01bc97937\` (\`account_id\`), PRIMARY KEY (\`id\`)) ENGINE=InnoDB`,
-    );
-    await queryRunner.query(
-      `CREATE TABLE \`mhxy_account_group\` (\`id\` int NOT NULL AUTO_INCREMENT, \`name\` varchar(16) NOT NULL COMMENT '名称', \`user_id\` varchar(36) NOT NULL, PRIMARY KEY (\`id\`)) ENGINE=InnoDB`,
-    );
-    await queryRunner.query(
-      `CREATE TABLE \`mhxy_account_gold_daily\` (\`id\` int NOT NULL AUTO_INCREMENT, \`date\` date NOT NULL COMMENT '统计日期', \`amount\` int NOT NULL COMMENT '金额' DEFAULT '0', \`change_amount\` int NOT NULL COMMENT '与前一日金额差额' DEFAULT '0', \`account_id\` varchar(10) NOT NULL COMMENT '账号 Id （官方）', PRIMARY KEY (\`id\`)) ENGINE=InnoDB`,
-    );
-    await queryRunner.query(
-      `CREATE TABLE \`mhxy_gold_transfer_policy_apply\` (\`id\` int NOT NULL AUTO_INCREMENT, \`status\` enum ('open', 'close') NOT NULL COMMENT '状态' DEFAULT 'open', \`next_execute_time\` date NULL COMMENT '下次执行时间', \`last_execute_time\` date NULL COMMENT '上次执行时间', \`account_id\` varchar(10) NULL COMMENT '账号 Id （官方）', \`policy_id\` int NOT NULL, \`user_id\` varchar(36) NOT NULL, PRIMARY KEY (\`id\`)) ENGINE=InnoDB`,
-    );
-    await queryRunner.query(
-      `CREATE TABLE \`mhxy_gold_transfer_policy\` (\`id\` int NOT NULL AUTO_INCREMENT, \`name\` varchar(32) NOT NULL COMMENT '策略名称', \`quota\` int NOT NULL COMMENT '额度', \`cycle_by_day\` int NOT NULL COMMENT '周期(天)', \`prop_category_id\` int NOT NULL, \`user_id\` varchar(36) NOT NULL, PRIMARY KEY (\`id\`)) ENGINE=InnoDB`,
     );
     await queryRunner.query(
       `CREATE TABLE \`schedule_task\` (\`id\` int NOT NULL AUTO_INCREMENT, \`key\` varchar(32) NOT NULL COMMENT '任务唯一标识', \`name\` varchar(128) NOT NULL COMMENT '任务名称', \`description\` varchar(512) NULL COMMENT '任务描述', \`cycle\` varchar(32) NOT NULL COMMENT '执行周期', \`status\` enum ('inactive', 'open', 'inProgress', 'close') NOT NULL COMMENT '任务状态' DEFAULT 'inactive', \`last_run_time\` timestamp NULL COMMENT '上次执行时间', UNIQUE INDEX \`IDX_c7feefb5ef65f9fc251aff410e\` (\`key\`), PRIMARY KEY (\`id\`)) ENGINE=InnoDB`,
@@ -137,63 +107,6 @@ export class CreateV1061716198320286 implements MigrationInterface {
       `ALTER TABLE \`psn_profile\` ADD CONSTRAINT \`FK_aaaf66028d29a6ce8cd0fe91d05\` FOREIGN KEY (\`userId\`) REFERENCES \`user\`(\`id\`) ON DELETE NO ACTION ON UPDATE NO ACTION`,
     );
     await queryRunner.query(
-      `ALTER TABLE \`mhxy_account\` ADD CONSTRAINT \`FK_442b554c3276c9de7fb9027dfdc\` FOREIGN KEY (\`user_id\`) REFERENCES \`user\`(\`id\`) ON DELETE CASCADE ON UPDATE CASCADE`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE \`mhxy_account_gold_transfer\` ADD CONSTRAINT \`FK_2db0cd7c503f7ea4ddc8757b309\` FOREIGN KEY (\`from_account_id\`) REFERENCES \`mhxy_account\`(\`id\`) ON DELETE CASCADE ON UPDATE CASCADE`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE \`mhxy_account_gold_transfer\` ADD CONSTRAINT \`FK_f5f629d153c8af1cad4c9ef9cb9\` FOREIGN KEY (\`to_account_id\`) REFERENCES \`mhxy_account\`(\`id\`) ON DELETE CASCADE ON UPDATE CASCADE`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE \`mhxy_account_gold_transfer\` ADD CONSTRAINT \`FK_c6a5aaa8b384c27681760ad93a1\` FOREIGN KEY (\`prop_category_id\`) REFERENCES \`mhxy_prop_category\`(\`id\`) ON DELETE NO ACTION ON UPDATE NO ACTION`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE \`mhxy_account_gold_transfer\` ADD CONSTRAINT \`FK_ea41098e06586a02cb6dbbf90dd\` FOREIGN KEY (\`user_id\`) REFERENCES \`user\`(\`id\`) ON DELETE NO ACTION ON UPDATE NO ACTION`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE \`mhxy_account_gold_record\` ADD CONSTRAINT \`FK_e4614aebda1aa83a773726cb279\` FOREIGN KEY (\`channel_id\`) REFERENCES \`mhxy_channel\`(\`id\`) ON DELETE NO ACTION ON UPDATE NO ACTION`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE \`mhxy_account_gold_record\` ADD CONSTRAINT \`FK_305892470ab45eb2d45ce6e8c20\` FOREIGN KEY (\`prop_category_id\`) REFERENCES \`mhxy_prop_category\`(\`id\`) ON DELETE NO ACTION ON UPDATE NO ACTION`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE \`mhxy_account_gold_record\` ADD CONSTRAINT \`FK_94be1b29ff282df31b76b0eeaa6\` FOREIGN KEY (\`account_id\`) REFERENCES \`mhxy_account\`(\`id\`) ON DELETE CASCADE ON UPDATE CASCADE`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE \`mhxy_account_gold_record\` ADD CONSTRAINT \`FK_230638822b841d9f583c3ae188e\` FOREIGN KEY (\`user_id\`) REFERENCES \`user\`(\`id\`) ON DELETE CASCADE ON UPDATE CASCADE`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE \`mhxy_account_gold_record\` ADD CONSTRAINT \`FK_1f81e8bcab12fb276d778c739be\` FOREIGN KEY (\`transfer_id\`) REFERENCES \`mhxy_account_gold_transfer\`(\`id\`) ON DELETE CASCADE ON UPDATE CASCADE`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE \`mhxy_account_group_item\` ADD CONSTRAINT \`FK_e75d7b5a1a2e100dd01bc979370\` FOREIGN KEY (\`account_id\`) REFERENCES \`mhxy_account\`(\`id\`) ON DELETE CASCADE ON UPDATE CASCADE`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE \`mhxy_account_group_item\` ADD CONSTRAINT \`FK_e3a030d537fc509ebe1a310e557\` FOREIGN KEY (\`account_group_id\`) REFERENCES \`mhxy_account_group\`(\`id\`) ON DELETE CASCADE ON UPDATE CASCADE`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE \`mhxy_account_group\` ADD CONSTRAINT \`FK_b0a6989f554d847d302dce2fa49\` FOREIGN KEY (\`user_id\`) REFERENCES \`user\`(\`id\`) ON DELETE CASCADE ON UPDATE CASCADE`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE \`mhxy_account_gold_daily\` ADD CONSTRAINT \`FK_dffc4fd147e8cc2b498e3aeefe0\` FOREIGN KEY (\`account_id\`) REFERENCES \`mhxy_account\`(\`id\`) ON DELETE CASCADE ON UPDATE CASCADE`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE \`mhxy_gold_transfer_policy_apply\` ADD CONSTRAINT \`FK_9af45ec14017db282c728a012a8\` FOREIGN KEY (\`account_id\`) REFERENCES \`mhxy_account\`(\`id\`) ON DELETE NO ACTION ON UPDATE NO ACTION`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE \`mhxy_gold_transfer_policy_apply\` ADD CONSTRAINT \`FK_aa6dd82fd9f662983ff38cc8c2e\` FOREIGN KEY (\`policy_id\`) REFERENCES \`mhxy_gold_transfer_policy\`(\`id\`) ON DELETE CASCADE ON UPDATE CASCADE`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE \`mhxy_gold_transfer_policy_apply\` ADD CONSTRAINT \`FK_585db3305cb67ccef8504cdc5a6\` FOREIGN KEY (\`user_id\`) REFERENCES \`user\`(\`id\`) ON DELETE CASCADE ON UPDATE CASCADE`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE \`mhxy_gold_transfer_policy\` ADD CONSTRAINT \`FK_25acd3982d25d760d500efd2948\` FOREIGN KEY (\`prop_category_id\`) REFERENCES \`mhxy_prop_category\`(\`id\`) ON DELETE CASCADE ON UPDATE CASCADE`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE \`mhxy_gold_transfer_policy\` ADD CONSTRAINT \`FK_ef599067c7531bf44d333f4f1be\` FOREIGN KEY (\`user_id\`) REFERENCES \`user\`(\`id\`) ON DELETE CASCADE ON UPDATE CASCADE`,
-    );
-    await queryRunner.query(
       `ALTER TABLE \`schedule_task_log\` ADD CONSTRAINT \`FK_590752f2a28d6e4d11457ccd417\` FOREIGN KEY (\`schedule_task_id\`) REFERENCES \`schedule_task\`(\`id\`) ON DELETE CASCADE ON UPDATE CASCADE`,
     );
     await queryRunner.query(
@@ -231,63 +144,6 @@ export class CreateV1061716198320286 implements MigrationInterface {
     );
     await queryRunner.query(
       `ALTER TABLE \`schedule_task_log\` DROP FOREIGN KEY \`FK_590752f2a28d6e4d11457ccd417\``,
-    );
-    await queryRunner.query(
-      `ALTER TABLE \`mhxy_gold_transfer_policy\` DROP FOREIGN KEY \`FK_ef599067c7531bf44d333f4f1be\``,
-    );
-    await queryRunner.query(
-      `ALTER TABLE \`mhxy_gold_transfer_policy\` DROP FOREIGN KEY \`FK_25acd3982d25d760d500efd2948\``,
-    );
-    await queryRunner.query(
-      `ALTER TABLE \`mhxy_gold_transfer_policy_apply\` DROP FOREIGN KEY \`FK_585db3305cb67ccef8504cdc5a6\``,
-    );
-    await queryRunner.query(
-      `ALTER TABLE \`mhxy_gold_transfer_policy_apply\` DROP FOREIGN KEY \`FK_aa6dd82fd9f662983ff38cc8c2e\``,
-    );
-    await queryRunner.query(
-      `ALTER TABLE \`mhxy_gold_transfer_policy_apply\` DROP FOREIGN KEY \`FK_9af45ec14017db282c728a012a8\``,
-    );
-    await queryRunner.query(
-      `ALTER TABLE \`mhxy_account_gold_daily\` DROP FOREIGN KEY \`FK_dffc4fd147e8cc2b498e3aeefe0\``,
-    );
-    await queryRunner.query(
-      `ALTER TABLE \`mhxy_account_group\` DROP FOREIGN KEY \`FK_b0a6989f554d847d302dce2fa49\``,
-    );
-    await queryRunner.query(
-      `ALTER TABLE \`mhxy_account_group_item\` DROP FOREIGN KEY \`FK_e3a030d537fc509ebe1a310e557\``,
-    );
-    await queryRunner.query(
-      `ALTER TABLE \`mhxy_account_group_item\` DROP FOREIGN KEY \`FK_e75d7b5a1a2e100dd01bc979370\``,
-    );
-    await queryRunner.query(
-      `ALTER TABLE \`mhxy_account_gold_record\` DROP FOREIGN KEY \`FK_1f81e8bcab12fb276d778c739be\``,
-    );
-    await queryRunner.query(
-      `ALTER TABLE \`mhxy_account_gold_record\` DROP FOREIGN KEY \`FK_230638822b841d9f583c3ae188e\``,
-    );
-    await queryRunner.query(
-      `ALTER TABLE \`mhxy_account_gold_record\` DROP FOREIGN KEY \`FK_94be1b29ff282df31b76b0eeaa6\``,
-    );
-    await queryRunner.query(
-      `ALTER TABLE \`mhxy_account_gold_record\` DROP FOREIGN KEY \`FK_305892470ab45eb2d45ce6e8c20\``,
-    );
-    await queryRunner.query(
-      `ALTER TABLE \`mhxy_account_gold_record\` DROP FOREIGN KEY \`FK_e4614aebda1aa83a773726cb279\``,
-    );
-    await queryRunner.query(
-      `ALTER TABLE \`mhxy_account_gold_transfer\` DROP FOREIGN KEY \`FK_ea41098e06586a02cb6dbbf90dd\``,
-    );
-    await queryRunner.query(
-      `ALTER TABLE \`mhxy_account_gold_transfer\` DROP FOREIGN KEY \`FK_c6a5aaa8b384c27681760ad93a1\``,
-    );
-    await queryRunner.query(
-      `ALTER TABLE \`mhxy_account_gold_transfer\` DROP FOREIGN KEY \`FK_f5f629d153c8af1cad4c9ef9cb9\``,
-    );
-    await queryRunner.query(
-      `ALTER TABLE \`mhxy_account_gold_transfer\` DROP FOREIGN KEY \`FK_2db0cd7c503f7ea4ddc8757b309\``,
-    );
-    await queryRunner.query(
-      `ALTER TABLE \`mhxy_account\` DROP FOREIGN KEY \`FK_442b554c3276c9de7fb9027dfdc\``,
     );
     await queryRunner.query(
       `ALTER TABLE \`psn_profile\` DROP FOREIGN KEY \`FK_aaaf66028d29a6ce8cd0fe91d05\``,
@@ -341,19 +197,6 @@ export class CreateV1061716198320286 implements MigrationInterface {
     await queryRunner.query(`DROP TABLE \`schedule_task_log\``);
     await queryRunner.query(`DROP INDEX \`IDX_c7feefb5ef65f9fc251aff410e\` ON \`schedule_task\``);
     await queryRunner.query(`DROP TABLE \`schedule_task\``);
-    await queryRunner.query(`DROP TABLE \`mhxy_gold_transfer_policy\``);
-    await queryRunner.query(`DROP TABLE \`mhxy_gold_transfer_policy_apply\``);
-    await queryRunner.query(`DROP TABLE \`mhxy_account_gold_daily\``);
-    await queryRunner.query(`DROP TABLE \`mhxy_account_group\``);
-    await queryRunner.query(
-      `DROP INDEX \`REL_e75d7b5a1a2e100dd01bc97937\` ON \`mhxy_account_group_item\``,
-    );
-    await queryRunner.query(`DROP TABLE \`mhxy_account_group_item\``);
-    await queryRunner.query(`DROP TABLE \`mhxy_account_gold_record\``);
-    await queryRunner.query(`DROP TABLE \`mhxy_account_gold_transfer\``);
-    await queryRunner.query(`DROP TABLE \`mhxy_channel\``);
-    await queryRunner.query(`DROP TABLE \`mhxy_prop_category\``);
-    await queryRunner.query(`DROP TABLE \`mhxy_account\``);
     await queryRunner.query(`DROP INDEX \`REL_aaaf66028d29a6ce8cd0fe91d0\` ON \`psn_profile\``);
     await queryRunner.query(`DROP INDEX \`IDX_c8458bb0abcf3875cfbb03f1d9\` ON \`psn_profile\``);
     await queryRunner.query(`DROP TABLE \`psn_profile\``);
