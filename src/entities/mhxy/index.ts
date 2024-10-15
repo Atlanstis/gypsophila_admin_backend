@@ -8,3 +8,5 @@ export * from './mhxy-account-group-item.entity';
 export * from './mhxy-account-gold-daily.entity';
 export * from './mhxy-gold-transfer-policy';
 export * from './mhxy-gold-transfer-policy-apply';
+export * from './mhxy-area.entity';
+export * from './mhxy-area-price.entity';

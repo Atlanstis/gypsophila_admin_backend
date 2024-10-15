@@ -36,6 +36,8 @@ import { MhxyAccountGoldRecordService } from './mhxy-account-gold-record.service
 import { MhxyAccountGoldTransferService } from './mhxy-account-gold-transfer.service';
 import { MhxyAccountGroupService } from './mhxy-account-group.service';
 import { MhxyGoldTransferPolicyService } from './mhxy-gold-transfer-policy.service';
+import { MhxyAreaService } from './mhxy-area.service';
+import { AreaDto } from './dto/area.dto';
 
 @Controller('mhxy')
 @UseGuards(JwtGuard)
@@ -48,6 +50,7 @@ export class MhxyController {
     private readonly goldTransferService: MhxyAccountGoldTransferService,
     private readonly groupService: MhxyAccountGroupService,
     private readonly goldTransferPolicyService: MhxyGoldTransferPolicyService,
+    private readonly areaService: MhxyAreaService,
   ) {}
 
   /** 获取梦幻账号数据 */
@@ -282,5 +285,26 @@ export class MhxyController {
     @Req() req: Request,
   ) {
     return await this.goldTransferPolicyService.goldTransferPolicyApplyDelete(dto, req.user.id);
+  }
+
+  @Post('area/add')
+  async areaAdd(@Body() dto: AreaDto) {
+    return await this.areaService.areaAdd(dto);
+  }
+
+  @Get('area/list')
+  async areaList() {
+    return await this.areaService.areaList();
+  }
+
+  @Post('area/edit')
+  async areaEdit(@Body() dto: AreaDto) {
+    return await this.areaService.areaEdit(dto);
+  }
+
+  /** 删除账号数据 */
+  @Post('area/delete')
+  async areaDelete(@Body() dto: AreaDto) {
+    return await this.areaService.areaDelete(dto.id);
   }
 }
