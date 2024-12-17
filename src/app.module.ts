@@ -1,21 +1,18 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { PsnineModule } from './psnine/psnine.module';
+// import { PsnineModule } from './psnine/psnine.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import config from './utils/config';
 import * as Joi from 'joi';
 import { ENV_VARS } from './enum';
 import { LogModule } from './log/log.module';
-import { AuthModule } from './auth/auth.module';
-import { UserModule } from './user/user.module';
+import { AuthModule, UserModule, RoleModule, MenuModule } from './modules';
 import { RedisModule } from './redis/redis.module';
-import { RoleModule } from './role/role.module';
-import { MenuModule } from './menu/menu.module';
-import { SettingModule } from './setting/setting.module';
+// import { SettingModule } from './setting/setting.module';
 import { ormConfig } from 'ormconfig';
-import { PsnModule } from './psn/psn.module';
-import { ScheduleTaskModule } from './schedule-task/schedule-task.module';
-import { NoticeModule } from './notice/notice.module';
+// import { PsnModule } from './psn/psn.module';
+// import { ScheduleTaskModule } from './schedule-task/schedule-task.module';
+// import { NoticeModule } from './notice/notice.module';
 
 @Module({
   imports: [
@@ -36,7 +33,9 @@ import { NoticeModule } from './notice/notice.module';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
-        const redisConfig = configService.get<Environment.RedisConfig>(ENV_VARS.REDIS);
+        const redisConfig = configService.get<Environment.RedisConfig>(
+          ENV_VARS.REDIS,
+        );
         return {
           ...redisConfig,
           isGlobal: true,
@@ -44,15 +43,15 @@ import { NoticeModule } from './notice/notice.module';
       },
     }),
     LogModule,
-    PsnineModule,
     AuthModule,
     UserModule,
     RoleModule,
     MenuModule,
-    SettingModule,
-    PsnModule,
-    ScheduleTaskModule,
-    NoticeModule,
+    // PsnineModule,
+    // SettingModule,
+    // PsnModule,
+    // ScheduleTaskModule,
+    // NoticeModule,
   ],
   controllers: [],
   providers: [],

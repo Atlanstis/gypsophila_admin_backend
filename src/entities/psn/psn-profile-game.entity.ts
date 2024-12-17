@@ -1,4 +1,11 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { TimeNotSelectBase } from '../base';
 import { PsnProfile } from './psn-profile.entity';
 import { PsnGame } from './psn-game.entity';
@@ -55,7 +62,10 @@ export class PsnProfileGame extends TimeNotSelectBase {
   @JoinColumn({ name: 'psn_game_id' })
   game: PsnGame;
 
-  @OneToMany(() => PsnProfileGameTrophy, (profileGameTrophies) => profileGameTrophies.profileGame)
+  @OneToMany(
+    () => PsnProfileGameTrophy,
+    (profileGameTrophies) => profileGameTrophies.profileGame,
+  )
   profileGameTrophies: PsnProfileGameTrophy[];
 
   @OneToMany(() => PsnProfileGameGuide, (guide) => guide.profileGame)

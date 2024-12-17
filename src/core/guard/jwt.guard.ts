@@ -1,4 +1,9 @@
-import { CanActivate, ExecutionContext, Inject, Injectable } from '@nestjs/common';
+import {
+  CanActivate,
+  ExecutionContext,
+  Inject,
+  Injectable,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
 import { RedisService } from 'src/redis/redis.service';
@@ -37,7 +42,9 @@ export class JwtGuard implements CanActivate {
         message: 'token 错误，请重新登录',
       });
     }
-    const cachetoken = await this.redisService.get<string>(`access_token-${user.id}`);
+    const cachetoken = await this.redisService.get<string>(
+      `access_token-${user.id}`,
+    );
     if (!cachetoken) {
       throw new UnauthorizedException({
         code: ResponseCode.ReUnauthorized,

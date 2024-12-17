@@ -1,6 +1,17 @@
-import { EnumNoticeCategory, NoticeLength, EnumNoticeStatus, EnumNoticeType } from '../constants';
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { User } from './user.entity';
+import {
+  EnumNoticeCategory,
+  NoticeLength,
+  EnumNoticeStatus,
+  EnumNoticeType,
+} from '../constants';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { User } from '.';
 
 @Entity({ name: 'notice' })
 export class Notice {
@@ -10,13 +21,22 @@ export class Notice {
   @Column({ comment: '标题', length: NoticeLength.TitleMax })
   title: string;
 
-  @Column({ comment: '描述', length: NoticeLength.DescriptionMax, nullable: true })
+  @Column({
+    comment: '描述',
+    length: NoticeLength.DescriptionMax,
+    nullable: true,
+  })
   description: string;
 
   @Column({ comment: '类型', type: 'enum', enum: EnumNoticeType })
   type: EnumNoticeType;
 
-  @Column({ comment: '种类', type: 'varchar', length: NoticeLength.CategoryMax, nullable: true })
+  @Column({
+    comment: '种类',
+    type: 'varchar',
+    length: NoticeLength.CategoryMax,
+    nullable: true,
+  })
   category: EnumNoticeCategory;
 
   @Column({ comment: '关联信息', type: 'json', nullable: true })

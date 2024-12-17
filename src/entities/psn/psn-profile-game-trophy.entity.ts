@@ -1,4 +1,10 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { PsnTrophy } from './psn-trophy.entity';
 import { PsnProfileGame } from './psn-profile-game.entity';
 
@@ -31,10 +37,14 @@ export class PsnProfileGameTrophy {
   })
   video: string;
 
-  @ManyToOne(() => PsnProfileGame, (profileGame) => profileGame.profileGameTrophies, {
-    onDelete: 'CASCADE',
-    onUpdate: 'CASCADE',
-  })
+  @ManyToOne(
+    () => PsnProfileGame,
+    (profileGame) => profileGame.profileGameTrophies,
+    {
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE',
+    },
+  )
   @JoinColumn({ name: 'psn_profile_game_id' })
   profileGame: PsnProfileGame;
 

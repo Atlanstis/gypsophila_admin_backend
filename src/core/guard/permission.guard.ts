@@ -1,39 +1,44 @@
-import { CanActivate, ExecutionContext, Inject, Injectable } from '@nestjs/common';
+import {
+  CanActivate,
+  ExecutionContext,
+  Inject,
+  Injectable,
+} from '@nestjs/common';
 import type { Request } from 'express';
 import { Reflector } from '@nestjs/core';
-import { RoleService } from 'src/role/role.service';
 import { BusinessException } from '../exception';
+import { RoleService } from 'src/modules/role/role.service';
 
-/** 检查接口的访问的权限，配合 RequirePermission() 使用 */
+function hasCommonPermission(arr1: string[], arr2: string[]) {
+  const set1 = new Set(arr1);
+  return arr2.some((item) => set1.has(item));
+}
+
+/** 检查接口的访问的权限，配合 JwtGuard 与 RequirePermission() 使用 */
 @Injectable()
 export class PermissionGuard implements CanActivate {
   @Inject(Reflector)
   private reflector: Reflector;
 
   @Inject(RoleService)
-  private roleService: RoleService;
+  private readonly roleService: RoleService;
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request: Request = context.switchToHttp().getRequest();
 
-    const permission = this.reflector.getAllAndOverride('require-permission', [
-      context.getHandler(),
-      context.getClass(),
-    ]) as string[];
+    const methodPermissions = this.reflector.getAllAndOverride(
+      'require-permission',
+      [context.getHandler(), context.getClass()],
+    ) as string[];
+    if (!request.user) {
+      throw new BusinessException('请先进行登录');
+    }
 
-    const hasPermissions = (
-      await this.roleService.getPermissionByRoleIds(request.user.roleIds)
-    ).map((rmp) => rmp.permission.key);
+    const permissions = await this.roleService.getPermissionByRoleIds(
+      request.user.roleIds,
+    );
 
-    let flag: boolean = false;
-
-    permission.forEach((p) => {
-      const isIn = hasPermissions.includes(p);
-      if (isIn) {
-        flag = true;
-        return flag;
-      }
-    });
+    const flag = hasCommonPermission(permissions, methodPermissions);
     if (!flag) {
       throw new BusinessException('无访问该接口的权限');
     }

@@ -3,7 +3,7 @@ import { SettingService } from './setting.service';
 import { SettingController } from './setting.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { SystemSetting } from 'src/entities';
-import { RoleModule } from 'src/role/role.module';
+import { RoleModule } from 'src/modules/role/role.module';
 
 @Module({
   imports: [TypeOrmModule.forFeature([SystemSetting]), RoleModule],

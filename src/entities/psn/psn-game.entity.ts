@@ -1,4 +1,10 @@
-import { Column, Entity, OneToMany, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  OneToMany,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { TimeBase } from '../base';
 import { PsnGameLink } from './psn-game-link.entity';
 import { PsnTrophyGroup } from './psn-trophy-group.entity';

@@ -1,4 +1,10 @@
-import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { PsnTrophy } from './psn-trophy.entity';
 
 @Entity({ name: 'psn_trophy_link' })
@@ -19,7 +25,10 @@ export class PsnTrophyLink {
   })
   psnineUrl: string;
 
-  @OneToOne(() => PsnTrophy, (trophy) => trophy.link, { onDelete: 'CASCADE', onUpdate: 'CASCADE' })
+  @OneToOne(() => PsnTrophy, (trophy) => trophy.link, {
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  })
   @JoinColumn({ name: 'psn_trophy_id' })
   trophy: PsnTrophy;
 }

@@ -1,10 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { WEBSITE_NAME, WEBSITE_RECORD_NUMBER, WEBSITE_SHOW_RECORD_NUMBER } from 'src/constants';
+import {
+  WEBSITE_NAME,
+  WEBSITE_RECORD_NUMBER,
+  WEBSITE_SHOW_RECORD_NUMBER,
+} from 'src/constants';
 import { SystemSetting } from 'src/entities';
 import { In, Repository } from 'typeorm';
 import { WebsiteDto } from './dto';
-import { RoleService } from 'src/role/role.service';
+import { RoleService } from 'src/modules/role/role.service';
 import { BusinessException } from 'src/core';
 
 /** 网站设置-字段对应 */
@@ -26,7 +30,13 @@ export class SettingService {
   async getWebsiteInfo() {
     const list = await this.settingRepository.find({
       select: { key: true, value: true },
-      where: { key: In([WEBSITE_NAME, WEBSITE_RECORD_NUMBER, WEBSITE_SHOW_RECORD_NUMBER]) },
+      where: {
+        key: In([
+          WEBSITE_NAME,
+          WEBSITE_RECORD_NUMBER,
+          WEBSITE_SHOW_RECORD_NUMBER,
+        ]),
+      },
     });
     const info: Record<string, string | boolean> = {};
     list.forEach(({ key, value }) => {
@@ -42,7 +52,13 @@ export class SettingService {
   /** 更新网站配置 */
   async updateWebsiteInfo(dto: WebsiteDto) {
     const list = await this.settingRepository.find({
-      where: { key: In([WEBSITE_NAME, WEBSITE_RECORD_NUMBER, WEBSITE_SHOW_RECORD_NUMBER]) },
+      where: {
+        key: In([
+          WEBSITE_NAME,
+          WEBSITE_RECORD_NUMBER,
+          WEBSITE_SHOW_RECORD_NUMBER,
+        ]),
+      },
     });
     list.forEach((item) => {
       item.value =
@@ -54,8 +70,10 @@ export class SettingService {
   }
 
   async getSettingCommonTabs(roleIds: number[]) {
-    const rmps = await this.roleService.getPermissionByRoleIds(roleIds);
-    return rmps.filter((rmp) => rmp.menu.key === 'Setting_Common').map((rmp) => rmp.permission.key);
+    // const rmps = await this.roleService.getPermissionByRoleIds(roleIds);
+    // return rmps
+    //   .filter((rmp) => rmp.menu.key === 'Setting_Common')
+    //   .map((rmp) => rmp.permission.key);
   }
 
   /**
@@ -63,7 +81,10 @@ export class SettingService {
    * @param key key
    * @Param actions 判断条件
    */
-  async getSettingByKey(key: string, actions: [(setting: SystemSetting) => boolean, string][]) {
+  async getSettingByKey(
+    key: string,
+    actions: [(setting: SystemSetting) => boolean, string][],
+  ) {
     const setting = await this.settingRepository.findOne({
       where: {
         key,

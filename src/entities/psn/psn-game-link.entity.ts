@@ -1,4 +1,10 @@
-import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { PsnGame } from './psn-game.entity';
 
 @Entity({
@@ -21,7 +27,10 @@ export class PsnGameLink {
   })
   psnineUrl: string;
 
-  @OneToOne(() => PsnGame, (game) => game.link, { onDelete: 'CASCADE', onUpdate: 'CASCADE' })
+  @OneToOne(() => PsnGame, (game) => game.link, {
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  })
   @JoinColumn({ name: 'psn_game_id' })
   game: PsnGame;
 }

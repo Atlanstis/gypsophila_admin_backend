@@ -31,7 +31,11 @@ export class PsnTrophy extends TimeNotSelectBase {
   @Column({ comment: '缩略图', length: 255 })
   thumbnail: string;
 
-  @Column({ comment: '奖杯类型', type: 'enum', enum: ['platinum', 'gold', 'silver', 'bronze'] })
+  @Column({
+    comment: '奖杯类型',
+    type: 'enum',
+    enum: ['platinum', 'gold', 'silver', 'bronze'],
+  })
   type: TrophyType;
 
   /** 完成信息 */
@@ -47,6 +51,9 @@ export class PsnTrophy extends TimeNotSelectBase {
   @OneToOne(() => PsnTrophyLink, (link) => link.trophy)
   link: PsnTrophyLink;
 
-  @OneToMany(() => PsnProfileGameTrophy, (profileGameTrophies) => profileGameTrophies.trophy)
+  @OneToMany(
+    () => PsnProfileGameTrophy,
+    (profileGameTrophies) => profileGameTrophies.trophy,
+  )
   profileGameTrophies: PsnProfileGameTrophy[];
 }

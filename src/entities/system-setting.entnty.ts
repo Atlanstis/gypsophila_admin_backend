@@ -12,6 +12,10 @@ export class SystemSetting {
   @Column({ length: SETTING_LENGTH.VALUE_MAX, nullable: true, comment: '值' })
   value: string;
 
-  @Column({ length: SETTING_LENGTH.DESCRIPTION_MAX, nullable: true, comment: '描述' })
+  @Column({
+    length: SETTING_LENGTH.DESCRIPTION_MAX,
+    nullable: true,
+    comment: '描述',
+  })
   description: string;
 }

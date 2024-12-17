@@ -1,4 +1,10 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { ScheduleTask } from './schedule-task.entity';
 import { ENUM_SCHEDULE_TASK_LOG_STATUS } from '../../constants';
 

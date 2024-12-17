@@ -1,6 +1,15 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { TimeBase } from '../base';
-import { PSN_PROFILE_GAME_GUIDE_LENGTH, PSN_PROFILE_GAME_GUIDE_TYPE_ENUM } from '../../constants';
+import {
+  PSN_PROFILE_GAME_GUIDE_LENGTH,
+  PSN_PROFILE_GAME_GUIDE_TYPE_ENUM,
+} from '../../constants';
 import { PsnProfileGame } from './psn-profile-game.entity';
 
 @Entity({ name: 'psn_profile_game_guide', orderBy: { updateTime: 'DESC' } })
@@ -11,10 +20,19 @@ export class PsnProfileGameGuide extends TimeBase {
   @Column({ comment: '标题', length: PSN_PROFILE_GAME_GUIDE_LENGTH.TITLE_MAX })
   title: string;
 
-  @Column({ comment: '类型', type: 'enum', enum: PSN_PROFILE_GAME_GUIDE_TYPE_ENUM, default: 'url' })
+  @Column({
+    comment: '类型',
+    type: 'enum',
+    enum: PSN_PROFILE_GAME_GUIDE_TYPE_ENUM,
+    default: 'url',
+  })
   type: PSN_PROFILE_GAME_GUIDE_TYPE_ENUM;
 
-  @Column({ comment: 'url 地址', length: PSN_PROFILE_GAME_GUIDE_LENGTH.URL_MAX, nullable: true })
+  @Column({
+    comment: 'url 地址',
+    length: PSN_PROFILE_GAME_GUIDE_LENGTH.URL_MAX,
+    nullable: true,
+  })
   url: string;
 
   @Column({ type: 'text', comment: '文本内容', nullable: true })
