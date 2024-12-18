@@ -1,5 +1,6 @@
 import * as dayjs from 'dayjs';
 
+/** 日期格式：年-月-日 */
 export const YYYY_MM_DD = 'YYYY-MM-DD';
 
 /**

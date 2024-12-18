@@ -8,8 +8,9 @@ import { ENV_VARS } from './enum';
 import { LogModule } from './log/log.module';
 import { AuthModule, UserModule, RoleModule, MenuModule } from './modules';
 import { RedisModule } from './redis/redis.module';
-// import { SettingModule } from './setting/setting.module';
 import { ormConfig } from 'ormconfig';
+import { AppService } from './app.service';
+// import { SettingModule } from './setting/setting.module';
 // import { PsnModule } from './psn/psn.module';
 // import { ScheduleTaskModule } from './schedule-task/schedule-task.module';
 // import { NoticeModule } from './notice/notice.module';
@@ -54,6 +55,6 @@ import { ormConfig } from 'ormconfig';
     // NoticeModule,
   ],
   controllers: [],
-  providers: [],
+  providers: [AppService],
 })
 export class AppModule {}

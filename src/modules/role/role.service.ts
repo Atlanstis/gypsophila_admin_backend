@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable, LoggerService } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Menu, Role, RoleMenuPermission } from 'src/entities';
 import { DataSource, EntityManager, In, Not, Repository } from 'typeorm';
@@ -8,6 +8,8 @@ import { RoleEnum } from 'src/enum';
 import { MenuService } from 'src/modules/menu/menu.service';
 import { findOneBy, useTransaction } from 'src/utils';
 import { aggregateMenuPermissions } from './helper';
+import { RedisService } from 'src/redis/redis.service';
+import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 
 @Injectable()
 export class RoleService {
@@ -20,6 +22,9 @@ export class RoleService {
     private readonly rmpRepo: Repository<RoleMenuPermission>,
     private readonly menuService: MenuService,
     private dataSource: DataSource,
+    private redisService: RedisService,
+    @Inject(WINSTON_MODULE_NEST_PROVIDER)
+    private readonly logger: LoggerService,
   ) {}
 
   /**
@@ -237,5 +242,52 @@ export class RoleService {
    */
   async findRoleById(id: number) {
     return await this.roleRepo.findOne({ where: { id } });
+  }
+
+  /**
+   * 根据角色 id 从 redis 中加载权限列表
+   * @param roleIds 角色 id 列表
+   * @returns 权限列表
+   */
+  async getRolePermissionsFromRedis(roleIds: number[]) {
+    const result = await Promise.all(
+      roleIds.map((roleId) =>
+        this.redisService.getHash('role_permissions', String(roleId)),
+      ),
+    );
+    return Array.from(
+      result.reduce((map, str) => {
+        if (str) {
+          try {
+            const permissions = JSON.parse(str);
+            permissions.forEach((permission: string) => map.add(permission));
+          } catch {}
+        }
+        return map;
+      }, new Set<string>()),
+    );
+  }
+
+  /** 获取各角色的权限，并加载进 redis */
+  async loadRMPs2Redis() {
+    this.logger.log('Load role permissions --> start');
+    const rmps = await this.rmpRepo.find({ relations: { permission: true } });
+    const map = new Map<number, Set<string>>();
+    for (const { roleId, permission } of rmps) {
+      let rolePermissions = map.get(roleId);
+      if (!rolePermissions) {
+        map.set(roleId, (rolePermissions = new Set<string>()));
+      }
+      rolePermissions.add(permission.key);
+    }
+    const fieldsValues: [string, string][] = [];
+    for (const [roleId, permissions] of map.entries()) {
+      fieldsValues.push([
+        String(roleId),
+        JSON.stringify(Array.from(permissions)),
+      ]);
+    }
+    await this.redisService.setHashes('role_permissions', fieldsValues);
+    this.logger.log('Load role permissions --> success');
   }
 }

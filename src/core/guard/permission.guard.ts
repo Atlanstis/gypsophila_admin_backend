@@ -8,11 +8,7 @@ import type { Request } from 'express';
 import { Reflector } from '@nestjs/core';
 import { BusinessException } from '../exception';
 import { RoleService } from 'src/modules/role/role.service';
-
-function hasCommonPermission(arr1: string[], arr2: string[]) {
-  const set1 = new Set(arr1);
-  return arr2.some((item) => set1.has(item));
-}
+import { hasCommonString } from 'src/utils';
 
 /** 检查接口的访问的权限，配合 JwtGuard 与 RequirePermission() 使用 */
 @Injectable()
@@ -34,11 +30,11 @@ export class PermissionGuard implements CanActivate {
       throw new BusinessException('请先进行登录');
     }
 
-    const permissions = await this.roleService.getPermissionByRoleIds(
+    const permissions = await this.roleService.getRolePermissionsFromRedis(
       request.user.roleIds,
     );
 
-    const flag = hasCommonPermission(permissions, methodPermissions);
+    const flag = hasCommonString(permissions, methodPermissions);
     if (!flag) {
       throw new BusinessException('无访问该接口的权限');
     }
