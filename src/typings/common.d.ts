@@ -5,4 +5,7 @@ declare namespace Common {
     iv: string;
     key: string;
   }
+
+  /** 可空类型 */
+  type Nullable<T> = null | T;
 }

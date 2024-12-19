@@ -5,7 +5,7 @@ mysql:
   username: 'root'
   password: 'j!Y6hTwR'
   database: 'gypsophila'
-  synchronize: false
+  synchronize: true
 # redis 配置
 redis:
   host: 'localhost'
@@ -13,8 +13,10 @@ redis:
 # 运行端口
 port: 3000
 # jwt 密钥
-jwtSecret: 'W9RsC*5zV^sp7*xXG6VY6d#yqn=FNPqA'
-# token 过期时间(秒)
-tokenExpire:
+jwt: 
+  # 密钥
+  secret: 'W9RsC*5zV^sp7*xXG6VY6d#yqn=FNPqA'
+  # access_token 过期时间(秒)
   accessExpire: 3000
+  # refresh_token 过期时间(秒)
   refreshExpire: 18000

@@ -1,14 +1,14 @@
 import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
-import { AuthService } from './auth.service';
-import { LoginDto, RefreshDto } from './dto';
 import { JwtGuard } from 'src/core';
 import { Request } from 'express';
+import { AuthService } from './auth.service';
+import { LoginDto, RefreshDto } from './dto';
 
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
 
-  /** 用户登录 */
+  /** 登录-账号密码 */
   @Post('/login')
   async login(@Body() user: LoginDto) {
     return await this.authService.login(user);
@@ -31,7 +31,6 @@ export class AuthController {
   @Get('/info')
   @UseGuards(JwtGuard)
   async info(@Req() req: Request) {
-    const { user } = req;
-    return await this.authService.info(user.id);
+    return await this.authService.info(req.user.id);
   }
 }

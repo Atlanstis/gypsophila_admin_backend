@@ -9,6 +9,7 @@ import { Request } from 'express';
 import { RedisService } from 'src/modules';
 import { UnauthorizedException } from 'src/core';
 import { ResponseCode } from 'src/typings';
+import { getJwtRedisKey } from 'src/utils';
 
 /**
  * jwt 守卫：
@@ -43,7 +44,7 @@ export class JwtGuard implements CanActivate {
       });
     }
     const cachetoken = await this.redisService.get<string>(
-      `access_token-${user.id}`,
+      getJwtRedisKey(user.id, 'access'),
     );
     if (!cachetoken) {
       throw new UnauthorizedException({

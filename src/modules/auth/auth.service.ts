@@ -2,8 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as argon from 'argon2';
 import { BusinessException, UnauthorizedException } from 'src/core';
-import { UserService } from 'src/modules/user/user.service';
-import { RedisService } from 'src/redis/redis.service';
+import { RedisService } from 'src/modules';
 import { ResponseCode } from 'src/typings';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -15,11 +14,8 @@ import {
   UserAuthMethod,
 } from 'src/entities';
 import { ConfigService } from '@nestjs/config';
-import { ENV_VARS } from 'src/enum';
-import { getTokenKeyName } from './helper';
-import { v4 as uuidv4 } from 'uuid';
 import { LoginDto } from './dto';
-import { hybridDecrypt } from 'src/utils';
+import { createJwt, getJwtRedisKey, hybridDecrypt } from 'src/utils';
 @Injectable()
 export class AuthService {
   constructor(
@@ -27,16 +23,18 @@ export class AuthService {
     private readonly userRepo: Repository<User>,
     @InjectRepository(UserAuthMethod)
     private readonly userAuthMethodRepo: Repository<UserAuthMethod>,
-    private readonly userService: UserService,
-    private readonly jwtService: JwtService,
-    private readonly redisService: RedisService,
     @InjectRepository(Role)
     private readonly roleRepo: Repository<Role>,
+    private readonly jwtService: JwtService,
+    private readonly redisService: RedisService,
     private readonly configService: ConfigService,
   ) {}
 
   /**
-   * 用户登录
+   * 登录-账号密码
+   * @param dto - 包含用户名和密码的登录信息
+   * @returns - 返回生成的 JWT 令牌
+   * @throws {BusinessException} - 如果用户名或密码错误，则抛出业务异常
    */
   async login(dto: LoginDto) {
     // 查询是否存在密码登录方式
@@ -47,93 +45,112 @@ export class AuthService {
       },
       relations: { user: true },
     });
+
+    // 未查询到相应的密码信息，则抛出业务异常
     const errorMsg = '用户名或密码错误';
     if (!userAuthMethod) throw new BusinessException(errorMsg);
 
-    // 验证密码是否正确
+    // 解密传输过来的密码数据
     const passwordDecrypted = hybridDecrypt(
       dto.password.data,
       dto.password.key,
       dto.password.iv,
     );
+    // 验证密码是否正确
     const valid = await argon.verify(
       userAuthMethod.password,
       passwordDecrypted,
     );
+
+    // 如果密码不正确，则抛出业务异常
     if (!valid) throw new BusinessException(errorMsg);
+
+    // 生成并返回 JWT 令牌
     const { id, username } = userAuthMethod.user;
     const roles = await this.roleRepo.findBy({ users: { id } });
-    return await this.registerToken(
+    const payload: App.JwtPayload = {
+      id: userAuthMethod.user.id,
       username,
-      id,
-      roles.map((role) => role.id),
-    );
+      roleIds: roles.map((role) => role.id),
+    };
+    return await this.registerToken(payload);
   }
 
   /**
    * 用户退出登录
-   * @param id 用户id
+   * @param id 用户 ID
    */
   async logout(id: string) {
-    const accessToken = getTokenKeyName(id, 'access_token');
-    const refreshToken = getTokenKeyName(id, 'refresh_token');
+    // 获取访问令牌和刷新令牌的 Redis 键
+    const accessToken = getJwtRedisKey(id, 'access');
+    const refreshToken = getJwtRedisKey(id, 'refresh');
+
+    // 从 Redis 中删除访问令牌和刷新令牌
     await this.redisService.del(accessToken);
     await this.redisService.del(refreshToken);
-    return null;
   }
 
   /**
-   * token 重签
-   * @param token token
-   * @returns { refreshToken, accessToken }
+   * 刷新 JWT 令牌
+   * @param token - 传入的 refresh JWT 令牌
+   * @returns - 返回新生成的 JWT 令牌
+   * @throws {UnauthorizedException} - 如果令牌无效或已过期，则抛出未授权异常
    */
   async refresh(token: string) {
+    // 定义未授权异常
     const error = new UnauthorizedException({
       code: ResponseCode.Unauthorized,
       message: '认证已失效，请重新登录',
     });
-    if (!token) {
-      throw error;
-    }
+
+    // 如果传入的令牌为空，则抛出未授权异常
+    if (!token) throw error;
+
+    // 验证令牌的有效性
     let payload: App.JwtPayload;
     try {
       payload = this.jwtService.verify(token);
     } catch {
       throw error;
     }
-    const cachetoken = await this.redisService.get<string>(
-      `refresh_token-${payload.id}`,
+
+    // 如果 Redis 中没有刷新令牌或者刷新令牌与传入的令牌不匹配，则抛出未授权异常
+    const refreshToken = await this.redisService.get<string>(
+      getJwtRedisKey(payload.id, 'refresh'),
     );
-    if (!cachetoken || cachetoken !== token) {
+    if (!refreshToken && refreshToken !== token) {
       throw error;
     }
-    return await this.registerToken(
-      payload.username,
-      payload.id,
-      payload.roleIds,
-    );
+
+    // 生成并返回新的 JWT 令牌
+    return await this.registerToken({
+      id: payload.id,
+      username: payload.username,
+      roleIds: payload.roleIds,
+    });
   }
 
   /**
-   * 获取已登录用户信息
-   * @param id 用户 Id
+   * 获取当前登录用户信息
+   * @param id - 用户 ID
+   * @returns - 返回用户信息及授权菜单信息
    */
   async info(id: string) {
+    // 根据用户 ID 查询用户信息
     const user = await this.userRepo.findOne({ where: { id } });
-    // 根据用户权限，获取菜单
-    // 获取授权菜单
+
+    // 查询用户的角色角色信息，并关联查询授权菜单信息
     const roles = await this.roleRepo.find({
       where: { users: { id: user.id }, state: RoleStateEnum.active },
       relations: {
         menus: true,
       },
     });
-    const menus = new Set<string>();
-    roles.forEach((role) => {
-      role.menus.forEach((menu) => {
-        menus.add(menu.key);
-      });
-    });
+
+    // 聚合不同角色下的菜单信息
+    const menus = new Set(
+      roles.flatMap((role) => role.menus.map((menu) => menu.key)),
+    );
     return {
       ...user,
       menus: Array.from(menus),
@@ -141,35 +158,34 @@ export class AuthService {
   }
 
   /**
-   * 根据 payload 生成 token
-   * @param username 用户名
-   * @param id 用户id
-   * @returns token 对象
+   * 注册 JWT 令牌
+   * @param payload - 包含用户信息的 JWT 负载
+   * @returns - 返回生成的 JWT 令牌
    */
-  async registerToken(username: string, id: string, roleIds: number[]) {
+  async registerToken(payload: App.JwtPayload) {
+    // 从配置文件中获取访问令牌和刷新令牌的过期时间
     const { accessExpire, refreshExpire } = this.configService.get<{
       accessExpire: number;
       refreshExpire: number;
-    }>(ENV_VARS.TokenExpire);
-    const payload: App.JwtPayload = { username, id, roleIds };
-    const accessToken = await this.jwtService.signAsync({
-      ...payload,
-      uuid: uuidv4(),
-    });
-    const refreshToken = await this.jwtService.signAsync({
-      ...payload,
-      uuid: uuidv4(),
-    });
+    }>('jwt');
+
+    // 生成访问令牌和刷新令牌
+    const accessToken = createJwt(this.jwtService, payload, accessExpire);
+    const refreshToken = createJwt(this.jwtService, payload, refreshExpire);
+
+    // 将访问令牌和刷新令牌存入 Redis，并设置过期时间
     this.redisService.setWithExpire(
-      getTokenKeyName(id, 'access_token'),
+      getJwtRedisKey(payload.id, 'access'),
       accessToken,
       accessExpire,
     );
     this.redisService.setWithExpire(
-      getTokenKeyName(id, 'refresh_token'),
+      getJwtRedisKey(payload.id, 'refresh'),
       refreshToken,
       refreshExpire,
     );
-    return { refreshToken, accessToken };
+
+    // 返回生成的 JWT 令牌
+    return { accessToken, refreshToken };
   }
 }
