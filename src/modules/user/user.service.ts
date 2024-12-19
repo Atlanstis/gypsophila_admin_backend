@@ -3,11 +3,11 @@ import { InjectRepository } from '@nestjs/typeorm';
 import * as argon from 'argon2';
 import { User, UserAuthMethod, AuthMethodTypeEnum, Role } from 'src/entities';
 import { And, DataSource, EntityManager, In, Not, Repository } from 'typeorm';
-import { UserAddDto, UserEditDto } from './dto';
 import { BusinessException } from 'src/core';
 import { RoleService } from 'src/modules/role/role.service';
 import { findOneBy, hybridDecrypt, useTransaction } from 'src/utils';
-import { RoleEnum } from 'src/enum';
+import { RoleIdEnum } from '../role/constants';
+import { UserAddDto, UserEditDto } from './dto';
 
 @Injectable()
 export class UserService {
@@ -95,7 +95,7 @@ export class UserService {
     let roles = user.roles;
     const roleIds = roles.map((item) => item.id);
     // 不包含超级管理员，则更新角色信息
-    if (!roleIds.includes(RoleEnum.Admin)) {
+    if (!roleIds.includes(RoleIdEnum.Admin)) {
       roles = await this.judgeRoleValid(dto.role);
     }
     const newUser = this.userRepo.create({
@@ -113,7 +113,7 @@ export class UserService {
    */
   async judgeRoleValid(roleIds: number[]) {
     const roles = await this.roleRepo.findBy({
-      id: And(In(roleIds), Not(RoleEnum.Admin)),
+      id: And(In(roleIds), Not(RoleIdEnum.Admin)),
     });
     if (!roles.length) {
       throw new BusinessException('无效的角色，请重新选择');
@@ -139,7 +139,7 @@ export class UserService {
       throw new BusinessException('无法删除自己');
     }
     // 拥有超级管理员角色的用户无法删除
-    if (user.roles.find((item) => item.id === RoleEnum.Admin)) {
+    if (user.roles.find((item) => item.id === RoleIdEnum.Admin)) {
       throw new BusinessException('拥有超级管理员角色的用户无法删除');
     }
     await this.userRepo.delete({ id });

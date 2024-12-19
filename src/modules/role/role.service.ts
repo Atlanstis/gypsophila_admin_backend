@@ -4,7 +4,7 @@ import { Menu, Role, RoleMenuPermission } from 'src/entities';
 import { DataSource, EntityManager, In, Not, Repository } from 'typeorm';
 import { RMPEditDto, RoleAddDto, RoleEditDto } from './dto';
 import { BusinessException } from 'src/core';
-import { RoleEnum } from 'src/enum';
+import { RoleIdEnum } from './constants';
 import { MenuService } from 'src/modules/menu/menu.service';
 import { findOneBy, useTransaction } from 'src/utils';
 import { aggregateMenuPermissions } from './helper';
@@ -104,7 +104,7 @@ export class RoleService {
    */
   async assignable() {
     return await this.roleRepo.find({
-      where: { id: Not(RoleEnum.Admin) },
+      where: { id: Not(RoleIdEnum.Admin) },
     });
   }
 

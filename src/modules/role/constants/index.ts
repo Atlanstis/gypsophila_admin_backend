@@ -8,3 +8,8 @@ export const RoleConst = {
   /** 角色描述最大字符长度 */
   descMax: 64,
 };
+
+export const RoleIdEnum = {
+  /** 超级管理员 */
+  Admin: 1,
+};
