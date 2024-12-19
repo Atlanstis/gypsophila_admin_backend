@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Role, User, UserAuthMethod } from 'src/entities';
 import { AuthService } from './auth.service';
@@ -18,7 +18,8 @@ import { TypedConfigService } from 'src/modules';
           secret,
         };
       },
-      inject: [ConfigService],
+      extraProviders: [TypedConfigService],
+      inject: [TypedConfigService],
     }),
     TypeOrmModule.forFeature([Role, User, UserAuthMethod]),
   ],
