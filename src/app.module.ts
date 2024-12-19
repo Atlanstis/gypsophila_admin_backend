@@ -5,13 +5,13 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import config from './utils/config';
 import * as Joi from 'joi';
 import { ENV_VARS } from './enum';
-import { LogModule } from './log/log.module';
 import {
   AuthModule,
   UserModule,
   RoleModule,
   MenuModule,
   RedisModule,
+  LogModule,
 } from './modules';
 import { ormConfig } from 'ormconfig';
 import { AppService } from './app.service';

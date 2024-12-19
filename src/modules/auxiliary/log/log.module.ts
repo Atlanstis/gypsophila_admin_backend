@@ -6,7 +6,10 @@ import 'winston-daily-rotate-file';
 import { Console, DailyRotateFile } from 'winston/lib/winston/transports';
 
 const consoleTransport = new Console({
-  format: winston.format.combine(winston.format.timestamp(), utilities.format.nestLike()),
+  format: winston.format.combine(
+    winston.format.timestamp(),
+    utilities.format.nestLike(),
+  ),
 });
 
 const dailRotateFileTransport = new DailyRotateFile({
@@ -35,7 +38,11 @@ const errorDailRotateFileTransport = new DailyRotateFile({
       inject: [ConfigService],
       useFactory: () => {
         return {
-          transports: [consoleTransport, dailRotateFileTransport, errorDailRotateFileTransport],
+          transports: [
+            consoleTransport,
+            dailRotateFileTransport,
+            errorDailRotateFileTransport,
+          ],
         };
       },
     }),
