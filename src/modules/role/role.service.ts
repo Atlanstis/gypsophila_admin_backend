@@ -8,7 +8,7 @@ import { RoleEnum } from 'src/enum';
 import { MenuService } from 'src/modules/menu/menu.service';
 import { findOneBy, useTransaction } from 'src/utils';
 import { aggregateMenuPermissions } from './helper';
-import { RedisService } from 'src/redis/redis.service';
+import { RedisService } from 'src/modules';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 
 @Injectable()

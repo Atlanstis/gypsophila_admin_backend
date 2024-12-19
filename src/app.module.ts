@@ -6,8 +6,13 @@ import config from './utils/config';
 import * as Joi from 'joi';
 import { ENV_VARS } from './enum';
 import { LogModule } from './log/log.module';
-import { AuthModule, UserModule, RoleModule, MenuModule } from './modules';
-import { RedisModule } from './redis/redis.module';
+import {
+  AuthModule,
+  UserModule,
+  RoleModule,
+  MenuModule,
+  RedisModule,
+} from './modules';
 import { ormConfig } from 'ormconfig';
 import { AppService } from './app.service';
 // import { SettingModule } from './setting/setting.module';
