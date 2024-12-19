@@ -6,10 +6,8 @@ import {
   AllExceptionsFilter,
 } from './core';
 import { Logger, ValidationPipe } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
-
-import { ENV_VARS } from './enum';
+import { TypedConfigService } from './modules';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -35,8 +33,8 @@ async function bootstrap() {
   );
 
   // 获取端口
-  const configService = app.get(ConfigService);
-  const port = configService.get<number>(ENV_VARS.PORT);
+  const configService = app.get(TypedConfigService);
+  const port = configService.get('port');
 
   await app.listen(port);
 

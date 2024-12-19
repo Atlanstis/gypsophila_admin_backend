@@ -1,3 +1,5 @@
+# 运行端口
+port: 3000
 # mysql 配置
 mysql:
   host: 'localhost'
@@ -10,8 +12,6 @@ mysql:
 redis:
   host: 'localhost'
   port: 6379
-# 运行端口
-port: 3000
 # jwt 密钥
 jwt: 
   # 密钥

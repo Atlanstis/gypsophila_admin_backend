@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as argon from 'argon2';
 import { BusinessException, UnauthorizedException } from 'src/core';
-import { RedisService } from 'src/modules';
+import { RedisService, TypedConfigService } from 'src/modules';
 import { ResponseCode } from 'src/typings';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -13,7 +13,6 @@ import {
   User,
   UserAuthMethod,
 } from 'src/entities';
-import { ConfigService } from '@nestjs/config';
 import { LoginDto } from './dto';
 import { createJwt, getJwtRedisKey, hybridDecrypt } from 'src/utils';
 @Injectable()
@@ -27,7 +26,7 @@ export class AuthService {
     private readonly roleRepo: Repository<Role>,
     private readonly jwtService: JwtService,
     private readonly redisService: RedisService,
-    private readonly configService: ConfigService,
+    private readonly configService: TypedConfigService,
   ) {}
 
   /**
@@ -164,10 +163,7 @@ export class AuthService {
    */
   async registerToken(payload: App.JwtPayload) {
     // 从配置文件中获取访问令牌和刷新令牌的过期时间
-    const { accessExpire, refreshExpire } = this.configService.get<{
-      accessExpire: number;
-      refreshExpire: number;
-    }>('jwt');
+    const { accessExpire, refreshExpire } = this.configService.get('jwt');
 
     // 生成访问令牌和刷新令牌
     const accessToken = createJwt(this.jwtService, payload, accessExpire);

@@ -1,10 +1,9 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 // import { PsnineModule } from './psnine/psnine.module';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
 import config from './utils/config';
 import * as Joi from 'joi';
-import { ENV_VARS } from './enum';
 import {
   AuthModule,
   UserModule,
@@ -12,6 +11,7 @@ import {
   MenuModule,
   RedisModule,
   LogModule,
+  TypedConfigService,
 } from './modules';
 import { ormConfig } from 'ormconfig';
 import { AppService } from './app.service';
@@ -37,11 +37,9 @@ import { AppService } from './app.service';
     TypeOrmModule.forRoot(ormConfig),
     RedisModule.registerAsync({
       imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) => {
-        const redisConfig = configService.get<Environment.RedisConfig>(
-          ENV_VARS.REDIS,
-        );
+      inject: [TypedConfigService],
+      useFactory: (configService: TypedConfigService) => {
+        const redisConfig = configService.get('redis');
         return {
           ...redisConfig,
           isGlobal: true,
@@ -60,6 +58,7 @@ import { AppService } from './app.service';
     // NoticeModule,
   ],
   controllers: [],
-  providers: [AppService],
+  providers: [AppService, TypedConfigService],
+  exports: [],
 })
 export class AppModule {}
