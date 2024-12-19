@@ -43,7 +43,7 @@ export class JwtGuard implements CanActivate {
     );
     if (!cachetoken) {
       throw new UnauthorizedException(
-        '认证已失效，请重新认证',
+        '授权已过期，请重新登录',
         ResponseCode.RE_UNAUTHORIZED,
       );
     }
