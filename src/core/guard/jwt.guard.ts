@@ -6,9 +6,8 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
+import { ResponseCode, UnauthorizedException } from 'src/core';
 import { RedisService } from 'src/modules';
-import { UnauthorizedException } from 'src/core';
-import { ResponseCode } from 'src/typings';
 import { getJwtRedisKey } from 'src/utils';
 
 /**
@@ -17,20 +16,16 @@ import { getJwtRedisKey } from 'src/utils';
  */
 @Injectable()
 export class JwtGuard implements CanActivate {
-  @Inject(JwtService)
-  private jwtService: JwtService;
   @Inject(RedisService)
   private redisService: RedisService;
+  constructor(private jwtService: JwtService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request: Request = context.switchToHttp().getRequest();
     const authorization = request.header('authorization') || '';
     const bearer = authorization.split(' ');
     if (!bearer || bearer.length < 2) {
-      throw new UnauthorizedException({
-        code: ResponseCode.Unauthorized,
-        message: '请进行登录',
-      });
+      throw new UnauthorizedException('请进行登录', ResponseCode.UNAUTHORIZED);
     }
 
     const token = bearer[1];
@@ -38,25 +33,25 @@ export class JwtGuard implements CanActivate {
     try {
       user = await this.jwtService.verify(token);
     } catch {
-      throw new UnauthorizedException({
-        code: ResponseCode.Unauthorized,
-        message: 'token 错误，请重新登录',
-      });
+      throw new UnauthorizedException(
+        '授权已过期，请重新登录',
+        ResponseCode.UNAUTHORIZED,
+      );
     }
     const cachetoken = await this.redisService.get<string>(
       getJwtRedisKey(user.id, 'access'),
     );
     if (!cachetoken) {
-      throw new UnauthorizedException({
-        code: ResponseCode.ReUnauthorized,
-        message: '认证已失效，请重新登录',
-      });
+      throw new UnauthorizedException(
+        '认证已失效，请重新认证',
+        ResponseCode.RE_UNAUTHORIZED,
+      );
     }
     if (cachetoken !== token) {
-      throw new UnauthorizedException({
-        code: ResponseCode.Unauthorized,
-        message: '已在其它地方登录，请重新登录',
-      });
+      throw new UnauthorizedException(
+        '已在其它地方登录，请重新登录',
+        ResponseCode.UNAUTHORIZED,
+      );
     }
     request.user = user;
     return true;

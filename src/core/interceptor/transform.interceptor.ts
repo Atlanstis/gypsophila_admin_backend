@@ -5,15 +5,15 @@ import {
   Injectable,
   NestInterceptor,
 } from '@nestjs/common';
-import { Response } from 'express';
+import { type Response } from 'express';
+import { Reflector } from '@nestjs/core';
 import { Observable, map } from 'rxjs';
-import { ResponseCode, ResponseData } from 'src/typings';
+import { IS_RAW_DATA, ResponseData } from 'src/core';
 
-/**
- * 对成功返回的数据，进行包裹，进行格式统一
- */
 @Injectable()
 export class TransformInterceptor implements NestInterceptor {
+  constructor(private reflector: Reflector) {}
+
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const response: Response = context.switchToHttp().getResponse();
     // Nestjs 中 POST 请求默认的响应码为 201，此处将之修改为 200
@@ -23,14 +23,14 @@ export class TransformInterceptor implements NestInterceptor {
     ) {
       response.status(HttpStatus.OK);
     }
+
+    const isRawData = this.reflector.getAllAndOverride<boolean>(IS_RAW_DATA, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
     return next.handle().pipe(
       map((data) => {
-        const newData: ResponseData = {
-          code: ResponseCode.Success,
-          msg: '请求成功',
-          data,
-        };
-        return newData;
+        return isRawData ? data : ResponseData.success(data);
       }),
     );
   }

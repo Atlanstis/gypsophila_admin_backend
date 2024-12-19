@@ -1,12 +1,8 @@
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
-import {
-  HttpExceptionFilter,
-  TransformInterceptor,
-  AllExceptionsFilter,
-} from './core';
-import { Logger, ValidationPipe } from '@nestjs/common';
+import { Logger } from '@nestjs/common';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
+import { AppModule } from './app.module';
+import { setupFilter, setupInterceptor, setupPipe } from './core';
 import { TypedConfigService } from './modules';
 
 async function bootstrap() {
@@ -16,21 +12,14 @@ async function bootstrap() {
   app.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));
   const logger = new Logger();
 
-  // 成功返回数据时，对内容进行包裹
-  app.useGlobalInterceptors(new TransformInterceptor());
-  // 注册全局错误的过滤器
-  app.useGlobalFilters(
-    new AllExceptionsFilter(logger),
-    new HttpExceptionFilter(),
-  );
-  // 参数校验
-  app.useGlobalPipes(
-    new ValidationPipe({
-      transform: true,
-      whitelist: true,
-      stopAtFirstError: true,
-    }),
-  );
+  // 注册拦截器
+  setupInterceptor(app);
+
+  // 注册过滤器
+  setupFilter(app, logger);
+
+  // 注册管道
+  setupPipe(app);
 
   // 获取端口
   const configService = app.get(TypedConfigService);

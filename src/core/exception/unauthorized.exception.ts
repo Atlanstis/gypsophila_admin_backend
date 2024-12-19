@@ -1,17 +1,16 @@
 import { HttpException, HttpStatus } from '@nestjs/common';
-import { UnauthorizedError } from 'src/typings';
+import { ResponseCode, ResponseData } from '../classes';
 /**
- * 认证异常
+ * 授权出错
  */
 export class UnauthorizedException extends HttpException {
-  private reason: UnauthorizedError;
-
-  constructor(reason: UnauthorizedError) {
-    super(reason.message, HttpStatus.OK);
-    this.reason = reason;
+  private code;
+  constructor(message: string, code: ResponseCode) {
+    super(message || '认证出错', HttpStatus.OK);
+    this.code = code;
   }
 
-  getCustomReponse() {
-    return this.reason;
+  getResponseData() {
+    return ResponseData.custom(this.code, undefined, this.message);
   }
 }

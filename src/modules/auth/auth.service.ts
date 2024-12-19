@@ -1,9 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as argon from 'argon2';
-import { BusinessException, UnauthorizedException } from 'src/core';
+import {
+  BusinessException,
+  UnauthorizedException,
+  ResponseCode,
+} from 'src/core';
 import { RedisService, TypedConfigService } from 'src/modules';
-import { ResponseCode } from 'src/typings';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
@@ -97,10 +100,10 @@ export class AuthService {
    */
   async refresh(token: string) {
     // 定义未授权异常
-    const error = new UnauthorizedException({
-      code: ResponseCode.Unauthorized,
-      message: '认证已失效，请重新登录',
-    });
+    const error = new UnauthorizedException(
+      '认证已失效，请重新登录',
+      ResponseCode.UNAUTHORIZED,
+    );
 
     // 如果传入的令牌为空，则抛出未授权异常
     if (!token) throw error;

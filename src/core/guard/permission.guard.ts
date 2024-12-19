@@ -9,6 +9,7 @@ import { Reflector } from '@nestjs/core';
 import { BusinessException } from '../exception';
 import { RoleService } from 'src/modules/role/role.service';
 import { hasCommonString } from 'src/utils';
+import { REQUIRE_PERMISSION } from 'src/core';
 
 /** 检查接口的访问的权限，配合 JwtGuard 与 RequirePermission() 使用 */
 @Injectable()
@@ -23,7 +24,7 @@ export class PermissionGuard implements CanActivate {
     const request: Request = context.switchToHttp().getRequest();
 
     const methodPermissions = this.reflector.getAllAndOverride(
-      'require-permission',
+      REQUIRE_PERMISSION,
       [context.getHandler(), context.getClass()],
     ) as string[];
     if (!request.user) {

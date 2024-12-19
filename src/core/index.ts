@@ -5,3 +5,5 @@ export * from './guard';
 export * from './dto';
 export * from './decorator';
 export * from './validator';
+export * from './pipe';
+export * from './classes';
