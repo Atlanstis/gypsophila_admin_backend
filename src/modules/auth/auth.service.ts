@@ -38,7 +38,7 @@ export class AuthService {
    * @returns - 返回生成的 JWT 令牌
    * @throws {BusinessException} - 如果用户名或密码错误，则抛出业务异常
    */
-  async login(dto: LoginDto) {
+  async login(dto: LoginDto): Promise<ResAuth.Token> {
     // 查询是否存在密码登录方式
     const userAuthMethod = await this.userAuthMethodRepo.findOne({
       where: {
@@ -98,7 +98,7 @@ export class AuthService {
    * @returns - 返回新生成的 JWT 令牌
    * @throws {UnauthorizedException} - 如果令牌无效或已过期，则抛出未授权异常
    */
-  async refresh(token: string) {
+  async refresh(token: string): Promise<ResAuth.Token> {
     // 定义未授权异常
     const error = new UnauthorizedException(
       '认证已失效，请重新登录',
@@ -137,9 +137,12 @@ export class AuthService {
    * @param id - 用户 ID
    * @returns - 返回用户信息及授权菜单信息
    */
-  async info(id: string) {
+  async info(id: string): Promise<ResAuth.User> {
     // 根据用户 ID 查询用户信息
-    const user = await this.userRepo.findOne({ where: { id } });
+    const user = await this.userRepo.findOne({
+      where: { id },
+      select: { updateTime: false, createTime: false },
+    });
 
     // 查询用户的角色角色信息，并关联查询授权菜单信息
     const roles = await this.roleRepo.find({
@@ -164,7 +167,7 @@ export class AuthService {
    * @param payload - 包含用户信息的 JWT 负载
    * @returns - 返回生成的 JWT 令牌
    */
-  async registerToken(payload: App.JwtPayload) {
+  async registerToken(payload: App.JwtPayload): Promise<ResAuth.Token> {
     // 从配置文件中获取访问令牌和刷新令牌的过期时间
     const { accessExpire, refreshExpire } = this.configService.get('jwt');
 
@@ -173,12 +176,12 @@ export class AuthService {
     const refreshToken = createJwt(this.jwtService, payload, refreshExpire);
 
     // 将访问令牌和刷新令牌存入 Redis，并设置过期时间
-    this.redisService.setWithExpire(
+    await this.redisService.setWithExpire(
       getJwtRedisKey(payload.id, 'access'),
       accessToken,
       accessExpire,
     );
-    this.redisService.setWithExpire(
+    await this.redisService.setWithExpire(
       getJwtRedisKey(payload.id, 'refresh'),
       refreshToken,
       refreshExpire,
