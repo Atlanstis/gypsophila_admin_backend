@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
-import { JwtGuard } from 'src/core';
+import { JwtGuard, RawData, ResponseData } from 'src/core';
 import { Request } from 'express';
 import { AuthService } from './auth.service';
 import { LoginDto, RefreshDto } from './dto';
@@ -10,15 +10,19 @@ export class AuthController {
 
   /** 登录-账号密码 */
   @Post('/login')
+  @RawData()
   async login(@Body() user: LoginDto) {
-    return await this.authService.login(user);
+    const res = await this.authService.login(user);
+    return ResponseData.success(res, '登录成功');
   }
 
   /** 用户退出登录 */
   @Get('/logout')
   @UseGuards(JwtGuard)
+  @RawData()
   async logOut(@Req() req: Request) {
-    this.authService.logout(req.user.id);
+    const res = await this.authService.logout(req.user.id);
+    return ResponseData.success(res, '退出登录成功');
   }
 
   /** 重签认证 */
