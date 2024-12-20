@@ -115,12 +115,11 @@ export class AuthService {
     } catch {
       throw error;
     }
-
     // 如果 Redis 中没有刷新令牌或者刷新令牌与传入的令牌不匹配，则抛出未授权异常
     const refreshToken = await this.redisService.get<string>(
       getJwtRedisKey(payload.id, 'refresh'),
     );
-    if (!refreshToken && refreshToken !== token) {
+    if (!refreshToken || refreshToken !== token) {
       throw error;
     }
 
