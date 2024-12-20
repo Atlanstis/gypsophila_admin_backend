@@ -8,7 +8,7 @@ import {
 import { SystemSetting } from 'src/entities';
 import { In, Repository } from 'typeorm';
 import { WebsiteDto } from './dto';
-import { RoleService } from 'src/modules/role/role.service';
+import { RoleService } from 'src/modules/management/role/role.service';
 import { BusinessException } from 'src/core';
 
 /** 网站设置-字段对应 */

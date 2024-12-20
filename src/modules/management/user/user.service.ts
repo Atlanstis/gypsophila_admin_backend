@@ -4,7 +4,7 @@ import * as argon from 'argon2';
 import { User, UserAuthMethod, AuthMethodTypeEnum, Role } from 'src/entities';
 import { And, DataSource, EntityManager, In, Not, Repository } from 'typeorm';
 import { BusinessException } from 'src/core';
-import { RoleService } from 'src/modules/role/role.service';
+import { RoleService } from 'src/modules/management/role/role.service';
 import { findOneBy, hybridDecrypt, useTransaction } from 'src/utils';
 import { RoleIdEnum } from '../role/constants';
 import { UserAddDto, UserEditDto } from './dto';

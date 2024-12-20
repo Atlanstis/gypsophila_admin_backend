@@ -7,7 +7,7 @@ import {
 import type { Request } from 'express';
 import { Reflector } from '@nestjs/core';
 import { BusinessException } from '../exception';
-import { RoleService } from 'src/modules/role/role.service';
+import { RoleService } from 'src/modules/management/role/role.service';
 import { hasCommonString } from 'src/utils';
 import { REQUIRE_PERMISSION } from 'src/core';
 
