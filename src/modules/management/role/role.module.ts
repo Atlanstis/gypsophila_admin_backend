@@ -3,7 +3,7 @@ import { RoleService } from './role.service';
 import { RoleController } from './role.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Menu, MenuPermission, Role, RoleMenuPermission } from 'src/entities';
-import { MenuModule } from 'src/modules/management/menu/menu.module';
+import { MenuModule } from '../menu/menu.module';
 
 @Global()
 @Module({

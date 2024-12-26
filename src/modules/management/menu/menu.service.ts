@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Menu, MenuPermission, RoleMenuPermission } from 'src/entities';
+import { Menu } from 'src/entities';
 import { DataSource, In, IsNull, Not, Repository } from 'typeorm';
 import { MenuAddDto, MenuEditDto } from './dto';
 import { BusinessException } from 'src/core';
-import { getMenuOperationPermission, sortMenuChildren } from './helper';
+import { sortMenuChildren } from './helper';
 import { findOneBy } from 'src/utils';
 
 @Injectable()
@@ -12,10 +12,6 @@ export class MenuService {
   constructor(
     @InjectRepository(Menu)
     private readonly menuRepo: Repository<Menu>,
-    @InjectRepository(MenuPermission)
-    private readonly mpRepo: Repository<MenuPermission>,
-    @InjectRepository(RoleMenuPermission)
-    private readonly rmpRepository: Repository<RoleMenuPermission>,
     private dataSource: DataSource,
   ) {}
 
@@ -141,19 +137,6 @@ export class MenuService {
     });
   }
 
-  // /**
-  //  * 根据 key 获取菜单组
-  //  * @param menus key 数组
-  //  * @returns 菜单组
-  //  */
-  // async getMenuByKey(menus: string[]) {
-  //   return await this.menuRepo.find({
-  //     where: {
-  //       key: In(menus),
-  //     },
-  //   });
-  // }
-
   /**
    * 获取顶级菜单的子菜单
    * @param topMenus 顶级菜单
@@ -172,23 +155,4 @@ export class MenuService {
     });
     return children;
   }
-
-  // /**
-  //  * 获取当前用户当前页面的操作权限
-  //  * @param key 当前菜单 Key
-  //  * @param roleIds 角色列表
-  //  * @returns 操作权限
-  //  */
-  // async permissionSearch(key: string, roleIds: number[]) {
-  //   const menu = await this.menuRepo.findOneBy({ key });
-  //   if (!menu) {
-  //     throw new BusinessException('当前菜单 Key 不存在');
-  //   }
-  //   const rmps = await this.rmpRepository
-  //     .createQueryBuilder('rmp')
-  //     .leftJoinAndSelect('rmp.permission', 'permission')
-  //     .where('rmp.menu_id = :menuId and rmp.role_id IN (:...roleIds)', { menuId: menu.id, roleIds })
-  //     .getMany();
-  //   return getMenuOperationPermission(rmps, key);
-  // }
 }

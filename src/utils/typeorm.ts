@@ -9,14 +9,29 @@ import type {
 } from 'typeorm';
 
 /**
- * 根据条件查找单个资源
- * @param dataSource 数据库资源
- * @param entityTarget 对应的实体
+ * 计算分页的跳过和获取数量。
+ * @param page 当前页码，从 1 开始。
+ * @param size 每页显示的记录数。
+ * @returns 一个对象，包含 `skip` 和 `take` 属性。
+ */
+export function getSkipTake(page: number, size: number) {
+  page = Math.max(1, page);
+  size = Math.max(1, size);
+  return {
+    skip: (page - 1) * size,
+    take: size,
+  };
+}
+
+/**
+ * 根据条件查找一个实体，如果满足判断函数则抛出业务异常。
+ * @param dataSource 数据源实例
+ * @param entityTarget 实体目标
  * @param where 查询条件
- * @param judgeFn 报错条件
- * @param errorMsg 报错信息
- * @param relations 关联查询
- * @returns 相应的资源
+ * @param judgeFn 判断函数，接收实体作为参数，返回布尔值
+ * @param errorMsg 异常信息
+ * @param relations 关系
+ * @returns 查找到的实体或null
  */
 export async function findOneBy<T>(
   dataSource: DataSource,
@@ -35,9 +50,9 @@ export async function findOneBy<T>(
 }
 
 /**
- *  数据库，事务操作
- * @param dataSource 数据库资源
- * @param inTransaction 在事务中执行的函数
+ *  使用事务处理数据源中的操作。
+ * @param dataSource 数据源实例
+ * @param inTransaction 在事务中执行的操作
  */
 export async function useTransaction(
   dataSource: DataSource,
@@ -52,6 +67,7 @@ export async function useTransaction(
     // 提交事务
     await queryRunner.commitTransaction();
   } catch (err) {
+    // 如果发生错误，回滚事务
     await queryRunner.rollbackTransaction();
     throw err;
   } finally {

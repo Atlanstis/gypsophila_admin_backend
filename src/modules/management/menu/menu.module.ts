@@ -12,6 +12,6 @@ import { Menu, MenuPermission, RoleMenuPermission } from 'src/entities';
   ],
   controllers: [MenuController, MenuPermissionController],
   providers: [MenuService, MenuPermissionService],
-  exports: [MenuService],
+  exports: [MenuService, MenuPermissionService],
 })
 export class MenuModule {}

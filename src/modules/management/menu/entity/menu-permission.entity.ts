@@ -42,6 +42,12 @@ export class MenuPermission {
   })
   order: number;
 
+  @Column({
+    name: 'menu_id',
+    comment: '菜单 id',
+  })
+  menuId: number;
+
   @JoinColumn({
     name: 'menu_id',
   })

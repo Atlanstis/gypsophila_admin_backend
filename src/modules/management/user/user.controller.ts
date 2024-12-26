@@ -53,4 +53,10 @@ export class UserController {
   async delete(@Query() dto: UserIdDto, @Req() req: Request) {
     return this.userService.delete(dto.id, req.user.id);
   }
+
+  /** 页面配置 */
+  @Get('config')
+  async config(@Req() req: Request) {
+    return this.userService.getPageConfig(req.user.roleIds);
+  }
 }

@@ -18,7 +18,7 @@ export class MenuPermissionController {
   @UseGuards(PermissionGuard)
   @RequirePermission('MenuPermission')
   async permissionList(@Body() dto: MenuIdDto) {
-    return await this.mpService.permissionList(dto.menuId);
+    return await this.mpService.getPermissionList({ id: dto.menuId });
   }
 
   /** 菜单增加权限选项 */

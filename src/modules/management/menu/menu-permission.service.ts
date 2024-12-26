@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Menu, MenuPermission, RoleMenuPermission } from 'src/entities';
-import { DataSource, Not, Repository } from 'typeorm';
+import { Menu, MenuPermission } from 'src/entities';
+import { DataSource, FindOptionsWhere, Not, Repository } from 'typeorm';
 import { PermissionAddDto, PermissionEditDto } from './dto';
 import { findOneBy } from 'src/utils';
 
@@ -12,8 +12,6 @@ export class MenuPermissionService {
     private readonly menuRepo: Repository<Menu>,
     @InjectRepository(MenuPermission)
     private readonly mpRepo: Repository<MenuPermission>,
-    @InjectRepository(RoleMenuPermission)
-    private readonly rmpRepository: Repository<RoleMenuPermission>,
     private dataSource: DataSource,
   ) {}
 
@@ -21,17 +19,17 @@ export class MenuPermissionService {
    * 获取菜单权限选项
    * @param menuId 菜单 id
    */
-  async permissionList(menuId: number) {
+  async getPermissionList(where: FindOptionsWhere<Menu>) {
     // 判断当前菜单是否存在
-    await findOneBy(
+    const menu = await findOneBy(
       this.dataSource,
       Menu,
-      { id: menuId },
+      where,
       (menu) => !menu,
       '该菜单不存在',
     );
     const permissions = await this.mpRepo.find({
-      where: { menu: { id: menuId } },
+      where: { menuId: menu.id },
     });
     return permissions;
   }

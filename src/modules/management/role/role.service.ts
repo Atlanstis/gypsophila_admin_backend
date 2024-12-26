@@ -6,10 +6,16 @@ import { RMPEditDto, RoleAddDto, RoleEditDto } from './dto';
 import { BusinessException } from 'src/core';
 import { RoleIdEnum } from './constants';
 import { MenuService } from 'src/modules/management/menu/menu.service';
-import { findOneBy, useTransaction } from 'src/utils';
+import {
+  findOneBy,
+  KeyRolePermission,
+  transformRolePermissions,
+  useTransaction,
+} from 'src/utils';
 import { aggregateMenuPermissions } from './helper';
 import { RedisService } from 'src/modules';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
+import { MenuPermissionService } from '../menu/menu-permission.service';
 
 @Injectable()
 export class RoleService {
@@ -21,6 +27,7 @@ export class RoleService {
     @InjectRepository(RoleMenuPermission)
     private readonly rmpRepo: Repository<RoleMenuPermission>,
     private readonly menuService: MenuService,
+    private readonly mpService: MenuPermissionService,
     private dataSource: DataSource,
     private redisService: RedisService,
     @Inject(WINSTON_MODULE_NEST_PROVIDER)
@@ -219,23 +226,6 @@ export class RoleService {
   }
 
   /**
-   * 根据角色，获取操作权限
-   * @param roleIds 角色 id 列表
-   * @returns 权限
-   */
-  async getPermissionByRoleIds(roleIds: number[]) {
-    const rmps = await this.rmpRepo.find({
-      where: {
-        roleId: In(roleIds),
-      },
-      relations: {
-        permission: true,
-      },
-    });
-    return rmps.map((rmp) => rmp.permission.key);
-  }
-
-  /**
    * 根据 id 获取角色
    * @param id 角色 id
    * @returns 角色
@@ -245,27 +235,37 @@ export class RoleService {
   }
 
   /**
-   * 根据角色 id 从 redis 中加载权限列表
-   * @param roleIds 角色 id 列表
-   * @returns 权限列表
+   * 从 Redis 中获取角色的权限集合。
+   * @param roleIds - 角色ID数组。
+   * @returns 一个包含所有角色权限的集合。
    */
   async getRolePermissionsFromRedis(roleIds: number[]) {
+    // 获取每个角色的权限
     const result = await Promise.all(
       roleIds.map((roleId) =>
-        this.redisService.getHash('role_permissions', String(roleId)),
+        this.redisService.getHash(KeyRolePermission, String(roleId)),
       ),
     );
-    return Array.from(
-      result.reduce((map, str) => {
-        if (str) {
-          try {
-            const permissions = JSON.parse(str);
-            permissions.forEach((permission: string) => map.add(permission));
-          } catch {}
-        }
-        return map;
-      }, new Set<string>()),
-    );
+    // 将权限集合合并为一个集合
+    return transformRolePermissions(result);
+  }
+
+  /**
+   * 获取角色菜单权限映射。
+   * @param roleIds - 角色ID数组。
+   * @param key - 权限菜单的键。
+   * @returns 一个包含角色菜单权限映射的对象。
+   */
+  async getRoleMenuPermissionMap<T>(roleIds: number[], key: string) {
+    // 获取权限列表
+    const permissions = await this.mpService.getPermissionList({ key });
+    // 获取角色权限
+    const rolePermissionSet = await this.getRolePermissionsFromRedis(roleIds);
+    const map: any = {};
+    permissions.forEach((item) => {
+      map[item.alias] = rolePermissionSet.has(item.key);
+    });
+    return map as T;
   }
 
   /** 获取各角色的权限，并加载进 redis */
@@ -287,7 +287,7 @@ export class RoleService {
         JSON.stringify(Array.from(permissions)),
       ]);
     }
-    await this.redisService.setHashes('role_permissions', fieldsValues);
+    await this.redisService.setHashes(KeyRolePermission, fieldsValues);
     this.logger.log('Load role permissions --> success');
   }
 }

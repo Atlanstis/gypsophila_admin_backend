@@ -1,13 +1,19 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as argon from 'argon2';
-import { User, UserAuthMethod, AuthMethodTypeEnum, Role } from 'src/entities';
 import { And, DataSource, EntityManager, In, Not, Repository } from 'typeorm';
 import { BusinessException } from 'src/core';
-import { RoleService } from 'src/modules/management/role/role.service';
-import { findOneBy, hybridDecrypt, useTransaction } from 'src/utils';
-import { RoleIdEnum } from '../role/constants';
+import { User, UserAuthMethod, AuthMethodTypeEnum, Role } from 'src/entities';
+import {
+  findOneBy,
+  getSkipTake,
+  hybridDecrypt,
+  useTransaction,
+} from 'src/utils';
 import { UserAddDto, UserEditDto } from './dto';
+import { RoleIdEnum } from '../role/constants';
+import { EnumMenuKey } from 'src/constants';
+import { RoleService } from '../role/role.service';
 
 @Injectable()
 export class UserService {
@@ -27,9 +33,10 @@ export class UserService {
    * @returns 用户列表
    */
   async list(page: number, size: number) {
+    const { skip, take } = getSkipTake(page, size);
     const [list, total] = await this.userRepo.findAndCount({
-      skip: (page - 1) * size,
-      take: size,
+      skip,
+      take,
       relations: { roles: true },
       order: {
         createTime: 'ASC',
@@ -143,5 +150,22 @@ export class UserService {
       throw new BusinessException('拥有超级管理员角色的用户无法删除');
     }
     await this.userRepo.delete({ id });
+  }
+
+  /**
+   * 获取用户管理页面相关配置
+   * @param roleIds 角色 id 列表
+   */
+  async getPageConfig(roleIds: number[]): Promise<ReqUser.Config> {
+    const key = EnumMenuKey.ManagementUser;
+    const permission =
+      await this.roleService.getRoleMenuPermissionMap<ReqUser.ConfigPermission>(
+        roleIds,
+        key,
+      );
+
+    return {
+      permission,
+    };
   }
 }
