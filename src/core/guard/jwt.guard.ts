@@ -35,7 +35,7 @@ export class JwtGuard implements CanActivate {
     } catch {
       throw new UnauthorizedException(
         '授权已过期，请重新登录',
-        ResponseCode.UNAUTHORIZED,
+        ResponseCode.RE_UNAUTHORIZED,
       );
     }
     const cachetoken = await this.redisService.get<string>(
