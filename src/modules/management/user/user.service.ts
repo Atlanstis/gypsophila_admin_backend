@@ -2,9 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as argon from 'argon2';
 import { And, DataSource, EntityManager, In, Not, Repository } from 'typeorm';
-import { BusinessException } from 'src/core';
+import { BusinessException, CommonPageDto } from 'src/core';
 import { User, UserAuthMethod, AuthMethodTypeEnum, Role } from 'src/entities';
 import {
+  execSingleStrategy,
   findOneBy,
   getSkipTake,
   hybridDecrypt,
@@ -27,22 +28,58 @@ export class UserService {
   ) {}
 
   /**
-   * 根据页码跟长度获取用户列表
-   * @param page 页码
-   * @param size 长度
-   * @returns 用户列表
+   * 获取用户列表。
+   * @param dto - 包含分页信息的对象。
+   * @param payload - 包含 JWT 负载信息的对象。
+   * @returns 一个包含用户列表和总数的对象。
    */
-  async list(page: number, size: number) {
+  async list(
+    dto: CommonPageDto,
+    payload: App.JwtPayload,
+  ): Promise<ResCommon.TableData<ResUser.UserListData>> {
+    // 计算跳过的记录数和获取的记录数
+    const { page, size } = dto;
     const { skip, take } = getSkipTake(page, size);
-    const [list, total] = await this.userRepo.findAndCount({
+
+    // 从数据库中获取用户列表和总数，包括关联的角色信息
+    const [users, total] = await this.userRepo.findAndCount({
       skip,
       take,
       relations: { roles: true },
-      order: {
-        createTime: 'ASC',
-      },
+      order: { createTime: 'ASC' },
     });
-    return { list, total };
+
+    // 获取当前用户的权限
+    const permission = await this.getPermission(payload.roleIds);
+
+    // 格式化用户列表，添加权限信息
+    const formattedUsers = users.map((user) => {
+      // 编辑权限的策略
+      const editStrategies = [
+        // 是否拥有编辑权限
+        () => permission.edit,
+      ];
+
+      // 删除权限的策略
+      const deleteStrategies = [
+        // 是否拥有删除权限
+        () => permission.delete,
+        // 无法删除拥有超级管理员角色的用户
+        () => !user.roles.some((role) => role.id === RoleIdEnum.Admin),
+        // 无法删除自己
+        () => user.id !== payload.id,
+      ];
+
+      return {
+        ...user,
+        permission: {
+          edit: execSingleStrategy(editStrategies),
+          delete: execSingleStrategy(deleteStrategies),
+        },
+      };
+    });
+
+    return { list: formattedUsers, total };
   }
 
   /**
@@ -58,7 +95,7 @@ export class UserService {
       '该用户名已存在，请更换后重试',
     );
     const inTransaction = async (manager: EntityManager) => {
-      const roles = await this.judgeRoleValid(dto.role);
+      const roles = await this.judgeRoleValid(dto.roleIds);
       const user = manager.create(User, {
         username: dto.username,
         nickname: dto.nickname,
@@ -103,7 +140,7 @@ export class UserService {
     const roleIds = roles.map((item) => item.id);
     // 不包含超级管理员，则更新角色信息
     if (!roleIds.includes(RoleIdEnum.Admin)) {
-      roles = await this.judgeRoleValid(dto.role);
+      roles = await this.judgeRoleValid(dto.roleIds);
     }
     const newUser = this.userRepo.create({
       ...user,
@@ -156,16 +193,19 @@ export class UserService {
    * 获取用户管理页面相关配置
    * @param roleIds 角色 id 列表
    */
-  async getPageConfig(roleIds: number[]): Promise<ReqUser.Config> {
-    const key = EnumMenuKey.ManagementUser;
-    const permission =
-      await this.roleService.getRoleMenuPermissionMap<ReqUser.ConfigPermission>(
-        roleIds,
-        key,
-      );
+  async getPageConfig(roleIds: number[]): Promise<ResUser.Config> {
+    const permission = await this.getPermission(roleIds);
 
     return {
       permission,
     };
+  }
+
+  async getPermission(roleIds: number[]) {
+    const key = EnumMenuKey.ManagementUser;
+    return this.roleService.getRoleMenuPermissionMap<ResUser.ConfigPermission>(
+      roleIds,
+      key,
+    );
   }
 }

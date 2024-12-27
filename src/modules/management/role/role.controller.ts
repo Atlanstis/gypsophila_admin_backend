@@ -46,7 +46,7 @@ export class RoleController {
   }
 
   /** 获取可以分配的角色，使用于用户新增编辑 */
-  @Get('/list/assignable')
+  @Get('/assignable')
   @UseGuards(PermissionGuard)
   @RequirePermission(['UserAdd', 'UserEdit'])
   async assignable() {

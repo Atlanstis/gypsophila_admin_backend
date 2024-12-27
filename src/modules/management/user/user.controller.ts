@@ -14,6 +14,8 @@ import {
   CommonPageDto,
   PermissionGuard,
   RequirePermission,
+  RawData,
+  ResponseData,
 } from 'src/core';
 import { Request } from 'express';
 
@@ -26,24 +28,28 @@ export class UserController {
   @Post('/list')
   @UseGuards(PermissionGuard)
   @RequirePermission('UserWatch')
-  async list(@Body() dto: CommonPageDto) {
-    return this.userService.list(dto.page, dto.size);
+  async list(@Body() dto: CommonPageDto, @Req() req: Request) {
+    return this.userService.list(dto, req.user);
   }
 
   /** 新增用户 */
   @Post('/add')
+  @RawData()
   @UseGuards(PermissionGuard)
   @RequirePermission('UserAdd')
   async add(@Body() dto: UserAddDto) {
-    return this.userService.add(dto);
+    await this.userService.add(dto);
+    return ResponseData.success(null, '新增用户成功');
   }
 
   /** 编辑用户 */
   @Post('/edit')
+  @RawData()
   @UseGuards(PermissionGuard)
   @RequirePermission('UserEdit')
   async edit(@Body() user: UserEditDto) {
-    return this.userService.edit(user);
+    await this.userService.edit(user);
+    return ResponseData.success(null, '编辑用户成功');
   }
 
   /** 删除用户 */

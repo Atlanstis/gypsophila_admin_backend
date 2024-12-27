@@ -3,3 +3,4 @@ export * from './math';
 export * from './hybrid-encrypt';
 export * from './typeorm';
 export * from './redis';
+export * from './strategy';

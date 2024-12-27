@@ -37,7 +37,7 @@ export class UserDto {
   @ArrayMaxSize(UserKeyLength.roleMax, {
     message: `用户最多绑定 ${UserKeyLength.roleMin} - ${UserKeyLength.roleMax} 个角色`,
   })
-  role: number[];
+  roleIds: number[];
 
   @Validate(IsEncryptedData, {
     message: `密码加密错误`,
@@ -49,13 +49,13 @@ export class UserAddDto extends PickType(UserDto, [
   'username',
   'nickname',
   'password',
-  'role',
+  'roleIds',
 ]) {}
 
 export class UserEditDto extends PickType(UserDto, [
   'id',
   'nickname',
-  'role',
+  'roleIds',
 ]) {}
 
 export class UserIdDto extends PickType(UserDto, ['id']) {}

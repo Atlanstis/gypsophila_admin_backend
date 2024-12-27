@@ -8,4 +8,7 @@ declare namespace Common {
 
   /** 可空类型 */
   type Nullable<T> = null | T;
+
+  /** 单策略 */
+  type SingleStrategy = () => boolean;
 }

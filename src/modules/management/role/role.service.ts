@@ -223,6 +223,8 @@ export class RoleService {
       await manager.save(role);
     };
     await useTransaction(this.dataSource, inTransaction);
+    // 更新缓存
+    await this.loadRMPs2Redis();
   }
 
   /**
