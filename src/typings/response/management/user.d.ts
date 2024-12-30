@@ -9,10 +9,7 @@ declare namespace ResUser {
 
   /** 用户列表数据 */
   interface UserListData extends User {
-    permission: {
-      delete: boolean;
-      edit: boolean;
-    };
+    permission: Pick<ConfigPermission, 'delete' | 'edit'>;
   }
 
   /** 权限配置 */

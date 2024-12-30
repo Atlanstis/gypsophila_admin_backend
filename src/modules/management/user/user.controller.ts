@@ -39,7 +39,7 @@ export class UserController {
   @RequirePermission('UserAdd')
   async add(@Body() dto: UserAddDto) {
     await this.userService.add(dto);
-    return ResponseData.success(null, '新增用户成功');
+    return ResponseData.success(null, '新增成功');
   }
 
   /** 编辑用户 */
@@ -49,20 +49,22 @@ export class UserController {
   @RequirePermission('UserEdit')
   async edit(@Body() user: UserEditDto) {
     await this.userService.edit(user);
-    return ResponseData.success(null, '编辑用户成功');
+    return ResponseData.success(null, '编辑成功');
   }
 
   /** 删除用户 */
   @Get('delete')
+  @RawData()
   @UseGuards(PermissionGuard)
   @RequirePermission('UserDelete')
   async delete(@Query() dto: UserIdDto, @Req() req: Request) {
-    return this.userService.delete(dto.id, req.user.id);
+    await this.userService.delete(dto.id, req.user.id);
+    return ResponseData.success(null, '删除成功');
   }
 
   /** 页面配置 */
   @Get('config')
   async config(@Req() req: Request) {
-    return this.userService.getPageConfig(req.user.roleIds);
+    return await this.userService.getPageConfig(req.user.roleIds);
   }
 }
