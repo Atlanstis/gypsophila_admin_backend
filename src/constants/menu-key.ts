@@ -3,4 +3,6 @@ export enum EnumMenuKey {
   Management = 'Management',
   /** 用户管理 */
   ManagementUser = 'Management_User',
+  /** 角色管理 */
+  ManagementRole = 'Management_Role',
 }

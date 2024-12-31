@@ -3,11 +3,13 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Menu, Role, RoleMenuPermission } from 'src/entities';
 import { DataSource, EntityManager, In, Not, Repository } from 'typeorm';
 import { RMPEditDto, RoleAddDto, RoleEditDto } from './dto';
-import { BusinessException } from 'src/core';
+import { BusinessException, CommonPageDto } from 'src/core';
 import { RoleIdEnum } from './constants';
 import { MenuService } from 'src/modules/management/menu/menu.service';
 import {
+  execSingleStrategy,
   findOneBy,
+  getSkipTake,
   KeyRolePermission,
   transformRolePermissions,
   useTransaction,
@@ -16,6 +18,7 @@ import { aggregateMenuPermissions } from './helper';
 import { RedisService } from 'src/modules';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { MenuPermissionService } from '../menu/menu-permission.service';
+import { EnumMenuKey } from 'src/constants';
 
 @Injectable()
 export class RoleService {
@@ -40,15 +43,68 @@ export class RoleService {
    * @param size 条数
    * @returns 角色列表
    */
-  async list(page: number, size: number) {
-    const [list, total] = await this.roleRepo.findAndCount({
-      skip: (page - 1) * size,
-      take: size,
+  async list(
+    dto: CommonPageDto,
+    payload: App.JwtPayload,
+  ): Promise<ResCommon.TableData<ResRole.RoleListData>> {
+    // 计算跳过的记录数和获取的记录数
+    const { page, size } = dto;
+    const { skip, take } = getSkipTake(page, size);
+    const [roles, total] = await this.roleRepo.findAndCount({
+      skip,
+      take,
       order: {
         id: 'ASC',
       },
     });
-    return { list, total };
+
+    // 获取当前用户的权限
+    const permission = await this.getPermission(payload.roleIds);
+
+    // 格式化用户列表，添加权限信息
+    const formattedRoles = roles.map((role) => {
+      // 编辑权限的策略
+      const editStrategies = [
+        // 是否拥有编辑权限
+        () => permission.edit,
+        // 内置权限无法编辑
+        () => role.isBuiltin === 0,
+      ];
+
+      // 删除权限的策略
+      const deleteStrategies = [
+        // 是否拥有删除权限
+        () => permission.delete,
+        // 内置权限无法删除
+        () => role.isBuiltin === 0,
+      ];
+
+      // 权限设置的策略
+      const permissionStrategies = [
+        // 是否拥有权限设置权限
+        () => permission.permissionSet,
+        // 非超级管理员不能设置超级管理员的权限
+        // 非超级管理员不能设置自身拥有的角色的权限
+        () => {
+          if (role.id === RoleIdEnum.Admin) {
+            return payload.roleIds.includes(RoleIdEnum.Admin);
+          } else {
+            return !payload.roleIds.includes(role.id);
+          }
+        },
+      ];
+
+      return {
+        ...role,
+        permission: {
+          edit: execSingleStrategy(editStrategies),
+          delete: execSingleStrategy(deleteStrategies),
+          permissionSet: execSingleStrategy(permissionStrategies),
+        },
+      };
+    });
+
+    return { list: formattedRoles, total };
   }
 
   /**
@@ -61,7 +117,7 @@ export class RoleService {
       Role,
       { name: dto.name },
       (role) => !!role,
-      '角色名已存在',
+      '当前角色名已存在',
     );
     const newRole = this.roleRepo.create({ ...dto });
     await this.roleRepo.save(newRole);
@@ -77,7 +133,7 @@ export class RoleService {
       Role,
       { id: dto.id },
       (role) => !role,
-      '角色不存在',
+      '当前角色不存在',
     );
     const updateRole = this.roleRepo.create(dto);
     await this.roleRepo.update({ id: dto.id }, updateRole);
@@ -109,10 +165,31 @@ export class RoleService {
    * 获取可以分配的角色
    * @returns 除超级管理员外的角色
    */
-  async assignable() {
+  async assignable(): Promise<ResRole.Role[]> {
     return await this.roleRepo.find({
       where: { id: Not(RoleIdEnum.Admin) },
     });
+  }
+
+  /**
+   * 获取角色管理页面相关配置
+   * @param roleIds 角色 id 列表
+   */
+  async getPageConfig(roleIds: number[]): Promise<ResRole.Config> {
+    const permission = await this.getPermission(roleIds);
+
+    return {
+      permission,
+    };
+  }
+
+  /** 获取当前角色下，角色管理页面的权限映射 */
+  async getPermission(roleIds: number[]) {
+    const key = EnumMenuKey.ManagementRole;
+    return this.getRoleMenuPermissionMap<ResRole.ConfigPermission>(
+      roleIds,
+      key,
+    );
   }
 
   /**
@@ -228,12 +305,21 @@ export class RoleService {
   }
 
   /**
-   * 根据 id 获取角色
-   * @param id 角色 id
-   * @returns 角色
+   * 获取角色菜单权限映射。
+   * @param roleIds - 角色ID数组。
+   * @param key - 权限菜单的键。
+   * @returns 一个包含角色菜单权限映射的对象。
    */
-  async findRoleById(id: number) {
-    return await this.roleRepo.findOne({ where: { id } });
+  async getRoleMenuPermissionMap<T>(roleIds: number[], key: string) {
+    // 获取权限列表
+    const permissions = await this.mpService.getPermissionList({ key });
+    // 获取角色权限
+    const rolePermissionSet = await this.getRolePermissionsFromRedis(roleIds);
+    const map: any = {};
+    permissions.forEach((item) => {
+      map[item.alias] = rolePermissionSet.has(item.key);
+    });
+    return map as T;
   }
 
   /**
@@ -250,24 +336,6 @@ export class RoleService {
     );
     // 将权限集合合并为一个集合
     return transformRolePermissions(result);
-  }
-
-  /**
-   * 获取角色菜单权限映射。
-   * @param roleIds - 角色ID数组。
-   * @param key - 权限菜单的键。
-   * @returns 一个包含角色菜单权限映射的对象。
-   */
-  async getRoleMenuPermissionMap<T>(roleIds: number[], key: string) {
-    // 获取权限列表
-    const permissions = await this.mpService.getPermissionList({ key });
-    // 获取角色权限
-    const rolePermissionSet = await this.getRolePermissionsFromRedis(roleIds);
-    const map: any = {};
-    permissions.forEach((item) => {
-      map[item.alias] = rolePermissionSet.has(item.key);
-    });
-    return map as T;
   }
 
   /** 获取各角色的权限，并加载进 redis */

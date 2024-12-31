@@ -19,8 +19,8 @@ export class RoleDto {
   name: string;
 
   /** 角色描述 */
-  @Length(RoleConst.descMin, RoleConst.descMax, {
-    message: `角色描述长度为 ${RoleConst.descMin} - ${RoleConst.descMax} 个字符`,
+  @Length(0, RoleConst.descMax, {
+    message: `角色描述最大长度不能超过 ${RoleConst.descMax} 个字符`,
   })
   desc: string;
 }
