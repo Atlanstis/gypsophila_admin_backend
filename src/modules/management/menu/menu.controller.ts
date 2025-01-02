@@ -18,6 +18,7 @@ import {
   ResponseData,
 } from 'src/core';
 import { MenuAddDto, MenuEditDto, IdDto } from './dto';
+import { MenuAdd, MenuDelete, MenuEdit, MenuWatch } from './constants';
 
 @Controller('menu')
 @UseGuards(JwtGuard)
@@ -27,7 +28,7 @@ export class MenuController {
   /** 根据页码跟长度获取一级菜单列表及其子菜单 */
   @Post('/list')
   @UseGuards(PermissionGuard)
-  @RequirePermission('MenuWatch')
+  @RequirePermission(MenuWatch)
   async list(@Body() dto: CommonPageDto, @Req() req: Request) {
     return await this.menuService.list(dto, req.user);
   }
@@ -35,7 +36,7 @@ export class MenuController {
   /** 获取一级菜单数据 */
   @Get('/list/top')
   @UseGuards(PermissionGuard)
-  @RequirePermission(['MenuAdd', 'MenuEdit'])
+  @RequirePermission([MenuAdd, MenuEdit])
   async listTop() {
     return await this.menuService.listTop();
   }
@@ -44,7 +45,7 @@ export class MenuController {
   @Post('/add')
   @RawData()
   @UseGuards(PermissionGuard)
-  @RequirePermission('MenuAdd')
+  @RequirePermission(MenuAdd)
   async add(@Body() dto: MenuAddDto) {
     await this.menuService.add(dto);
     return ResponseData.success(null, '新增成功');
@@ -54,7 +55,7 @@ export class MenuController {
   @Post('/edit')
   @RawData()
   @UseGuards(PermissionGuard)
-  @RequirePermission('MenuEdit')
+  @RequirePermission(MenuEdit)
   async edit(@Body() dto: MenuEditDto) {
     await this.menuService.edit(dto);
     return ResponseData.success(null, '编辑成功');
@@ -64,7 +65,7 @@ export class MenuController {
   @Get('/delete')
   @RawData()
   @UseGuards(PermissionGuard)
-  @RequirePermission('MenuDelete')
+  @RequirePermission(MenuDelete)
   async delete(@Query() dto: IdDto) {
     await this.menuService.delete(dto.id);
     return ResponseData.success(null, '删除成功');

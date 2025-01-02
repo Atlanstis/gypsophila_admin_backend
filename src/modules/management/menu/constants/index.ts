@@ -23,3 +23,5 @@ export const MenuPermissionConst = {
   /** key 最大长度 */
   keyMax: 32,
 };
+
+export * from './permission';

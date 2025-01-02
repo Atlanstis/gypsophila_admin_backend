@@ -18,6 +18,7 @@ import {
   RawData,
   ResponseData,
 } from 'src/core';
+import { UserAdd, UserDelete, UserEdit, UserWatch } from './constants';
 
 @Controller('user')
 @UseGuards(JwtGuard)
@@ -27,7 +28,7 @@ export class UserController {
   /** 用户列表 */
   @Post('/list')
   @UseGuards(PermissionGuard)
-  @RequirePermission('UserWatch')
+  @RequirePermission(UserWatch)
   async list(@Body() dto: CommonPageDto, @Req() req: Request) {
     return this.userService.list(dto, req.user);
   }
@@ -36,7 +37,7 @@ export class UserController {
   @Post('/add')
   @RawData()
   @UseGuards(PermissionGuard)
-  @RequirePermission('UserAdd')
+  @RequirePermission(UserAdd)
   async add(@Body() dto: UserAddDto) {
     await this.userService.add(dto);
     return ResponseData.success(null, '新增成功');
@@ -46,7 +47,7 @@ export class UserController {
   @Post('/edit')
   @RawData()
   @UseGuards(PermissionGuard)
-  @RequirePermission('UserEdit')
+  @RequirePermission(UserEdit)
   async edit(@Body() user: UserEditDto) {
     await this.userService.edit(user);
     return ResponseData.success(null, '编辑成功');
@@ -56,7 +57,7 @@ export class UserController {
   @Get('delete')
   @RawData()
   @UseGuards(PermissionGuard)
-  @RequirePermission('UserDelete')
+  @RequirePermission(UserDelete)
   async delete(@Query() dto: UserIdDto, @Req() req: Request) {
     await this.userService.delete(dto.id, req.user.id);
     return ResponseData.success(null, '删除成功');

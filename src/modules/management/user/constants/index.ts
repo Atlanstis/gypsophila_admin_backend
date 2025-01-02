@@ -10,3 +10,5 @@ export const UserKeyLength = {
   roleMin: 1,
   roleMax: 3,
 };
+
+export * from './permission';
