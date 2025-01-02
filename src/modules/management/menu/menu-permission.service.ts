@@ -8,8 +8,6 @@ import { findOneBy } from 'src/utils';
 @Injectable()
 export class MenuPermissionService {
   constructor(
-    @InjectRepository(Menu)
-    private readonly menuRepo: Repository<Menu>,
     @InjectRepository(MenuPermission)
     private readonly mpRepo: Repository<MenuPermission>,
     private dataSource: DataSource,

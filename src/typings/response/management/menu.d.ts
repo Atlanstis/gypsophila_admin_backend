@@ -4,6 +4,9 @@ declare namespace ResMenu {
     key: string;
     type: 'page' | 'menu';
     name: string;
+    order: number;
+    parentId: number;
+    permissions?: MenuPermission[];
   }
 
   interface MenuPermission {
@@ -12,5 +15,27 @@ declare namespace ResMenu {
     name: string;
     alias: string;
     order: number;
+  }
+
+  interface MenuListData extends Menu {
+    children?: MenuListData[];
+    permission: Pick<
+      ConfigPermission,
+      'add' | 'delete' | 'edit' | 'permissionManage'
+    >;
+  }
+
+  /** 权限配置 */
+  interface ConfigPermission {
+    add: boolean;
+    delete: boolean;
+    edit: boolean;
+    watch: boolean;
+    permissionManage: boolean;
+  }
+
+  /** 页面配置 */
+  interface Config {
+    permission: ConfigPermission;
   }
 }

@@ -1,18 +1,22 @@
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Menu } from 'src/entities';
 import { DataSource, In, IsNull, Not, Repository } from 'typeorm';
 import { MenuAddDto, MenuEditDto } from './dto';
-import { BusinessException } from 'src/core';
+import { BusinessException, CommonPageDto } from 'src/core';
 import { sortMenuChildren } from './helper';
-import { findOneBy } from 'src/utils';
+import { execSingleStrategy, findOneBy, getSkipTake } from 'src/utils';
+import { EnumMenuKey } from 'src/constants';
+import { RoleService } from '../role/role.service';
 
 @Injectable()
 export class MenuService {
   constructor(
     @InjectRepository(Menu)
     private readonly menuRepo: Repository<Menu>,
-    private dataSource: DataSource,
+    private readonly dataSource: DataSource,
+    @Inject(forwardRef(() => RoleService))
+    private readonly roleService: RoleService,
   ) {}
 
   /**
@@ -21,24 +25,108 @@ export class MenuService {
    * @param size 长度
    * @returns 菜单列表
    */
-  async list(page: number, size: number) {
-    const [list, total] = await this.menuRepo.findAndCount({
+  async list(
+    dto: CommonPageDto,
+    payload: App.JwtPayload,
+  ): Promise<ResCommon.TableData<ResMenu.MenuListData>> {
+    const { skip, take } = getSkipTake(dto.page, dto.size);
+    const [menus, total] = await this.menuRepo.findAndCount({
       where: {
         parentId: IsNull(),
       },
-      skip: (page - 1) * size,
-      take: size,
+      skip,
+      take,
       order: {
         order: 'ASC',
       },
     });
-    const children = await this.getSecondaryMenu(list);
-    const menus = sortMenuChildren(list, children);
-    return { list: menus, total };
+    // 获取次级菜单
+    const secondaryMenus = await this.getSecondaryMenu(menus);
+    const menuSorted = sortMenuChildren(menus, secondaryMenus);
+
+    // 获取权限
+    const permission = await this.getPermission(payload.roleIds);
+
+    const formattedMenus = menuSorted.map((menu) => {
+      const menuAddStrategies = [
+        // 是否拥有编辑权限
+        () => permission.add,
+      ];
+      // 顶级菜单新增子菜单的策略
+      const topMenuAddStrategies = [
+        ...menuAddStrategies,
+        // 菜单类型为"菜单"类型，才能新增
+        () => menu.type === 'menu',
+        // 顶级菜单可新增子菜单
+        () => true,
+      ];
+
+      // 次级新增权限的策略
+      const secondaryMenuAddStrategies = [
+        ...menuAddStrategies,
+        // 次级菜单不可新增子菜单
+        () => false,
+      ];
+
+      // 编辑菜单的策略
+      const editStrategies = [
+        // 是否拥有编辑权限
+        () => permission.edit,
+      ];
+
+      // 删除菜单的策略
+      const deleteStrategies = [
+        // 是否拥有删除权限
+        () => permission.delete,
+      ];
+
+      // 权限管理的策略
+      const permissionStrategies = [
+        // 是否拥有权限管理权限
+        () => permission.permissionManage,
+      ];
+
+      let children: ResMenu.MenuListData[] = [];
+
+      if (menu.children) {
+        children = menu.children.map((secondary) => {
+          return {
+            ...secondary,
+            children: [],
+            permission: {
+              add: execSingleStrategy(secondaryMenuAddStrategies),
+              edit: execSingleStrategy(editStrategies),
+              delete: execSingleStrategy(deleteStrategies),
+              permissionManage: execSingleStrategy([
+                ...permissionStrategies,
+                // "页面"类型，可以进行权限管理
+                () => secondary.type === 'page',
+              ]),
+            },
+          };
+        });
+      }
+      return {
+        ...menu,
+        children,
+        permission: {
+          add: execSingleStrategy(topMenuAddStrategies),
+          edit: execSingleStrategy(editStrategies),
+          delete: execSingleStrategy(deleteStrategies),
+          permissionManage: execSingleStrategy([
+            ...permissionStrategies,
+            // "页面"类型，可以进行权限管理
+            () => menu.type === 'page',
+          ]),
+        },
+      };
+    });
+
+    return { list: formattedMenus, total };
   }
 
   /** 获取所有菜单及下面的菜单 */
-  async getMenuPermissions() {
+  async getMenus() {
     const topMenus = await this.menuRepo.find({
       where: { parentId: IsNull() },
       order: {
@@ -126,7 +214,7 @@ export class MenuService {
   }
 
   /** 获取一级菜单数据 */
-  async listTop() {
+  async listTop(): Promise<ResMenu.Menu[]> {
     return await this.menuRepo.find({
       where: {
         parentId: IsNull(),
@@ -154,5 +242,25 @@ export class MenuService {
       },
     });
     return children;
+  }
+
+  /**
+   * 获取菜单管理页面相关配置
+   * @param roleIds 角色 id 列表
+   */
+  async getPageConfig(roleIds: number[]): Promise<ResMenu.Config> {
+    const permission = await this.getPermission(roleIds);
+
+    return {
+      permission,
+    };
+  }
+
+  async getPermission(roleIds: number[]) {
+    const key = EnumMenuKey.ManagementMenu;
+    return this.roleService.getRoleMenuPermissionMap<ResMenu.ConfigPermission>(
+      roleIds,
+      key,
+    );
   }
 }

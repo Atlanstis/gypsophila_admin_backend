@@ -71,7 +71,7 @@ export class RoleController {
   }
 
   /** 页面配置 */
-  @Get('config')
+  @Get('/config')
   async config(@Req() req: Request) {
     return this.roleService.getPageConfig(req.user.roleIds);
   }

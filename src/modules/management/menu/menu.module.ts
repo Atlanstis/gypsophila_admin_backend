@@ -1,17 +1,14 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { MenuService } from './menu.service';
-import { MenuPermissionService } from './menu-permission.service';
 import { MenuController } from './menu.controller';
-import { MenuPermissionController } from './menu-permission.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Menu, MenuPermission, RoleMenuPermission } from 'src/entities';
+import { Menu } from 'src/entities';
+import { RoleModule } from '../role/role.module';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Menu, MenuPermission, RoleMenuPermission]),
-  ],
-  controllers: [MenuController, MenuPermissionController],
-  providers: [MenuService, MenuPermissionService],
-  exports: [MenuService, MenuPermissionService],
+  imports: [TypeOrmModule.forFeature([Menu]), forwardRef(() => RoleModule)],
+  controllers: [MenuController],
+  providers: [MenuService],
+  exports: [MenuService],
 })
 export class MenuModule {}

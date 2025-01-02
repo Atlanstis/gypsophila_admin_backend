@@ -1,11 +1,9 @@
 import { Inject, Injectable, LoggerService } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Menu, Role, RoleMenuPermission } from 'src/entities';
 import { DataSource, EntityManager, In, Not, Repository } from 'typeorm';
-import { RMPEditDto, RoleAddDto, RoleEditDto } from './dto';
+import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { BusinessException, CommonPageDto } from 'src/core';
-import { RoleIdEnum } from './constants';
-import { MenuService } from 'src/modules/management/menu/menu.service';
+import { Menu, Role, RoleMenuPermission } from 'src/entities';
 import {
   execSingleStrategy,
   findOneBy,
@@ -14,11 +12,13 @@ import {
   transformRolePermissions,
   useTransaction,
 } from 'src/utils';
-import { aggregateMenuPermissions } from './helper';
 import { RedisService } from 'src/modules';
-import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
-import { MenuPermissionService } from '../menu/menu-permission.service';
 import { EnumMenuKey } from 'src/constants';
+import { aggregateMenuPermissions } from './helper';
+import { RoleIdEnum } from './constants';
+import { RMPEditDto, RoleAddDto, RoleEditDto } from './dto';
+import { MenuService } from '../menu/menu.service';
+import { MenuPermissionService } from '../menu/menu-permission.service';
 
 @Injectable()
 export class RoleService {
@@ -67,7 +67,7 @@ export class RoleService {
       const editStrategies = [
         // 是否拥有编辑权限
         () => permission.edit,
-        // 内置权限无法编辑
+        // 内置角色无法编辑
         () => role.isBuiltin === 0,
       ];
 
@@ -75,7 +75,7 @@ export class RoleService {
       const deleteStrategies = [
         // 是否拥有删除权限
         () => permission.delete,
-        // 内置权限无法删除
+        // 内置角色无法删除
         () => role.isBuiltin === 0,
       ];
 
@@ -213,7 +213,7 @@ export class RoleService {
     const mps = aggregateMenuPermissions(rmps, role.menus);
 
     /** 获取所有菜单及下面的菜单 */
-    const list = await this.menuService.getMenuPermissions();
+    const list = await this.menuService.getMenus();
 
     return {
       list,

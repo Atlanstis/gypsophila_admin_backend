@@ -1,10 +1,21 @@
-import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
+import { Request } from 'express';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Query,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { MenuService } from './menu.service';
 import {
   JwtGuard,
   CommonPageDto,
   PermissionGuard,
   RequirePermission,
+  RawData,
+  ResponseData,
 } from 'src/core';
 import { MenuAddDto, MenuEditDto, IdDto } from './dto';
 
@@ -17,8 +28,8 @@ export class MenuController {
   @Post('/list')
   @UseGuards(PermissionGuard)
   @RequirePermission('MenuWatch')
-  async list(@Body() dto: CommonPageDto) {
-    return await this.menuService.list(dto.page, dto.size);
+  async list(@Body() dto: CommonPageDto, @Req() req: Request) {
+    return await this.menuService.list(dto, req.user);
   }
 
   /** 获取一级菜单数据 */
@@ -31,31 +42,37 @@ export class MenuController {
 
   /** 添加菜单 */
   @Post('/add')
+  @RawData()
   @UseGuards(PermissionGuard)
   @RequirePermission('MenuAdd')
   async add(@Body() dto: MenuAddDto) {
-    return await this.menuService.add(dto);
+    await this.menuService.add(dto);
+    return ResponseData.success(null, '新增成功');
   }
 
   /** 编辑菜单 */
   @Post('/edit')
+  @RawData()
   @UseGuards(PermissionGuard)
   @RequirePermission('MenuEdit')
   async edit(@Body() dto: MenuEditDto) {
-    return await this.menuService.edit(dto);
+    await this.menuService.edit(dto);
+    return ResponseData.success(null, '编辑成功');
   }
 
   /** 删除菜单 */
   @Get('/delete')
+  @RawData()
   @UseGuards(PermissionGuard)
   @RequirePermission('MenuDelete')
   async delete(@Query() dto: IdDto) {
-    return await this.menuService.delete(dto.id);
+    await this.menuService.delete(dto.id);
+    return ResponseData.success(null, '删除成功');
   }
 
-  // /** 获取当前用户当前页面的操作权限 */
-  // @Post('/operation/permission')
-  // async permissionSearch(@Body() dto: MenuKeyDto, @Req() req: Request) {
-  //   return await this.menuService.permissionSearch(dto.key, req.user.roleIds);
-  // }
+  /** 页面配置 */
+  @Get('config')
+  async config(@Req() req: Request) {
+    return await this.menuService.getPageConfig(req.user.roleIds);
+  }
 }

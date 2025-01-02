@@ -1,5 +1,11 @@
 import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
-import { JwtGuard, PermissionGuard, RequirePermission } from 'src/core';
+import {
+  JwtGuard,
+  PermissionGuard,
+  RawData,
+  RequirePermission,
+  ResponseData,
+} from 'src/core';
 import { MenuPermissionService } from './menu-permission.service';
 import {
   MenuIdDto,
@@ -16,32 +22,38 @@ export class MenuPermissionController {
   /** 获取菜单权限选项 */
   @Post('/list')
   @UseGuards(PermissionGuard)
-  @RequirePermission('MenuPermission')
+  @RequirePermission('MenuPermissionManage')
   async permissionList(@Body() dto: MenuIdDto) {
     return await this.mpService.getPermissionList({ id: dto.menuId });
   }
 
   /** 菜单增加权限选项 */
   @Post('/add')
+  @RawData()
   @UseGuards(PermissionGuard)
-  @RequirePermission('MenuPermission')
+  @RequirePermission('MenuPermissionManage')
   async permissionAdd(@Body() dto: PermissionAddDto) {
-    return await this.mpService.permissionAdd(dto);
+    await this.mpService.permissionAdd(dto);
+    return ResponseData.success(null, '新增成功');
   }
 
   /** 菜单权限选项编辑 */
   @Post('/edit')
+  @RawData()
   @UseGuards(PermissionGuard)
-  @RequirePermission('MenuPermission')
+  @RequirePermission('MenuPermissionManage')
   async permissionEdit(@Body() dto: PermissionEditDto) {
-    return await this.mpService.permissionEdit(dto);
+    await this.mpService.permissionEdit(dto);
+    return ResponseData.success(null, '编辑成功');
   }
 
   /** 菜单权限选项删除 */
   @Get('/delete')
+  @RawData()
   @UseGuards(PermissionGuard)
-  @RequirePermission('MenuPermission')
+  @RequirePermission('MenuPermissionManage')
   async permissionDelete(@Query() dto: MenuPermissionIdDto) {
-    return await this.mpService.permissionDelete(dto.id);
+    await this.mpService.permissionDelete(dto.id);
+    return ResponseData.success(null, '删除成功');
   }
 }

@@ -1,3 +1,4 @@
+import { Request } from 'express';
 import {
   Body,
   Controller,
@@ -17,7 +18,6 @@ import {
   RawData,
   ResponseData,
 } from 'src/core';
-import { Request } from 'express';
 
 @Controller('user')
 @UseGuards(JwtGuard)
