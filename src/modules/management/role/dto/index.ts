@@ -5,17 +5,17 @@ import { RoleConst } from '../constants';
 import { IsMPsArray } from './validator';
 
 export class RoleDto {
-  @IsNotEmpty({ message: '角色 id 不能为空' })
   @IsInt({ message: '角色 id 格式不正确' })
+  @IsNotEmpty({ message: '角色 id 不能为空' })
   @Type(() => Number)
   /** 角色 id */
   id: number;
 
   /** 角色名 */
-  @IsNotEmpty({ message: '角色名称不能为空' })
   @Length(RoleConst.nameMin, RoleConst.nameMax, {
     message: `角色名称长度为 ${RoleConst.nameMin} - ${RoleConst.nameMax} 个字符`,
   })
+  @IsNotEmpty({ message: '角色名称不能为空' })
   name: string;
 
   /** 角色描述 */
