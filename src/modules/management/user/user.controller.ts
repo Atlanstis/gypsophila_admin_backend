@@ -48,8 +48,8 @@ export class UserController {
   @RawData()
   @UseGuards(PermissionGuard)
   @RequirePermission(UserEdit)
-  async edit(@Body() user: UserEditDto) {
-    await this.userService.edit(user);
+  async edit(@Body() user: UserEditDto, @Req() req: Request) {
+    await this.userService.edit(user, req.user);
     return ResponseData.success(null, '编辑成功');
   }
 

@@ -5,8 +5,10 @@ import { And, DataSource, EntityManager, In, Not, Repository } from 'typeorm';
 import { BusinessException, CommonPageDto } from 'src/core';
 import { User, UserAuthMethod, AuthMethodTypeEnum, Role } from 'src/entities';
 import {
+  areArraysEqualUnordered,
   execSingleStrategy,
   findOneBy,
+  getJwtRedisKey,
   getSkipTake,
   hybridDecrypt,
   useTransaction,
@@ -15,6 +17,7 @@ import { UserAddDto, UserEditDto } from './dto';
 import { RoleIdEnum } from '../role/constants';
 import { EnumMenuKey } from 'src/constants';
 import { RoleService } from '../role/role.service';
+import { RedisService } from 'src/modules/auxiliary';
 
 @Injectable()
 export class UserService {
@@ -24,7 +27,8 @@ export class UserService {
     @InjectRepository(Role)
     private readonly roleRepo: Repository<Role>,
     private readonly roleService: RoleService,
-    private dataSource: DataSource,
+    private readonly redisService: RedisService,
+    private readonly dataSource: DataSource,
   ) {}
 
   /**
@@ -124,10 +128,12 @@ export class UserService {
   }
 
   /**
-   * 编辑用户
-   * @param dto 用户信息
+   * 编辑用户信息
+   * @param {UserEditDto} dto - 用户编辑数据
+   * @param {App.JwtPayload} payload - jwt 数据
    */
-  async edit(dto: UserEditDto) {
+  async edit(dto: UserEditDto, payload: App.JwtPayload) {
+    // 查找用户及其角色信息
     const user = await findOneBy(
       this.dataSource,
       User,
@@ -136,12 +142,20 @@ export class UserService {
       '该用户不存在，请更换后重试',
       { roles: true },
     );
+    // 获取用户的角色ID列表
     let roles = user.roles;
-    const roleIds = roles.map((item) => item.id);
+    const beforeRoleIds = roles.map((role) => role.id);
     // 不包含超级管理员，则更新角色信息
-    if (!roleIds.includes(RoleIdEnum.Admin)) {
+    // 同时不能更新自身角色信息
+    if (!beforeRoleIds.includes(RoleIdEnum.Admin) && payload.id !== dto.id) {
       roles = await this.judgeRoleValid(dto.roleIds);
     }
+    // 用户角色信息发生变化，则删除其 accessToken
+    const afterRoleIds = roles.map((role) => role.id);
+    if (!areArraysEqualUnordered(beforeRoleIds, afterRoleIds)) {
+      await this.redisService.del(getJwtRedisKey(dto.id, 'access'));
+    }
+    // 更新用户
     const newUser = this.userRepo.create({
       ...user,
       ...dto,
@@ -167,9 +181,11 @@ export class UserService {
 
   /**
    * 删除用户
-   * @param id 用户 id
+   * @param id 用户 ID
+   * @param userId 操作用户 ID
    */
   async delete(id: string, userId: string) {
+    // 查找用户及其角色信息
     const user = await findOneBy(
       this.dataSource,
       User,
@@ -178,7 +194,7 @@ export class UserService {
       '该用户不存在，请更换后重试',
       { roles: true },
     );
-    // 不能删除自己
+    // 无法删除自己
     if (user.id === userId) {
       throw new BusinessException('无法删除自己');
     }
@@ -187,6 +203,9 @@ export class UserService {
       throw new BusinessException('拥有超级管理员角色的用户无法删除');
     }
     await this.userRepo.delete({ id });
+    // 删除用户后，同时删除其 accessToken 及 refreshToken
+    await this.redisService.del(getJwtRedisKey(id, 'access'));
+    await this.redisService.del(getJwtRedisKey(id, 'refresh'));
   }
 
   /**
