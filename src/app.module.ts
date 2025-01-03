@@ -60,7 +60,7 @@ import { AppService } from './app.service';
     // NoticeModule,
   ],
   controllers: [],
-  providers: [AppService, TypedConfigService],
+  providers: [AppService],
   exports: [],
 })
 export class AppModule {}

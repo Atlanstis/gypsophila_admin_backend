@@ -1,7 +1,7 @@
 import { type JwtService } from '@nestjs/jwt';
 
-export const AccessTokenKey = 'access_key_';
-export const RefreshTokenKey = 'refresh_key_';
+export const Key_AccessToken_Prefix = 'access_key_';
+export const Key_RefreshToken_Prefix = 'refresh_key_';
 
 /**
  * 创建 JWT 令牌
@@ -25,6 +25,7 @@ export function createJwt(
  * @returns - 返回生成的 JWT key
  */
 export function getJwtRedisKey(userId: string, key: 'access' | 'refresh') {
-  const suffix = key === 'access' ? AccessTokenKey : RefreshTokenKey;
+  const suffix =
+    key === 'access' ? Key_AccessToken_Prefix : Key_RefreshToken_Prefix;
   return `${suffix}${userId}`;
 }

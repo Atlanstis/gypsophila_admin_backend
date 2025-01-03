@@ -8,7 +8,7 @@ import {
   execSingleStrategy,
   findOneBy,
   getSkipTake,
-  KeyRolePermission,
+  Key_RolePermission,
   transformRolePermissions,
   useTransaction,
 } from 'src/utils';
@@ -331,7 +331,7 @@ export class RoleService {
     // 获取每个角色的权限
     const result = await Promise.all(
       roleIds.map((roleId) =>
-        this.redisService.getHash(KeyRolePermission, String(roleId)),
+        this.redisService.getHash(Key_RolePermission, String(roleId)),
       ),
     );
     // 将权限集合合并为一个集合
@@ -357,7 +357,7 @@ export class RoleService {
         JSON.stringify(Array.from(permissions)),
       ]);
     }
-    await this.redisService.setHashes(KeyRolePermission, fieldsValues);
+    await this.redisService.setHashes(Key_RolePermission, fieldsValues);
     this.logger.log('Load role permissions --> success');
   }
 }

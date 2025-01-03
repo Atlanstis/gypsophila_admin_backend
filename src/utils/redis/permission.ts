@@ -1,5 +1,5 @@
 /** Redis-角色权限键 */
-export const KeyRolePermission = 'role_permission';
+export const Key_RolePermission = 'role_permission';
 
 /**
  * 将字符串数组转换为权限集合。
