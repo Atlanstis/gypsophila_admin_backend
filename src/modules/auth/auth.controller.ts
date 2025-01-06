@@ -22,7 +22,7 @@ export class AuthController {
   @RawData()
   async logOut(@Req() req: Request) {
     const res = await this.authService.logout(req.user.id);
-    return ResponseData.success(res, '退出登录成功');
+    return ResponseData.success(res, '退出成功');
   }
 
   /** 重签认证 */
