@@ -17,7 +17,13 @@ import {
   UserAuthMethod,
 } from 'src/entities';
 import { LoginDto } from './dto';
-import { createJwt, getJwtRedisKey, hybridDecrypt } from 'src/utils';
+import {
+  createJwt,
+  getJwtRedisKey,
+  hybridDecrypt,
+  Key_RoleMenu,
+  transformStringArray2Set,
+} from 'src/utils';
 @Injectable()
 export class AuthService {
   constructor(
@@ -143,21 +149,20 @@ export class AuthService {
       select: { updateTime: false, createTime: false },
     });
 
-    // 查询用户的角色角色信息，并关联查询授权菜单信息
+    // 查询用户的角色角色信息
     const roles = await this.roleRepo.find({
       where: { users: { id: user.id }, state: RoleStateEnum.active },
-      relations: {
-        menus: true,
-      },
     });
 
-    // 聚合不同角色下的菜单信息
-    const menus = new Set(
-      roles.flatMap((role) => role.menus.map((menu) => menu.key)),
+    // 根据角色 id 查询角色拥有的菜单信息
+    const result = await Promise.all(
+      roles.map(({ id }) =>
+        this.redisService.getHash(Key_RoleMenu, String(id)),
+      ),
     );
     return {
       ...user,
-      menus: Array.from(menus),
+      menus: Array.from(transformStringArray2Set(result)),
     };
   }
 

@@ -1,6 +1,13 @@
 import { Inject, Injectable, LoggerService } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, EntityManager, In, Not, Repository } from 'typeorm';
+import {
+  DataSource,
+  EntityManager,
+  FindOptionsWhere,
+  In,
+  Not,
+  Repository,
+} from 'typeorm';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { BusinessException, CommonPageDto } from 'src/core';
 import { Menu, Role, RoleMenuPermission } from 'src/entities';
@@ -8,8 +15,9 @@ import {
   execSingleStrategy,
   findOneBy,
   getSkipTake,
+  Key_RoleMenu,
   Key_RolePermission,
-  transformRolePermissions,
+  transformStringArray2Set,
   useTransaction,
 } from 'src/utils';
 import { RedisService } from 'src/modules';
@@ -301,7 +309,8 @@ export class RoleService {
     };
     await useTransaction(this.dataSource, inTransaction);
     // 更新缓存
-    await this.loadRMPs2Redis();
+    await this.loadRM2Redis(id);
+    await this.loadRMPs2Redis(id);
   }
 
   /**
@@ -335,20 +344,44 @@ export class RoleService {
       ),
     );
     // 将权限集合合并为一个集合
-    return transformRolePermissions(result);
+    return transformStringArray2Set(result);
+  }
+
+  /** 获取角色的菜单，并加载进 redis */
+  async loadRM2Redis(roleId?: number) {
+    this.logger.log('Load role menus --> start');
+    const where: FindOptionsWhere<Role> = roleId ? { id: roleId } : {};
+    const rms = await this.roleRepo.find({ where, relations: { menus: true } });
+    const fieldsValues: [string, string][] = [];
+    for (const { id, menus } of rms) {
+      fieldsValues.push([
+        String(id),
+        JSON.stringify(menus.map((menu) => menu.key)),
+      ]);
+    }
+    await this.redisService.setHashes(Key_RoleMenu, fieldsValues);
+    this.logger.log('Load role menus --> success');
   }
 
   /** 获取各角色的权限，并加载进 redis */
-  async loadRMPs2Redis() {
+  async loadRMPs2Redis(roleId?: number) {
     this.logger.log('Load role permissions --> start');
-    const rmps = await this.rmpRepo.find({ relations: { permission: true } });
+    const where: FindOptionsWhere<RoleMenuPermission> = roleId
+      ? { id: roleId }
+      : {};
+    const rmps = await this.rmpRepo.find({
+      where,
+      relations: { permission: true },
+    });
     const map = new Map<number, Set<string>>();
     for (const { roleId, permission } of rmps) {
       let rolePermissions = map.get(roleId);
       if (!rolePermissions) {
         map.set(roleId, (rolePermissions = new Set<string>()));
       }
-      rolePermissions.add(permission.key);
+      if (permission && !rolePermissions.has(permission.key)) {
+        rolePermissions.add(permission.key);
+      }
     }
     const fieldsValues: [string, string][] = [];
     for (const [roleId, permissions] of map.entries()) {
