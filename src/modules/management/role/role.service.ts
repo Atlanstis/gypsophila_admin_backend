@@ -343,7 +343,21 @@ export class RoleService {
         this.redisService.getHash(Key_RolePermission, String(roleId)),
       ),
     );
-    // 将权限集合合并为一个集合
+    return transformStringArray2Set(result);
+  }
+
+  /**
+   * 从 Redis 中获取角色的菜单集合。
+   * @param roleIds - 角色ID数组。
+   * @returns 一个包含所有角色菜单的集合。
+   */
+  async getRoleMenusFromRedis(roleIds: number[]) {
+    // 获取每个角色的拥有的菜单
+    const result = await Promise.all(
+      roleIds.map((roleId) =>
+        this.redisService.getHash(Key_RoleMenu, String(roleId)),
+      ),
+    );
     return transformStringArray2Set(result);
   }
 

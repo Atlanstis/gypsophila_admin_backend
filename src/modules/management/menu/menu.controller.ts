@@ -19,6 +19,7 @@ import {
 } from 'src/core';
 import { MenuAddDto, MenuEditDto, IdDto } from './dto';
 import { MenuAdd, MenuDelete, MenuEdit, MenuWatch } from './constants';
+import { EnumMenuKey } from 'src/constants';
 
 @Controller('menu')
 @UseGuards(JwtGuard)
@@ -73,6 +74,8 @@ export class MenuController {
 
   /** 页面配置 */
   @Get('config')
+  @UseGuards(PermissionGuard)
+  @RequirePermission(EnumMenuKey.ManagementMenu, 'menu')
   async config(@Req() req: Request) {
     return await this.menuService.getPageConfig(req.user.roleIds);
   }

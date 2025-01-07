@@ -22,19 +22,26 @@ export class PermissionGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request: Request = context.switchToHttp().getRequest();
 
-    const methodPermissions = this.reflector.getAllAndOverride(
+    const { keys, type } = this.reflector.getAllAndOverride(
       REQUIRE_PERMISSION,
       [context.getHandler(), context.getClass()],
-    ) as string[];
+    ) as App.PermissionGuardData;
     if (!request.user) {
       throw new BusinessException('请先进行登录');
     }
+    let flag = true;
+    let keySet = new Set<string>();
+    if (type === 'permission') {
+      keySet = await this.roleService.getRolePermissionsFromRedis(
+        request.user.roleIds,
+      );
+    } else if (type === 'menu') {
+      keySet = await this.roleService.getRoleMenusFromRedis(
+        request.user.roleIds,
+      );
+    }
+    flag = keys.some((item) => keySet.has(item));
 
-    const permissionSet = await this.roleService.getRolePermissionsFromRedis(
-      request.user.roleIds,
-    );
-
-    const flag = methodPermissions.some((item) => permissionSet.has(item));
     if (!flag) {
       throw new BusinessException('无访问该接口的权限');
     }

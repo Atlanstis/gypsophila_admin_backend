@@ -26,6 +26,7 @@ import {
   RoleWatch,
 } from './constants';
 import { UserAdd, UserEdit } from '../user/constants';
+import { EnumMenuKey } from 'src/constants';
 
 @Controller('role')
 @UseGuards(JwtGuard)
@@ -80,6 +81,8 @@ export class RoleController {
 
   /** 页面配置 */
   @Get('/config')
+  @UseGuards(PermissionGuard)
+  @RequirePermission(EnumMenuKey.ManagementRole, 'menu')
   async config(@Req() req: Request) {
     return this.roleService.getPageConfig(req.user.roleIds);
   }

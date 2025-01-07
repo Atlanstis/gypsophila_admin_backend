@@ -19,6 +19,7 @@ import {
   ResponseData,
 } from 'src/core';
 import { UserAdd, UserDelete, UserEdit, UserWatch } from './constants';
+import { EnumMenuKey } from 'src/constants';
 
 @Controller('user')
 @UseGuards(JwtGuard)
@@ -65,6 +66,8 @@ export class UserController {
 
   /** 页面配置 */
   @Get('config')
+  @UseGuards(PermissionGuard)
+  @RequirePermission(EnumMenuKey.ManagementUser, 'menu')
   async config(@Req() req: Request) {
     return await this.userService.getPageConfig(req.user.roleIds);
   }
