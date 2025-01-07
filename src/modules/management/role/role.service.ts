@@ -381,7 +381,7 @@ export class RoleService {
   async loadRMPs2Redis(roleId?: number) {
     this.logger.log('Load role permissions --> start');
     const where: FindOptionsWhere<RoleMenuPermission> = roleId
-      ? { id: roleId }
+      ? { roleId: roleId }
       : {};
     const rmps = await this.rmpRepo.find({
       where,
