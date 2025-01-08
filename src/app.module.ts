@@ -16,10 +16,11 @@ import {
 } from './modules';
 import { ormConfig } from 'ormconfig';
 import { AppService } from './app.service';
-// import { SettingModule } from './setting/setting.module';
 // import { PsnModule } from './psn/psn.module';
 // import { ScheduleTaskModule } from './schedule-task/schedule-task.module';
 // import { NoticeModule } from './notice/notice.module';
+import { SystemModule } from './modules/system/system.module';
+import { SettingModule } from './modules/system/modules/setting/setting.module';
 
 @Module({
   imports: [
@@ -53,8 +54,9 @@ import { AppService } from './app.service';
     RoleModule,
     MenuModule,
     MenuPermissionModule,
+    SystemModule,
+    SettingModule,
     // PsnineModule,
-    // SettingModule,
     // PsnModule,
     // ScheduleTaskModule,
     // NoticeModule,

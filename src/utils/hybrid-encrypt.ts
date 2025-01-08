@@ -14,7 +14,7 @@ const privateKey = readFileSync(
   'utf8',
 );
 
-const publicKey = readFileSync(
+export const publicKey = readFileSync(
   join(process.cwd(), `pem/public_key.pem`),
   'utf8',
 );

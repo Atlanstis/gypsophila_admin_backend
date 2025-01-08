@@ -7,4 +7,8 @@ export enum EnumMenuKey {
   ManagementRole = 'Management_Role',
   /** 菜单管理 */
   ManagementMenu = 'Management_Menu',
+  /** 系统设置 */
+  Setting = 'Setting',
+  /** 通用设置 */
+  Setting_Common = 'Setting_Common',
 }

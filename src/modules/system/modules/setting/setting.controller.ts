@@ -1,30 +1,35 @@
 import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { SettingService } from './setting.service';
 import { WebsiteDto } from './dto';
-import { JwtGuard, PermissionGuard, RequirePermission } from 'src/core';
+import {
+  JwtGuard,
+  PermissionGuard,
+  RawData,
+  RequirePermission,
+  ResponseData,
+} from 'src/core';
 import { Request } from 'express';
+import { EnumMenuKey } from 'src/constants';
+import { WebsiteSetting } from './constants';
 
 @Controller('setting')
+@UseGuards(JwtGuard)
 export class SettingController {
   constructor(private readonly settingService: SettingService) {}
 
-  /** 获取网站配置 */
-  @Get('website/info')
-  async getWebsiteInfo() {
-    return await this.settingService.getWebsiteInfo();
-  }
-
   /** 更新网站配置 */
   @Post('website/update')
-  @UseGuards(JwtGuard, PermissionGuard)
-  @RequirePermission('WebsiteSetting')
+  @RawData()
+  @UseGuards(PermissionGuard)
+  @RequirePermission(WebsiteSetting)
   async updateWebsiteInfo(@Body() dto: WebsiteDto) {
-    return await this.settingService.updateWebsiteInfo(dto);
+    await this.settingService.updateWebsiteInfo(dto);
+    return ResponseData.success(null, '更新成功');
   }
 
   /** 通用配置-可访问的配置项 */
   @Get('common/tabs')
-  @UseGuards(JwtGuard)
+  @RequirePermission(EnumMenuKey.Setting_Common, 'menu')
   async getSettingCommonTabs(@Req() req: Request) {
     return await this.settingService.getSettingCommonTabs(req.user.roleIds);
   }
