@@ -7,7 +7,7 @@ import {
   ResponseCode,
 } from 'src/core';
 import { RedisService, TypedConfigService } from 'src/modules';
-import { Repository } from 'typeorm';
+import { Repository, DataSource } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   AuthMethodTypeEnum,
@@ -19,6 +19,7 @@ import {
 import { LoginDto } from './dto';
 import {
   createJwt,
+  findOneBy,
   getJwtRedisKey,
   hybridDecrypt,
   Key_RoleMenu,
@@ -36,6 +37,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly redisService: RedisService,
     private readonly configService: TypedConfigService,
+    private readonly dataSource: DataSource,
   ) {}
 
   /**
@@ -144,10 +146,13 @@ export class AuthService {
    */
   async info(id: string): Promise<ResAuth.User> {
     // 根据用户 ID 查询用户信息
-    const user = await this.userRepo.findOne({
-      where: { id },
-      select: { updateTime: false, createTime: false },
-    });
+    const user = await findOneBy(
+      this.dataSource,
+      User,
+      { id },
+      (user) => !user,
+      '当前用户不存在',
+    );
 
     // 查询用户的角色角色信息
     const roles = await this.roleRepo.find({
@@ -155,11 +160,13 @@ export class AuthService {
     });
 
     // 根据角色 id 查询角色拥有的菜单信息
-    const result = await Promise.all(
-      roles.map(({ id }) =>
-        this.redisService.getHash(Key_RoleMenu, String(id)),
-      ),
-    );
+    const result = (
+      await Promise.all(
+        roles.map(({ id }) =>
+          this.redisService.getHash(Key_RoleMenu, String(id)),
+        ),
+      )
+    ).filter((item): item is string => item !== undefined);
     return {
       ...user,
       menus: Array.from(transformStringArray2Set(result)),

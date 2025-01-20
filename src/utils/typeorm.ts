@@ -5,6 +5,7 @@ import type {
   EntityTarget,
   FindOptionsRelations,
   FindOptionsWhere,
+  ObjectLiteral,
   Repository,
 } from 'typeorm';
 
@@ -28,25 +29,28 @@ export function getSkipTake(page: number, size: number) {
  * @param dataSource 数据源实例
  * @param entityTarget 实体目标
  * @param where 查询条件
- * @param judgeFn 判断函数，接收实体作为参数，返回布尔值
+ * @param judgeFn 判断函数，接收实体作为参数，返回布尔值，如果执行结果真则抛出包含 errorMsg 的异常
  * @param errorMsg 异常信息
  * @param relations 关系
- * @returns 查找到的实体或null
+ * @returns 查找到的实体
  */
-export async function findOneBy<T>(
+export async function findOneBy<T extends ObjectLiteral>(
   dataSource: DataSource,
   entityTarget: EntityTarget<T>,
   where: FindOptionsWhere<T> | FindOptionsWhere<T>[],
   judgeFn: (entity: T | null) => boolean,
   errorMsg = '',
   relations: FindOptionsRelations<T> = {},
-): Promise<T | null> {
+): Promise<T> {
   const repository: Repository<T> = dataSource.getRepository(entityTarget);
   const entity = await repository.findOne({ where, relations });
   if (judgeFn(entity)) {
     throw new BusinessException(errorMsg);
   }
-  return entity;
+  if (entity) {
+    return entity;
+  }
+  throw new BusinessException('未查找到相关数据');
 }
 
 /**
