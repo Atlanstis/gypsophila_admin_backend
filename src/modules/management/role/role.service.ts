@@ -338,11 +338,13 @@ export class RoleService {
    */
   async getRolePermissionsFromRedis(roleIds: number[]) {
     // 获取每个角色的权限
-    const result = await Promise.all(
-      roleIds.map((roleId) =>
-        this.redisService.getHash(Key_RolePermission, String(roleId)),
-      ),
-    );
+    const result = (
+      await Promise.all(
+        roleIds.map((roleId) =>
+          this.redisService.getHash(Key_RolePermission, String(roleId)),
+        ),
+      )
+    ).filter((item): item is string => item !== undefined);
     return transformStringArray2Set(result);
   }
 
@@ -353,11 +355,13 @@ export class RoleService {
    */
   async getRoleMenusFromRedis(roleIds: number[]) {
     // 获取每个角色的拥有的菜单
-    const result = await Promise.all(
-      roleIds.map((roleId) =>
-        this.redisService.getHash(Key_RoleMenu, String(roleId)),
-      ),
-    );
+    const result = (
+      await Promise.all(
+        roleIds.map((roleId) =>
+          this.redisService.getHash(Key_RoleMenu, String(roleId)),
+        ),
+      )
+    ).filter((item): item is string => item !== undefined);
     return transformStringArray2Set(result);
   }
 

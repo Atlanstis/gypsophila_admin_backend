@@ -16,7 +16,7 @@ export function aggregateMenuPermissions(
   for (const { menuId, permissionId } of rmps) {
     if (!resultMap.has(menuId)) continue;
     const permissions = resultMap.get(menuId);
-    if (!permissions.includes(permissionId)) {
+    if (permissions && !permissions.includes(permissionId)) {
       permissions.push(permissionId);
     }
   }

@@ -15,6 +15,9 @@ export class TypedConfigService extends ConfigService<Configuration> {
     subKey?: T,
   ): Configuration[K] | Configuration[K][T] {
     const config = super.get<Configuration[K]>(key);
+    if (!config) {
+      throw new Error(`Invalid config key: ${String(key)}`);
+    }
     if (subKey) {
       if (config && typeof config === 'object') {
         return (config as Configuration[K])[subKey];
