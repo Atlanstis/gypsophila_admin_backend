@@ -7,7 +7,8 @@ import { User, UserAuthMethod, AuthMethodTypeEnum, Role } from 'src/entities';
 import {
   areArraysEqualUnordered,
   execSingleStrategy,
-  findOneBy,
+  findOneByExistError,
+  findOneByNotExistError,
   getJwtRedisKey,
   getSkipTake,
   hybridDecrypt,
@@ -91,11 +92,10 @@ export class UserService {
    * @param dto 用户信息
    */
   async add(dto: UserAddDto) {
-    await findOneBy(
+    await findOneByExistError(
       this.dataSource,
       User,
       { username: dto.username },
-      (user) => !!user,
       '该用户名已存在，请更换后重试',
     );
     const inTransaction = async (manager: EntityManager) => {
@@ -134,11 +134,10 @@ export class UserService {
    */
   async edit(dto: UserEditDto, payload: App.JwtPayload) {
     // 查找用户及其角色信息
-    const user = await findOneBy(
+    const user = await findOneByNotExistError(
       this.dataSource,
       User,
       { id: dto.id },
-      (user) => !user,
       '该用户不存在，请更换后重试',
       { roles: true },
     );
@@ -186,11 +185,10 @@ export class UserService {
    */
   async delete(id: string, userId: string) {
     // 查找用户及其角色信息
-    const user = await findOneBy(
+    const user = await findOneByNotExistError(
       this.dataSource,
       User,
       { id: id },
-      (user) => !user,
       '该用户不存在，请更换后重试',
       { roles: true },
     );

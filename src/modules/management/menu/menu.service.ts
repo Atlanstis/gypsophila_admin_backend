@@ -5,7 +5,12 @@ import { DataSource, In, IsNull, Not, Repository } from 'typeorm';
 import { MenuAddDto, MenuEditDto } from './dto';
 import { BusinessException, CommonPageDto } from 'src/core';
 import { sortMenuChildren } from './helper';
-import { execSingleStrategy, findOneBy, getSkipTake } from 'src/utils';
+import {
+  execSingleStrategy,
+  findOneByExistError,
+  findOneByNotExistError,
+  getSkipTake,
+} from 'src/utils';
 import { EnumMenuKey } from 'src/constants';
 import { RoleService } from '../role/role.service';
 
@@ -142,22 +147,20 @@ export class MenuService {
    * @param dto 菜单数据
    */
   async add(dto: MenuAddDto) {
-    await findOneBy(
+    await findOneByExistError(
       this.dataSource,
       Menu,
       { key: dto.key },
-      (menu) => !!menu,
       '菜单标识已存在，请更换后重试',
     );
 
     const newMenu = this.menuRepo.create(dto);
     // 判断上级菜单是否存在
     if (dto.parentId) {
-      const parent = await findOneBy(
+      const parent = await findOneByNotExistError(
         this.dataSource,
         Menu,
         { id: dto.parentId },
-        (menu) => !menu,
         '上级菜单不存在',
       );
       newMenu.parent = parent;
@@ -171,19 +174,17 @@ export class MenuService {
    */
   async edit(dto: MenuEditDto) {
     // 判断当前菜单是否存在
-    await findOneBy(
+    await findOneByNotExistError(
       this.dataSource,
       Menu,
       { id: dto.id },
-      (menu) => !menu,
       '该菜单不存在',
     );
     // 判断菜单标识已否被使用
-    await findOneBy(
+    await findOneByExistError(
       this.dataSource,
       Menu,
       { key: dto.key, id: Not(dto.id) },
-      (menu) => !!menu,
       '当前菜单标识已存在',
     );
     const newMenu = this.menuRepo.create(dto);
@@ -196,11 +197,10 @@ export class MenuService {
    */
   async delete(id: number) {
     // 判断当前菜单是否存在
-    const menu = await findOneBy(
+    const menu = await findOneByNotExistError(
       this.dataSource,
       Menu,
       { id: id },
-      (menu) => !menu,
       '该菜单不存在',
     );
     // 如含有子菜单，则不让删除

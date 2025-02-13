@@ -5,7 +5,7 @@ declare namespace ResMenu {
     type: 'page' | 'menu';
     name: string;
     order: number;
-    parentId: number;
+    parentId: number | null;
     permissions?: MenuPermission[];
   }
 

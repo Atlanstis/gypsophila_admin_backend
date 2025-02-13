@@ -5,3 +5,7 @@ export * from './typeorm';
 export * from './redis';
 export * from './strategy';
 export * from './compare';
+export * from './cheerio';
+export * from './extract';
+export * from './url';
+export * from './parse';

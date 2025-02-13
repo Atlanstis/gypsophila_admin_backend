@@ -24,33 +24,33 @@ export function getSkipTake(page: number, size: number) {
   };
 }
 
-/**
- * 根据条件查找一个实体，如果满足判断函数则抛出业务异常。
- * @param dataSource 数据源实例
- * @param entityTarget 实体目标
- * @param where 查询条件
- * @param judgeFn 判断函数，接收实体作为参数，返回布尔值，如果执行结果真则抛出包含 errorMsg 的异常
- * @param errorMsg 异常信息
- * @param relations 关系
- * @returns 查找到的实体
- */
-export async function findOneBy<T extends ObjectLiteral>(
+export async function findOneByNotExistError<T extends ObjectLiteral>(
   dataSource: DataSource,
   entityTarget: EntityTarget<T>,
   where: FindOptionsWhere<T> | FindOptionsWhere<T>[],
-  judgeFn: (entity: T | null) => boolean,
   errorMsg = '',
   relations: FindOptionsRelations<T> = {},
 ): Promise<T> {
   const repository: Repository<T> = dataSource.getRepository(entityTarget);
   const entity = await repository.findOne({ where, relations });
-  if (judgeFn(entity)) {
+  if (!entity) {
     throw new BusinessException(errorMsg);
   }
+  return entity;
+}
+
+export async function findOneByExistError<T extends ObjectLiteral>(
+  dataSource: DataSource,
+  entityTarget: EntityTarget<T>,
+  where: FindOptionsWhere<T> | FindOptionsWhere<T>[],
+  errorMsg = '',
+  relations: FindOptionsRelations<T> = {},
+) {
+  const repository: Repository<T> = dataSource.getRepository(entityTarget);
+  const entity = await repository.findOne({ where, relations });
   if (entity) {
-    return entity;
+    throw new BusinessException(errorMsg);
   }
-  throw new BusinessException('未查找到相关数据');
 }
 
 /**

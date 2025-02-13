@@ -19,7 +19,7 @@ import {
 import { LoginDto } from './dto';
 import {
   createJwt,
-  findOneBy,
+  findOneByNotExistError,
   getJwtRedisKey,
   hybridDecrypt,
   Key_RoleMenu,
@@ -146,11 +146,10 @@ export class AuthService {
    */
   async info(id: string): Promise<ResAuth.User> {
     // 根据用户 ID 查询用户信息
-    const user = await findOneBy(
+    const user = await findOneByNotExistError(
       this.dataSource,
       User,
       { id },
-      (user) => !user,
       '当前用户不存在',
     );
 

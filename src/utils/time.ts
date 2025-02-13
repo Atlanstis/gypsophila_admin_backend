@@ -3,6 +3,8 @@ import * as dayjs from 'dayjs';
 /** 日期格式：年-月-日 */
 export const YYYY_MM_DD = 'YYYY-MM-DD';
 
+/** 日期格式：年-月-日 时:分：秒 */
+export const YYYY_MM_DD_HH_mm_ss = 'YYYY-MM-DD HH:mm:ss';
 /**
  * 获取当前时间所在 pattern 下的开始时间
  * @param pattrn 格式
@@ -31,4 +33,15 @@ export function startOfDate(date: Date, pattrn: dayjs.OpUnitType = 'day') {
 
 export function addDay(num: number) {
   return dayjs().add(num, 'day').toDate();
+}
+
+export function isValidDate(
+  dateString?: string,
+  format = YYYY_MM_DD_HH_mm_ss,
+): dateString is string {
+  if (!dateString) return false;
+  // 使用 dayjs 解析字符串，并指定格式
+  const date = dayjs(dateString, format);
+  // 检查解析结果是否有效
+  return date.isValid();
 }

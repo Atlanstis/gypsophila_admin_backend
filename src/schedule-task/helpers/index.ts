@@ -3,11 +3,17 @@ import { Task } from '../typings';
 import * as dayjs from 'dayjs';
 import { DataSource } from 'typeorm';
 import { ScheduleTask, ScheduleTaskLog } from 'src/entities';
-import { ENUM_SCHEDULE_TASK_LOG_STATUS, ENUM_SCHEDULE_TASK_STATUS } from 'src/constants';
+import {
+  ENUM_SCHEDULE_TASK_LOG_STATUS,
+  ENUM_SCHEDULE_TASK_STATUS,
+} from 'src/constants';
 import { SchedulerRegistry } from '@nestjs/schedule';
 import { roundToDecimal } from 'src/utils';
 
-export function removeTaskJob(task: ScheduleTask, schedulerRegistry: SchedulerRegistry) {
+export function removeTaskJob(
+  task: ScheduleTask,
+  schedulerRegistry: SchedulerRegistry,
+) {
   try {
     const job = schedulerRegistry.getCronJob(task.key);
     if (job) {
@@ -45,7 +51,7 @@ export function packExecuteTask(
       log.result = result;
       scheduleTask.lastRunTime = new Date();
       scheduleTask.status = lastStatus;
-    } catch (e) {
+    } catch (e: any) {
       log.status = ENUM_SCHEDULE_TASK_LOG_STATUS.FAIL;
       log.result = e.toString();
       scheduleTask.status = ENUM_SCHEDULE_TASK_STATUS.CLOSE;

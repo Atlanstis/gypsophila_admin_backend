@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Menu, MenuPermission } from 'src/entities';
 import { DataSource, FindOptionsWhere, Not, Repository } from 'typeorm';
 import { PermissionAddDto, PermissionEditDto } from './dto';
-import { findOneBy } from 'src/utils';
+import { findOneByExistError, findOneByNotExistError } from 'src/utils';
 
 @Injectable()
 export class MenuPermissionService {
@@ -19,11 +19,10 @@ export class MenuPermissionService {
    */
   async getPermissionList(where: FindOptionsWhere<Menu>) {
     // 判断当前菜单是否存在
-    const menu = await findOneBy(
+    const menu = await findOneByNotExistError(
       this.dataSource,
       Menu,
       where,
-      (menu) => !menu,
       '该菜单不存在',
     );
     const permissions = await this.mpRepo.find({
@@ -38,19 +37,17 @@ export class MenuPermissionService {
    */
   async permissionAdd(dto: PermissionAddDto) {
     // 判断当前菜单是否存在
-    const menu = await findOneBy(
+    const menu = await findOneByNotExistError(
       this.dataSource,
       Menu,
       { id: dto.menuId },
-      (menu) => !menu,
       '所属菜单不存在',
     );
     // 判断当前权限标识是否存在
-    await findOneBy(
+    await findOneByExistError(
       this.dataSource,
       MenuPermission,
       { key: dto.key },
-      (mp) => !!mp,
       '该权限标识已存在',
     );
     const permission = this.mpRepo.create({ ...dto, menu });
@@ -63,19 +60,17 @@ export class MenuPermissionService {
    */
   async permissionEdit(dto: PermissionEditDto) {
     // 判断当前菜单是否存在
-    const menu = await findOneBy(
+    const menu = await findOneByNotExistError(
       this.dataSource,
       Menu,
       { id: dto.menuId },
-      (menu) => !menu,
       '所属菜单不存在',
     );
     // 判断当前权限标识是否存在
-    await findOneBy(
+    await findOneByExistError(
       this.dataSource,
       MenuPermission,
       { key: dto.key, id: Not(dto.id) },
-      (mp) => !!mp,
       '该权限标识已存在',
     );
     const permission = this.mpRepo.create({ ...dto, menu });
@@ -88,11 +83,10 @@ export class MenuPermissionService {
    */
   async permissionDelete(id: number) {
     // 判断当前权限是否存在
-    await findOneBy(
+    await findOneByNotExistError(
       this.dataSource,
       MenuPermission,
       { id },
-      (menu) => !menu,
       '该权限不存在',
     );
     await this.mpRepo.delete({ id });

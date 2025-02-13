@@ -16,11 +16,13 @@ import {
 } from './modules';
 import { ormConfig } from 'ormconfig';
 import { AppService } from './app.service';
-// import { PsnModule } from './psn/psn.module';
 // import { ScheduleTaskModule } from './schedule-task/schedule-task.module';
 // import { NoticeModule } from './notice/notice.module';
 import { SystemModule } from './modules/system/system.module';
 import { SettingModule } from './modules/system/modules/setting/setting.module';
+import { PsProfileModule } from './modules/play-station/ps-profile/ps-profile.module';
+import { PsnineModule } from './modules/play-station/psnine/psnine.module';
+import { PsGameModule } from './modules/play-station/ps-game/ps-game.module';
 
 @Module({
   imports: [
@@ -56,8 +58,9 @@ import { SettingModule } from './modules/system/modules/setting/setting.module';
     MenuPermissionModule,
     SystemModule,
     SettingModule,
-    // PsnineModule,
-    // PsnModule,
+    PsProfileModule,
+    PsnineModule,
+    PsGameModule,
     // ScheduleTaskModule,
     // NoticeModule,
   ],

@@ -13,7 +13,8 @@ import { BusinessException, CommonPageDto } from 'src/core';
 import { Menu, Role, RoleMenuPermission } from 'src/entities';
 import {
   execSingleStrategy,
-  findOneBy,
+  findOneByExistError,
+  findOneByNotExistError,
   getSkipTake,
   Key_RoleMenu,
   Key_RolePermission,
@@ -120,11 +121,10 @@ export class RoleService {
    * @param dto 角色信息
    */
   async add(dto: RoleAddDto) {
-    await findOneBy(
+    await findOneByExistError(
       this.dataSource,
       Role,
       { name: dto.name },
-      (role) => !!role,
       '当前角色名已存在',
     );
     const newRole = this.roleRepo.create({ ...dto });
@@ -136,11 +136,10 @@ export class RoleService {
    * @param dto 角色信息
    */
   async edit(dto: RoleEditDto) {
-    await findOneBy(
+    await findOneByNotExistError(
       this.dataSource,
       Role,
       { id: dto.id },
-      (role) => !role,
       '当前角色不存在',
     );
     const updateRole = this.roleRepo.create(dto);
@@ -152,11 +151,10 @@ export class RoleService {
    * @param id 角色 id
    */
   async delete(id: number) {
-    const role = await findOneBy(
+    const role = await findOneByNotExistError(
       this.dataSource,
       Role,
       { id },
-      (role) => !role,
       '角色不存在',
       { users: true },
     );
@@ -207,11 +205,10 @@ export class RoleService {
    */
   async menuPermission(id: number) {
     /** 获取该角色下可访问的菜单 */
-    const role = await findOneBy(
+    const role = await findOneByNotExistError(
       this.dataSource,
       Role,
       { id },
-      (role) => !role,
       '该角色不存在',
       { menus: true },
     );
@@ -235,11 +232,10 @@ export class RoleService {
   async menuPermissionEdit(dto: RMPEditDto) {
     const { mps, id } = dto;
     // 查找当前角色
-    const role = await findOneBy(
+    const role = await findOneByNotExistError(
       this.dataSource,
       Role,
       { id },
-      (role) => !role,
       '当前角色不存在',
     );
 
