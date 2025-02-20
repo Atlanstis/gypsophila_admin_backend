@@ -4,7 +4,7 @@ declare namespace ResPsProfile {
   type Info = Util.Nullable<PlayStation.Profile>;
 
   /** 用户在 PSNINE 上同步的游戏信息 */
-  type PsnineGame = Psnine.ProfileGameCrawler & {
+  type PsnineGame = Psnine.ProfileGameItem & {
     /** 是否在本系统中已同步 */
     isSync: boolean;
   };

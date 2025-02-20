@@ -9,7 +9,6 @@ import {
 } from 'src/entities';
 import { PsProfileService } from './ps-profile.service';
 import { PsProfileController } from './ps-profile.controller';
-import { PsnineModule } from '../psnine/psnine.module';
 
 @Module({
   imports: [
@@ -20,7 +19,6 @@ import { PsnineModule } from '../psnine/psnine.module';
       PsGame,
       PsProfileTrophy,
     ]),
-    PsnineModule,
   ],
   controllers: [PsProfileController],
   providers: [PsProfileService],

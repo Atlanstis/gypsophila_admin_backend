@@ -18,9 +18,13 @@ import {
   findOneByNotExistError,
   isValidDate,
 } from 'src/utils';
-import { PsnineCrawlerService } from '../psnine/psnine-crawler.service';
 import { PsnineGameIdDto } from './dto';
 import { BusinessException } from 'src/core';
+import {
+  PsnineProfileCrawler,
+  PsnineProfileGameListCrawler,
+} from '../psnine/crawler';
+import { PsnineGameDetailCrawler } from '../psnine/crawler/psnine-game-detail.crawler';
 
 @Injectable()
 export class PsProfileService {
@@ -35,7 +39,6 @@ export class PsProfileService {
     private readonly psProfileGameRepo: Repository<PsProfileGame>,
     @InjectRepository(PsProfileTrophy)
     private readonly psProfileTrophyRepo: Repository<PsProfileTrophy>,
-    private readonly psnineCrawlerSrv: PsnineCrawlerService,
     private readonly dataSource: DataSource,
   ) {}
 
@@ -58,9 +61,14 @@ export class PsProfileService {
       '该 PSN ID 已被绑定或当前用户已绑定 PSN ID',
     );
 
-    const res = await this.psnineCrawlerSrv.getProfileDetail(psnId);
+    const crawler = new PsnineProfileCrawler(psnId);
+    await crawler.exec();
+    const { error, data } = crawler.getResult();
+    if (error) {
+      throw new BusinessException(error);
+    }
     const profile = this.psProfileRepo.create({
-      ...res,
+      ...data,
       userId: user.id,
     });
     await this.psProfileRepo.save(profile);
@@ -155,10 +163,13 @@ export class PsProfileService {
     const profile = await this.getProfileByUserId(user.id);
 
     // 从 psnine 上获取用户的游戏列表
-    const { list, total } = await this.psnineCrawlerSrv.getProfileGameList(
-      profile.psnId,
-      page,
-    );
+    const crawler = new PsnineProfileGameListCrawler(profile.psnId, page);
+    await crawler.exec();
+    const { error, data } = crawler.getResult();
+    if (error) {
+      throw new BusinessException(error);
+    }
+    const { list, total } = data;
 
     // 根据对应关系，将 psnine 上游戏的 id 转换成系统中的 ps 游戏 id
     const psnineGameIds = list.map((game) => game.id);
@@ -222,8 +233,13 @@ export class PsProfileService {
       }
 
       // 爬取游戏及奖杯信息
-      const { gameCrawler, trophyGroupCrawler } =
-        await this.psnineCrawlerSrv.getGameDetail(dto.id, profile.psnId);
+      const crawler = new PsnineGameDetailCrawler(dto.id, profile.psnId);
+      await crawler.exec();
+      const { error, data } = crawler.getResult();
+      if (error) {
+        throw new Error(error);
+      }
+      const { trophyGroups: trophyGroupCrawler, ...gameCrawler } = data;
 
       // 处理游戏、奖杯组、奖杯信息入库
       if (!psGame) {

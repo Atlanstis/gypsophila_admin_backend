@@ -1,5 +1,4 @@
 export * from './management';
 export * from './setting';
-export * from './psn';
 export * from './menu-key';
 export * from 'src/modules/system/modules/setting/constants/key';
