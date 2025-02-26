@@ -15,7 +15,7 @@ declare namespace ResAuth {
     username: string;
     /** 昵称 */
     nickname: string;
-    /** 菜单列表 */
-    menus: string[];
+    /** 授权菜单 */
+    menus: ResMenu.MenuRouteConfig[];
   }
 }

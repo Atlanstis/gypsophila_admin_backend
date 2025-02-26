@@ -7,13 +7,14 @@ import {
   ResponseCode,
 } from 'src/core';
 import { RedisService, TypedConfigService } from 'src/modules';
-import { Repository, DataSource } from 'typeorm';
+import { Repository, DataSource, In } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   AuthMethodTypeEnum,
   Role,
   RoleStateEnum,
   User,
+  Menu,
   UserAuthMethod,
 } from 'src/entities';
 import { LoginDto } from './dto';
@@ -22,16 +23,14 @@ import {
   findOneByNotExistError,
   getJwtRedisKey,
   hybridDecrypt,
-  Key_RoleMenu,
-  transformStringArray2Set,
 } from 'src/utils';
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectRepository(User)
-    private readonly userRepo: Repository<User>,
     @InjectRepository(UserAuthMethod)
     private readonly userAuthMethodRepo: Repository<UserAuthMethod>,
+    @InjectRepository(Menu)
+    private readonly menuRepo: Repository<Menu>,
     @InjectRepository(Role)
     private readonly roleRepo: Repository<Role>,
     private readonly jwtService: JwtService,
@@ -158,17 +157,55 @@ export class AuthService {
       where: { users: { id: user.id }, state: RoleStateEnum.active },
     });
 
-    // 根据角色 id 查询角色拥有的菜单信息
-    const result = (
-      await Promise.all(
-        roles.map(({ id }) =>
-          this.redisService.getHash(Key_RoleMenu, String(id)),
-        ),
-      )
-    ).filter((item): item is string => item !== undefined);
+    // 根据角色 id 查询查找菜单
+    const menus = await this.menuRepo.find({
+      where: { roles: { id: In(roles.map((role) => role.id)) } },
+      order: { order: 'ASC' },
+    });
+
+    // 构建菜单路由配置
+    const buildMenuTree = (
+      parentId: number | null = null,
+    ): ResMenu.MenuRouteConfig[] => {
+      return menus
+        .filter((menu) => menu.parentId === parentId)
+        .map((menu) => {
+          // 构建路由元数据
+          const meta: ResMenu.MenuRouteMeta = {
+            title: menu.name,
+            order: menu.order,
+            type: menu.type,
+            icon: menu.icon,
+            iconLocal: menu.iconLocal,
+            layout: menu.layout,
+            keepAlive: menu.keepAlive,
+            hideInMenu: menu.hideInMenu,
+            activeMenu: menu.activeMenu,
+          };
+
+          // 构建路由配置
+          const routeConfig: ResMenu.MenuRouteConfig = {
+            path: menu.path,
+            name: menu.key,
+            component: menu.view,
+            meta,
+            children: buildMenuTree(menu.id),
+          };
+
+          // 如果没有子菜单，则移除 children 属性
+          if (routeConfig.children?.length === 0) {
+            delete routeConfig.children;
+          }
+
+          return routeConfig;
+        });
+    };
+
+    const menuRoutes = buildMenuTree();
+
     return {
       ...user,
-      menus: Array.from(transformStringArray2Set(result)),
+      menus: menuRoutes,
     };
   }
 

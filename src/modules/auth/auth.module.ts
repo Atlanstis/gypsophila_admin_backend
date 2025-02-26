@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Role, User, UserAuthMethod } from 'src/entities';
+import { Role, UserAuthMethod, Menu } from 'src/entities';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { TypedConfigService } from 'src/modules';
@@ -21,7 +21,7 @@ import { TypedConfigService } from 'src/modules';
       extraProviders: [TypedConfigService],
       inject: [TypedConfigService],
     }),
-    TypeOrmModule.forFeature([Role, User, UserAuthMethod]),
+    TypeOrmModule.forFeature([Role, UserAuthMethod, Menu]),
   ],
   providers: [AuthService, TypedConfigService],
   controllers: [AuthController],

@@ -49,6 +49,62 @@ export class Menu {
   })
   order: number;
 
+  @Column({
+    name: 'path',
+    comment: '路径',
+    default: '',
+  })
+  path: string;
+
+  @Column({
+    name: 'icon',
+    comment: '在线图标',
+    nullable: true,
+  })
+  icon?: string;
+
+  @Column({
+    name: 'iconLocal',
+    comment: '本地图标',
+    nullable: true,
+  })
+  iconLocal?: string;
+
+  @Column({
+    name: 'view',
+    comment: '视图',
+    nullable: true,
+  })
+  view?: string;
+
+  @Column({
+    name: 'layout',
+    comment: '布局',
+    nullable: true,
+  })
+  layout?: string;
+
+  @Column({
+    name: 'keep_alive',
+    comment: '缓存路由',
+    nullable: true,
+  })
+  keepAlive?: boolean;
+
+  @Column({
+    name: 'hide_in_menu',
+    comment: '菜单隐藏',
+    nullable: true,
+  })
+  hideInMenu?: boolean;
+
+  @Column({
+    name: 'active_menu',
+    comment: '激活时选中菜单',
+    nullable: true,
+  })
+  activeMenu?: string;
+
   @Column({ nullable: true, name: 'parent_id' })
   parentId: number | null;
 
