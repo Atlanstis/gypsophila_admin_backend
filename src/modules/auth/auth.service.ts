@@ -187,7 +187,7 @@ export class AuthService {
           const routeConfig: ResMenu.MenuRouteConfig = {
             path: menu.path,
             name: menu.key,
-            component: menu.view,
+            component: menu.type === 'page' ? menu.key : undefined,
             meta,
             children: buildMenuTree(menu.id),
           };

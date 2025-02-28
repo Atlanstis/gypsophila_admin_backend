@@ -52,7 +52,6 @@ export class Menu {
   @Column({
     name: 'path',
     comment: '路径',
-    default: '',
   })
   path: string;
 
@@ -71,13 +70,6 @@ export class Menu {
   iconLocal?: string;
 
   @Column({
-    name: 'view',
-    comment: '视图',
-    nullable: true,
-  })
-  view?: string;
-
-  @Column({
     name: 'layout',
     comment: '布局',
     nullable: true,
@@ -87,14 +79,14 @@ export class Menu {
   @Column({
     name: 'keep_alive',
     comment: '缓存路由',
-    nullable: true,
+    default: false,
   })
   keepAlive?: boolean;
 
   @Column({
     name: 'hide_in_menu',
     comment: '菜单隐藏',
-    nullable: true,
+    default: false,
   })
   hideInMenu?: boolean;
 

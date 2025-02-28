@@ -23,4 +23,12 @@ declare namespace ResRole {
   interface Config {
     permission: ConfigPermission;
   }
+
+  type MenuPermission = {
+    list: ResMenu.MenuWithChildren[];
+    mps: {
+      menuId: number;
+      permissionIds: number[];
+    }[];
+  };
 }

@@ -4,15 +4,14 @@ import { Menu } from 'src/entities';
 import { DataSource, In, IsNull, Not, Repository } from 'typeorm';
 import { MenuAddDto, MenuEditDto } from './dto';
 import { BusinessException, CommonPageDto } from 'src/core';
-import { sortMenuChildren } from './helper';
 import {
-  execSingleStrategy,
   findOneByExistError,
   findOneByNotExistError,
   getSkipTake,
 } from 'src/utils';
 import { EnumMenuKey } from 'src/constants';
 import { RoleService } from '../role/role.service';
+import { buildMenuPermissionTree, combineMenuPermission } from './helper';
 
 @Injectable()
 export class MenuService {
@@ -25,7 +24,7 @@ export class MenuService {
   ) {}
 
   /**
-   * 根据页码跟长度获取一、二级菜单
+   * 根据页码跟长度获取菜单
    * @param page 页码
    * @param size 长度
    * @returns 菜单列表
@@ -35,6 +34,7 @@ export class MenuService {
     payload: App.JwtPayload,
   ): Promise<ResCommon.TableData<ResMenu.MenuListData>> {
     const { skip, take } = getSkipTake(dto.page, dto.size);
+    // 获取指定数量的顶级菜单
     const [menus, total] = await this.menuRepo.findAndCount({
       where: {
         parentId: IsNull(),
@@ -45,101 +45,68 @@ export class MenuService {
         order: 'ASC',
       },
     });
-    // 获取次级菜单
-    const secondaryMenus = await this.getSecondaryMenu(menus);
-    const menuSorted = sortMenuChildren(menus, secondaryMenus);
-
-    // 获取权限
-    const permission = await this.getPermission(payload.roleIds);
-
-    const formattedMenus = menuSorted.map((menu) => {
-      const menuAddStrategies = [
-        // 是否拥有编辑权限
-        () => permission.add,
-      ];
-      // 顶级菜单新增子菜单的策略
-      const topMenuAddStrategies = [
-        ...menuAddStrategies,
-        // 菜单类型为"菜单"类型，才能新增
-        () => menu.type === 'menu',
-        // 顶级菜单可新增子菜单
-        () => true,
-      ];
-
-      // 次级新增权限的策略
-      const secondaryMenuAddStrategies = [
-        ...menuAddStrategies,
-        // 次级菜单不可新增子菜单
-        () => false,
-      ];
-
-      // 编辑菜单的策略
-      const editStrategies = [
-        // 是否拥有编辑权限
-        () => permission.edit,
-      ];
-
-      // 删除菜单的策略
-      const deleteStrategies = [
-        // 是否拥有删除权限
-        () => permission.delete,
-      ];
-
-      // 权限管理的策略
-      const permissionStrategies = [
-        // 是否拥有权限管理权限
-        () => permission.permissionManage,
-      ];
-
-      let children: ResMenu.MenuListData[] = [];
-
-      if (menu.children) {
-        children = menu.children.map((secondary) => {
-          return {
-            ...secondary,
-            children: [],
-            permission: {
-              add: execSingleStrategy(secondaryMenuAddStrategies),
-              edit: execSingleStrategy(editStrategies),
-              delete: execSingleStrategy(deleteStrategies),
-              permissionManage: execSingleStrategy([
-                ...permissionStrategies,
-                // "页面"类型，可以进行权限管理
-                () => secondary.type === 'page',
-              ]),
-            },
-          };
-        });
-      }
-      return {
-        ...menu,
-        children,
-        permission: {
-          add: execSingleStrategy(topMenuAddStrategies),
-          edit: execSingleStrategy(editStrategies),
-          delete: execSingleStrategy(deleteStrategies),
-          permissionManage: execSingleStrategy([
-            ...permissionStrategies,
-            // "页面"类型，可以进行权限管理
-            () => menu.type === 'page',
-          ]),
-        },
-      };
-    });
-
-    return { list: formattedMenus, total };
-  }
-
-  /** 获取所有菜单及下面的菜单 */
-  async getMenus() {
-    const topMenus = await this.menuRepo.find({
-      where: { parentId: IsNull() },
+    // 获取所有子菜单
+    const allChildren = await this.menuRepo.find({
+      where: {
+        parentId: Not(IsNull()),
+      },
       order: {
         order: 'ASC',
       },
     });
-    const children = await this.getSecondaryMenu(topMenus, true);
-    return sortMenuChildren(topMenus, children);
+
+    // 获取权限
+    const permission = await this.getPermission(payload.roleIds);
+
+    // 构建树形结构
+    const list = menus.map((menu) => ({
+      ...combineMenuPermission(
+        menu,
+        permission,
+        buildMenuPermissionTree(menu.id, allChildren, permission),
+      ),
+    }));
+
+    return {
+      list,
+      total,
+    };
+  }
+
+  /** 获取所有菜单及下面的菜单 */
+  async getMenus() {
+    // 一次性获取所有菜单
+    const allMenus = await this.menuRepo.find({
+      order: {
+        order: 'ASC',
+      },
+      relations: {
+        permissions: true,
+      },
+    });
+
+    // 构建菜单映射表
+    const menuMap = new Map<number, ResMenu.MenuWithChildren>();
+    allMenus.forEach((menu) => {
+      menu.permissions.sort((a, b) => a.order - b.order);
+      menuMap.set(menu.id, { ...menu, children: [] });
+    });
+
+    // 构建树形结构
+    const tree: ResMenu.MenuWithChildren[] = [];
+    allMenus.forEach((menu) => {
+      const menuWithChildren = menuMap.get(menu.id);
+      if (!menuWithChildren) return;
+      if (menu.parentId === null) {
+        tree.push(menuWithChildren);
+      } else {
+        const parent = menuMap.get(menu.parentId);
+        if (parent) {
+          parent.children.push(menuWithChildren);
+        }
+      }
+    });
+    return tree;
   }
 
   /**

@@ -1,12 +1,5 @@
 import { OmitType, PickType } from '@nestjs/mapped-types';
-import {
-  Allow,
-  IsEnum,
-  IsInt,
-  IsNotEmpty,
-  IsNumber,
-  Length,
-} from 'class-validator';
+import { Allow, IsEnum, IsNotEmpty, IsNumber, Length } from 'class-validator';
 import { MenuTypeEnum } from '../entity';
 import { MenuConst } from '../constants';
 import { Type } from 'class-transformer';
@@ -36,9 +29,29 @@ export class MenuDto {
   @IsNotEmpty({ message: '菜单类型不能为空' })
   type: MenuTypeEnum;
 
-  @IsInt({ message: '排序字段格式错误' })
-  @IsNotEmpty({ message: '排序字段不能为空' })
-  order: number;
+  @IsNotEmpty({ message: '路径不能为空' })
+  path: string;
+
+  @Allow()
+  order?: number;
+
+  @Allow()
+  icon?: string;
+
+  @Allow()
+  iconLocal?: string;
+
+  @Allow()
+  layout?: string;
+
+  @Allow()
+  keepAlive?: boolean;
+
+  @Allow()
+  hideInMenu?: boolean;
+
+  @Allow()
+  activeMenu?: string;
 }
 
 export class MenuAddDto extends OmitType(MenuDto, ['id']) {

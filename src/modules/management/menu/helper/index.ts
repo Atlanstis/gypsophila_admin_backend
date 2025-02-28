@@ -1,31 +1,61 @@
-export type MenuSort = Omit<ResMenu.MenuListData, 'permission' | 'children'> & {
-  children?: MenuSort[];
-};
-/**
- * 整理顶级菜单的子菜单
- * @param menus 顶级菜单
- * @param children 子菜单
- * @returns 菜单
- */
-export function sortMenuChildren(menus: MenuSort[], children: MenuSort[]) {
-  const parents: MenuSort[] = menus.map((item) => ({ ...item, children: [] }));
-  children.forEach((child) => {
-    const father = parents.find((parent) => parent.id === child.parentId);
-    if (father) {
-      if (father.children) {
-        father.children.push(child);
-      } else {
-        father.children = [child];
-      }
-    }
-  });
-  parents.forEach((parent) => {
-    if (parent.children) {
-      parent.children.sort((a, b) => a.order - b.order);
-      parent.children.forEach((child) => {
-        child.permissions?.sort((a, b) => a.order - b.order);
-      });
-    }
-  });
-  return parents;
+import { Menu } from 'src/entities';
+import { execSingleStrategy } from 'src/utils';
+
+/** 组合菜单的操作权限 */
+export function combineMenuPermission(
+  menu: Menu,
+  permission: ResMenu.ConfigPermission,
+  children?: ResMenu.MenuListData[],
+): ResMenu.MenuListData {
+  const menuAddStrategies = [
+    // 是否拥有编辑权限
+    () => permission.add,
+    () => menu.type === 'menu',
+  ];
+  // 编辑菜单的策略
+  const editStrategies = [
+    // 是否拥有编辑权限
+    () => permission.edit,
+    () => menu.type === 'page',
+  ];
+
+  // 删除菜单的策略
+  const deleteStrategies = [
+    // 是否拥有删除权限
+    () => permission.delete,
+  ];
+
+  // 权限管理的策略
+  const permissionStrategies = [
+    // 是否拥有权限管理权限
+    () => permission.permissionManage,
+  ];
+
+  return {
+    ...menu,
+    children,
+    permission: {
+      add: execSingleStrategy(menuAddStrategies),
+      edit: execSingleStrategy(editStrategies),
+      delete: execSingleStrategy(deleteStrategies),
+      permissionManage: execSingleStrategy(permissionStrategies),
+    },
+  };
+}
+
+/** 构建菜单权限树 */
+export function buildMenuPermissionTree(
+  parentId: number,
+  allMenus: Menu[],
+  permission: ResMenu.ConfigPermission,
+): ResMenu.MenuListData[] {
+  return allMenus
+    .filter((menu) => menu.parentId === parentId)
+    .map((menu) => ({
+      ...combineMenuPermission(
+        menu,
+        permission,
+        buildMenuPermissionTree(menu.id, allMenus, permission),
+      ),
+    }));
 }

@@ -13,4 +13,9 @@ declare namespace Util {
 
   /** 可空类型 */
   type Nullable<T> = T | null;
+
+  /** 将可选属性设置为必须 */
+  type RequiredProperty<T, K extends keyof T> = T & {
+    [P in K]-?: T[P];
+  };
 }

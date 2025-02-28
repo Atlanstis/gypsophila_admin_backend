@@ -203,7 +203,7 @@ export class RoleService {
    * @param id 角色 id
    * @returns 授权菜单及权限
    */
-  async menuPermission(id: number) {
+  async menuPermission(id: number): Promise<ResRole.MenuPermission> {
     /** 获取该角色下可访问的菜单 */
     const role = await findOneByNotExistError(
       this.dataSource,
@@ -217,8 +217,37 @@ export class RoleService {
     const rmps = await this.rmpRepo.findBy({ roleId: id });
     const mps = aggregateMenuPermissions(rmps, role.menus);
 
-    /** 获取所有菜单及下面的菜单 */
-    const list = await this.menuService.getMenus();
+    // 一次性获取所有菜单
+    const allMenus = await this.menuRepo.find({
+      order: {
+        order: 'ASC',
+      },
+      relations: {
+        permissions: true,
+      },
+    });
+
+    // 构建菜单映射表
+    const menuMap = new Map<number, ResMenu.MenuWithChildren>();
+    allMenus.forEach((menu) => {
+      menu.permissions.sort((a, b) => a.order - b.order);
+      menuMap.set(menu.id, { ...menu, children: [] });
+    });
+
+    // 构建树形结构
+    const list: ResMenu.MenuWithChildren[] = [];
+    allMenus.forEach((menu) => {
+      const menuWithChildren = menuMap.get(menu.id);
+      if (!menuWithChildren) return;
+      if (menu.parentId === null) {
+        list.push(menuWithChildren);
+      } else {
+        const parent = menuMap.get(menu.parentId);
+        if (parent) {
+          parent.children.push(menuWithChildren);
+        }
+      }
+    });
 
     return {
       list,
